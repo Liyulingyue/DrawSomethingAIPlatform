@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+pydantic
+httpx
+openai>=1.40.0

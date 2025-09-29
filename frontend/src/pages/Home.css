@@ -1,0 +1,34 @@
+.home-wrapper {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.home-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 720px;
+}
+
+.home-hero p {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 1rem;
+  line-height: 1.75rem;
+}
+
+@media (max-width: 768px) {
+  .home-wrapper {
+    padding: 2.5rem 1.5rem 3rem;
+  }
+
+  .home-hero {
+    gap: 1.25rem;
+  }
+}

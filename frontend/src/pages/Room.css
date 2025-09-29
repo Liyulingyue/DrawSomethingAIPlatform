@@ -1,0 +1,27 @@
+.room-layout {
+  min-height: 100vh;
+  background: #f5f7ff;
+}
+
+.room-content {
+  padding: 2.5rem 2rem;
+}
+
+.room-inner {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.room-list-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+@media (max-width: 768px) {
+  .room-content {
+    padding: 1.5rem 1rem;
+  }
+}

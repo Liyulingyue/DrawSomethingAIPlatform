@@ -1,0 +1,98 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #2f54eb, #722ed1);
+  color: #fff;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  position: relative;
+}
+
+.nav-links li a,
+.nav-links li span {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.nav-links li a:hover,
+.nav-links li span:hover,
+.nav-links li.active a {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-source {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #f5f5f5;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.nav-source:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.nav-source-icon {
+  font-size: 1.5rem;
+}
+
+.nav-source-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.nav-source-repo {
+  font-weight: 600;
+}
+
+.nav-source-owner {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.nav-user {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.nav-user:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
