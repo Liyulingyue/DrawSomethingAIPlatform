@@ -14,10 +14,16 @@ function Navbar() {
 
   const activeKey = useMemo(() => {
     if (location.pathname.startsWith('/rooms')) return 'rooms'
-    if (location.pathname.startsWith('/game')) return 'game'
+    if (location.pathname.startsWith('/game')) {
+      const params = new URLSearchParams(location.search)
+      if (params.get('tab') === 'single') {
+        return 'single'
+      }
+      return 'game'
+    }
     if (location.pathname.startsWith('/login')) return 'login'
     return 'home'
-  }, [location.pathname])
+  }, [location.pathname, location.search])
 
   useEffect(() => {
     if (modalVisible) {
@@ -85,6 +91,7 @@ function Navbar() {
         <div className="nav-brand" onClick={() => handleNavigate('/')}>你画我猜AI平台</div>
         <ul className="nav-links">
           <li className={activeKey === 'home' ? 'active' : ''}><Link to="/">首页</Link></li>
+          <li className={activeKey === 'single' ? 'active' : ''}><Link to="/game?tab=single">单人AI测试</Link></li>
           <li className={activeKey === 'rooms' ? 'active' : ''}><Link to="/rooms">房间大厅</Link></li>
           <li className={activeKey === 'game' ? 'active' : ''}><span onClick={() => message.info('请先进入房间后再开始对局')} role="button">对局</span></li>
         </ul>

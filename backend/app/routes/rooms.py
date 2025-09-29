@@ -20,6 +20,8 @@ def init_room():
         "status": "waiting",  # waiting, ready, drawing, review, success
         "current_round": 0,
         "current_hint": None,
+    "current_target": None,
+    "current_clue": None,
         "current_drawer": None,
         "ready_status": {},
         "draw_history": [],
@@ -170,6 +172,8 @@ async def leave_room(request: LeaveRoomRequest):
         room["current_drawer"] = None
         room["status"] = "waiting"
         room["current_hint"] = None
+        room["current_target"] = None
+        room["current_clue"] = None
         room["current_submission"] = None
         room["ai_result"] = None
         for player in room.get("players", []):

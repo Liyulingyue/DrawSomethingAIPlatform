@@ -32,10 +32,12 @@ class SetReadyRequest(BaseModel):
     ready: bool
 
 
-class SetHintRequest(BaseModel):
+class SetRoundConfigRequest(BaseModel):
     room_id: str
     username: str
-    hint: str = Field(..., max_length=50)
+    target_word: Optional[str] = Field(default=None, max_length=50)
+    hint: Optional[str] = Field(default=None, max_length=50)  # legacy field name
+    clue: Optional[str] = Field(default=None, max_length=120)
 
 
 class SelectDrawerRequest(BaseModel):

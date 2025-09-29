@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Layout, Card, Button, Typography, message, Space, List, Tag, Spin, Tooltip, Empty, Popconfirm } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
+import Navbar from '../components/Navbar'
 import { api, formatRelativeTime } from '../utils/api'
 import './Room.css'
 
@@ -167,8 +168,9 @@ function Room() {
 
   if (initializing) {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Layout className="room-layout">
+        <Navbar />
+        <Content className="room-content initializing">
           <Spin tip="正在加载用户信息…" />
         </Content>
       </Layout>
@@ -177,6 +179,7 @@ function Room() {
 
   return (
     <Layout className="room-layout">
+      <Navbar />
       <Content className="room-content">
         <div className="room-inner">
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
