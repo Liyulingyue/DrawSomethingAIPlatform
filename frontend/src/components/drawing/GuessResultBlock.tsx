@@ -20,20 +20,29 @@ const GuessResultBlock = ({ guess }: GuessResultBlockProps) => {
   const matched = guess.matched ?? false
   const success = guess.success ?? (matched ? true : undefined)
   const bestGuessLabel = guess.best_guess ?? '暂无'
+  const targetWord = guess.target_word
 
   let infoMessage = 'AI 已给出猜测结果，请人工确认是否正确。'
   let alertType: 'success' | 'info' | 'warning' = 'info'
 
   if (matched) {
-    infoMessage = `模型猜中：${guess.matched_with ?? guess.best_guess ?? '目标词'}`
+    infoMessage = `🎉 猜中了！目标词语是"${targetWord || guess.matched_with || guess.best_guess}"`
     alertType = 'success'
   } else if (success === false) {
     infoMessage = 'AI 未能返回有效猜测，请尝试重新绘制或调整线索。'
     alertType = 'warning'
+  } else if (targetWord) {
+    infoMessage = `AI 猜测结果：${bestGuessLabel}，目标词语：${targetWord}`
   }
 
   return (
     <Space direction="vertical" size="middle">
+      {targetWord && (
+        <Space wrap>
+          <Text strong>目标词语：</Text>
+          <Tag color="blue">{targetWord}</Tag>
+        </Space>
+      )}
       <Space wrap>
         <Text strong>主要猜测：</Text>
         <Tag color={matched ? 'success' : success === false ? 'default' : 'processing'}>{bestGuessLabel}</Tag>
@@ -48,8 +57,8 @@ const GuessResultBlock = ({ guess }: GuessResultBlockProps) => {
           </Space>
         </Space>
       )}
-      {typeof guess.confidence === 'number' && (
-        <Text type="secondary">置信度：{(guess.confidence * 100).toFixed(1)}%</Text>
+      {guess.reason && (
+        <Text type="secondary">模型解释：{guess.reason}</Text>
       )}
       <Alert type={alertType} message={infoMessage} showIcon />
     </Space>

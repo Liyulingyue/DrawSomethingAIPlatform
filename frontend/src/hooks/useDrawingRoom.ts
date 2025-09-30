@@ -9,13 +9,13 @@ export interface GuessPayload {
   configured?: boolean
   best_guess?: string | null
   alternatives: string[]
-  confidence?: number | null
   matched?: boolean
   matched_with?: string | null
   error?: string | null
   timestamp?: number
   target_word?: string | null
   provider?: string
+  reason?: string | null
 }
 
 export interface DrawHistoryItem {
@@ -87,18 +87,18 @@ function normalizeGuess(raw: unknown): GuessPayload | null {
       ? [String(alternativesRaw)]
       : []
 
-  const confidenceValue = guess.confidence
-  const confidence = typeof confidenceValue === 'number'
-    ? confidenceValue
-    : confidenceValue != null
-      ? Number(confidenceValue)
+  const reasonValue = guess.reason
+  const reason = typeof reasonValue === 'string'
+    ? reasonValue
+    : reasonValue != null
+      ? String(reasonValue)
       : undefined
 
   return {
     ...guess,
     best_guess,
     alternatives,
-    confidence,
+    reason,
   } as GuessPayload
 }
 

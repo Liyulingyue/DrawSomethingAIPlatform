@@ -17,17 +17,26 @@
   gap: 24px;
 }
 
-.drawing-header {
+.drawing-header,
+.drawing-body {
+  width: 100%;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.drawing-header .ant-card-body,
+.drawing-body .ant-card-body {
   padding: 24px 32px;
 }
 
 .drawing-grid {
+  width: 100%;
   display: flex;
   flex-direction: row;
   gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .drawing-column {
@@ -37,9 +46,9 @@
 }
 
 .drawing-column--left {
-  flex: 0 0 260px;
-  min-width: 220px;
-  max-width: 320px;
+  flex: 0 0 300px;
+  min-width: 260px;
+  max-width: 340px;
 }
 
 .drawing-column--center {
@@ -49,9 +58,9 @@
 }
 
 .drawing-column--right {
-  flex: 0 0 320px;
+  flex: 0 0 300px;
   min-width: 260px;
-  max-width: 380px;
+  max-width: 340px;
 }
 
 .drawing-preview {

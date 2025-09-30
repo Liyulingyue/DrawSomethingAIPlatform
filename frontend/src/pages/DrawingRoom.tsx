@@ -1,3 +1,7 @@
+export { default } from './MultiplayerGame'
+
+// Legacy DrawingRoom implementation retained for reference.
+/*
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Layout, message } from 'antd'
@@ -10,12 +14,12 @@ import './DrawingRoom.css'
 
 const { Content } = Layout
 
-const DEFAULT_MODEL_PROMPT = '请仔细观察提供的图像，推测画面所表达的中文词语或短语，仅返回最可能的答案。'
+const DEFAULT_MODEL_PROMPT = ''
 
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
-  url: '',
+  url: 'https://aistudio.baidu.com/llm/lmapi/v3',
   key: '',
-  model: '',
+  model: 'ernie-4.5-vl-28b-a3b',
   prompt: DEFAULT_MODEL_PROMPT,
 }
 
@@ -48,13 +52,7 @@ function normalizeGuessPayload(raw: unknown): GuessPayload | null {
       ? [String(alternativesRaw)]
       : []
 
-  const confidenceRaw = data.confidence
-  const confidence =
-    typeof confidenceRaw === 'number'
-      ? confidenceRaw
-      : confidenceRaw != null
-        ? Number(confidenceRaw)
-        : undefined
+  // Note: confidence is no longer used
 
   const matchedRaw = data.matched
   const matched = typeof matchedRaw === 'boolean' ? matchedRaw : undefined
@@ -62,13 +60,16 @@ function normalizeGuessPayload(raw: unknown): GuessPayload | null {
   const matchedWithRaw = data.matched_with
   const matched_with = typeof matchedWithRaw === 'string' ? matchedWithRaw : undefined
 
+  const targetRaw = data.target
+  const target_word = typeof targetRaw === 'string' ? targetRaw : undefined
+
   return {
     ...(raw as GuessPayload),
     best_guess,
     alternatives,
-    confidence,
     matched,
     matched_with,
+    target_word,
   }
 }
 
@@ -94,7 +95,7 @@ function DrawingRoom() {
   const [targetInput, setTargetInput] = useState('')
   const [clueInput, setClueInput] = useState('')
   const [chatInput, setChatInput] = useState('')
-  const [singleClue, setSingleClue] = useState('')
+  const [singleTarget, setSingleTarget] = useState('')
   const [singleResult, setSingleResult] = useState<GuessPayload | null>(null)
   const [singleHistory, setSingleHistory] = useState<SingleHistoryEntry[]>([])
   const [singleSubmitting, setSingleSubmitting] = useState(false)
@@ -181,24 +182,13 @@ function DrawingRoom() {
     }
   }, [status, currentDrawer, guess?.matched, guess?.matched_with, guess?.best_guess])
 
-  const sanitizedDefaultModelConfig = useMemo(() => sanitizeModelConfig(DEFAULT_MODEL_CONFIG), [])
   const sanitizedCurrentModelConfig = useMemo(() => sanitizeModelConfig(modelConfig), [modelConfig])
-
-  const isCustomModelConfig = useMemo(() => {
-    return (['url', 'key', 'model', 'prompt'] as const).some((field) => {
-      return sanitizedCurrentModelConfig[field] !== sanitizedDefaultModelConfig[field]
-    })
-  }, [sanitizedCurrentModelConfig, sanitizedDefaultModelConfig])
 
   const handleModelConfigChange = (patch: Partial<ModelConfig>) => {
     setModelConfig((prev) => ({
       ...prev,
       ...patch,
     }))
-  }
-
-  const handleResetModelConfig = () => {
-    setModelConfig({ ...DEFAULT_MODEL_CONFIG })
   }
 
   const handleToggleReady = async () => {
@@ -258,7 +248,7 @@ function DrawingRoom() {
     try {
       const requestBody: {
         image: string
-        clue?: string
+        target?: string
         config?: {
           url?: string
           key?: string
@@ -267,30 +257,28 @@ function DrawingRoom() {
         }
       } = {
         image,
-        clue: singleClue.trim() || undefined,
+        target: singleTarget.trim() || undefined,
       }
 
-      if (isCustomModelConfig) {
-        const configPayload: {
-          url?: string
-          key?: string
-          model?: string
-          prompt?: string
-        } = {}
+      const configPayload: {
+        url?: string
+        key?: string
+        model?: string
+        prompt?: string
+      } = {}
 
-        if (sanitizedCurrentModelConfig.url) {
-          configPayload.url = sanitizedCurrentModelConfig.url
-        }
-        if (sanitizedCurrentModelConfig.key) {
-          configPayload.key = sanitizedCurrentModelConfig.key
-        }
-        if (sanitizedCurrentModelConfig.model) {
-          configPayload.model = sanitizedCurrentModelConfig.model
-        }
-        configPayload.prompt = sanitizedCurrentModelConfig.prompt
-
-        requestBody.config = configPayload
+      if (sanitizedCurrentModelConfig.url) {
+        configPayload.url = sanitizedCurrentModelConfig.url
       }
+      if (sanitizedCurrentModelConfig.key) {
+        configPayload.key = sanitizedCurrentModelConfig.key
+      }
+      if (sanitizedCurrentModelConfig.model) {
+        configPayload.model = sanitizedCurrentModelConfig.model
+      }
+      configPayload.prompt = sanitizedCurrentModelConfig.prompt
+
+      requestBody.config = configPayload
 
       const response = await api.post('/ai/guess', requestBody)
       const normalized = normalizeGuessPayload(response.data)
@@ -304,7 +292,7 @@ function DrawingRoom() {
       setSingleHistory((prev) => [
         {
           id: createdAt,
-          clue: singleClue.trim() || undefined,
+          target: singleTarget.trim(),
           createdAt,
           guess: normalized,
         },
@@ -322,8 +310,58 @@ function DrawingRoom() {
   const handleResetSingle = () => {
     setSingleResult(null)
     setSingleHistory([])
-    setSingleClue('')
     message.success('已清空单人测试记录')
+  }
+
+  const handleTestConfig = async (image: string) => {
+    setSingleSubmitting(true)
+    try {
+      const requestBody: {
+        image: string
+        target?: string
+        config: {
+          url?: string
+          key?: string
+          model?: string
+          prompt?: string
+        }
+      } = {
+        image: image,
+        target: singleTarget.trim() || undefined,
+        config: {
+          url: sanitizedCurrentModelConfig.url || undefined,
+          key: sanitizedCurrentModelConfig.key || undefined,
+          model: sanitizedCurrentModelConfig.model || undefined,
+          prompt: sanitizedCurrentModelConfig.prompt,
+        },
+      }
+
+      const response = await api.post('/ai/guess', requestBody)
+      const normalized = normalizeGuessPayload(response.data)
+      if (!normalized) {
+        setSingleResult(null)
+        message.warning('AI 未返回有效结果，请检查配置')
+        return
+      }
+      setSingleResult(normalized)
+      const createdAt = Math.floor(Date.now() / 1000)
+      setSingleHistory((prev) => [
+        {
+          id: createdAt,
+          target: singleTarget.trim(),
+          createdAt,
+          guess: normalized,
+        },
+        ...prev,
+      ].slice(0, 10))
+      message.success('配置测试完成')
+    } catch (error: any) {
+      console.error('配置测试失败', error)
+      const errorMessage = error?.response?.data?.error || error?.message || '未知错误'
+      message.error(`配置测试失败: ${errorMessage}`)
+    } finally {
+      setSingleSubmitting(false)
+    }
   }
 
   const hasRoomData = Boolean(combined)
@@ -335,8 +373,8 @@ function DrawingRoom() {
         <div className="drawing-container">
           {isSingleView ? (
             <SingleTester
-              clue={singleClue}
-              onClueChange={setSingleClue}
+              target={singleTarget}
+              onTargetChange={setSingleTarget}
               onSubmit={(image) => {
                 void handleSingleSubmit(image)
               }}
@@ -346,8 +384,7 @@ function DrawingRoom() {
               history={singleHistory}
               modelConfig={modelConfig}
               onModelConfigChange={handleModelConfigChange}
-              onResetModelConfig={handleResetModelConfig}
-              isCustomConfig={isCustomModelConfig}
+              onTestConfig={handleTestConfig}
             />
           ) : (
             <MultiplayerView
@@ -411,3 +448,4 @@ function DrawingRoom() {
 }
 
 export default DrawingRoom
+*/

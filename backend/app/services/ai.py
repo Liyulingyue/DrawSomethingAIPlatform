@@ -1,71 +1,127 @@
+import json
 import os
+import re
+from collections.abc import Sequence
 from typing import Any, Dict, List, Optional
 
-import httpx
+from openai import OpenAI
 
 MODEL_NAME = "ernie-4.5-vl-28b-a3b"
-DEFAULT_PROMPT = "请仔细观察提供的图像，推测画面所表达的中文词语或短语，仅返回最可能的答案。"
 
-class AIServiceNotConfigured(Exception):
-    """Raised when ERNIE credentials are missing."""
+FORMAT_INSTRUCTIONS = (
+    "请仅输出一个 JSON 代码块，严格按照如下格式返回：\n"
+    "```json\n"
+    "{\n"
+    '  "best_guess": "最可能的中文词语或短语",\n'
+    '  "alternatives": ["备选答案1", "备选答案2"],\n'
+    '  "reason": "简要的中文解释"\n'
+    "}\n"
+    "```\n"
+    "其中 alternatives 按可能性从高到低排列，如无可填空数组；不允许输出除上述 JSON 代码块之外的任何文字。"
+)
 
+DEFAULT_PROMPT = (
+    "你是一位能够理解绘画的中文助手，请根据提供的图像推测其所表达的中文词语或短语，并生成答案。\n"
+)
 
-def _get_access_token() -> str | None:
-    api_key = os.getenv("ERNIE_API_KEY")
-    secret_key = os.getenv("ERNIE_API_SECRET")
-    token_url = os.getenv("ERNIE_OAUTH_URL", "https://aip.baidubce.com/oauth/2.0/token")
-    if not api_key or not secret_key:
-        return None
+JSON_BLOCK_PATTERN = re.compile(r"```json\s*(.*?)\s*```", re.IGNORECASE | re.DOTALL)
 
-    try:
-        response = httpx.get(
-            token_url,
-            params={
-                "grant_type": "client_credentials",
-                "client_id": api_key,
-                "client_secret": secret_key,
-            },
-            timeout=10.0,
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data.get("access_token")
-    except Exception:
-        return None
+def _is_guess_correct(guess: Optional[str], target: Optional[str]) -> bool:
+    """Check if the AI guess matches the target word."""
+    if not guess or not target:
+        return False
+    
+    # Normalize both strings for comparison
+    guess_normalized = guess.strip().lower()
+    target_normalized = target.strip().lower()
+    
+    # Exact match
+    if guess_normalized == target_normalized:
+        return True
+    
+    # Check if target is contained in guess (e.g., target="苹果", guess="一个苹果")
+    # This allows AI to be more descriptive while still being correct
+    if target_normalized in guess_normalized:
+        return True
+    
+    # Handle common variations for Chinese words
+    # Remove common prefixes/suffixes and check again
+    common_prefixes = ['一个', '一只', '一朵', '一条', '一张', '一辆', '一座', '一本', '一支']
+    common_suffixes = ['的', '了', '着', '过', '们', '子', '儿', '头', '手']
+    
+    for prefix in common_prefixes:
+        if guess_normalized.startswith(prefix) and guess_normalized[len(prefix):].strip() == target_normalized:
+            return True
+    
+    for suffix in common_suffixes:
+        if guess_normalized.endswith(suffix) and guess_normalized[:-len(suffix)].strip() == target_normalized:
+            return True
+    
+    return False
 
 
 def _call_ernie_inference(
-    access_token: str,
     image: str,
     prompt: str,
     model_name: Optional[str] = None,
 ) -> Dict[str, Any]:
-    endpoint = os.getenv("ERNIE_API_ENDPOINT")
-    if not endpoint:
-        raise AIServiceNotConfigured("ERNIE_API_ENDPOINT 未配置")
+    # 使用AI Studio API Key直接调用
+    api_key = os.getenv("AI_STUDIO_API_KEY")
+    if not api_key:
+        raise AIServiceNotConfigured("AI_STUDIO_API_KEY 未配置")
 
-    payload = {
-        "model": model_name or MODEL_NAME,
-        "input": {
-            "image": image,
-            "prompt": prompt,
-        },
-    }
-
-    response = httpx.post(
-        f"{endpoint}?access_token={access_token}",
-        json=payload,
-        timeout=30.0,
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://aistudio.baidu.com/llm/lmapi/v3",
     )
-    response.raise_for_status()
-    return response.json()
+
+    try:
+        # 构造消息，包含文本提示和图片
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image,
+                            "detail": "high"
+                        }
+                    }
+                ]
+            }
+        ]
+
+        completion = client.chat.completions.create(
+            model=model_name or MODEL_NAME,
+            messages=messages,
+            stream=False,  # 不使用流式响应
+        )
+
+        # 提取响应内容
+        if completion.choices and len(completion.choices) > 0:
+            content = completion.choices[0].message.content
+            return {"result": content}
+        else:
+            raise Exception("API返回空响应")
+
+    except Exception as e:
+        raise Exception(f"调用ERNIE推理失败: {str(e)}")
 
 
 def _build_instruction(clue: Optional[str], custom_prompt: Optional[str]) -> str:
-    base = (custom_prompt or "").strip() or DEFAULT_PROMPT
+    sections: List[str] = []
+    sections.append(DEFAULT_PROMPT)
+    if custom_prompt and custom_prompt.strip():
+        sections.append(custom_prompt.strip())
     if clue:
-        base += f"\n参考线索：{clue}"
-    return base
+        sections.append(f"参考线索：{clue}")
+    sections.append(FORMAT_INSTRUCTIONS)
+    return "\n\n".join(section for section in sections if section)
 
 
 def _sanitize_config(config: Optional[Dict[str, Optional[str]]]) -> Dict[str, str]:
@@ -83,23 +139,51 @@ def _call_custom_model(image: str, prompt: str, config: Dict[str, str]) -> Dict[
     if not url:
         raise AIServiceNotConfigured("自定义模型 URL 未提供")
 
-    headers: Dict[str, str] = {}
     api_key = config.get("key")
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
-        headers.setdefault("X-API-Key", api_key)
+    if not api_key:
+        raise AIServiceNotConfigured("自定义模型 API Key 未提供")
 
-    payload = {
-        "model": config.get("model") or MODEL_NAME,
-        "input": {
-            "image": image,
-            "prompt": prompt,
-        },
-    }
+    client = OpenAI(
+        api_key=api_key,
+        base_url=url,
+    )
 
-    response = httpx.post(url, json=payload, headers=headers or None, timeout=30.0)
-    response.raise_for_status()
-    return response.json()
+    try:
+        # 构造消息，包含文本提示和图片
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image,
+                            "detail": "high"
+                        }
+                    }
+                ]
+            }
+        ]
+
+        completion = client.chat.completions.create(
+            model=config.get("model") or MODEL_NAME,
+            messages=messages,
+            stream=False,  # 不使用流式响应
+        )
+
+        # 提取响应内容
+        if completion.choices and len(completion.choices) > 0:
+            content = completion.choices[0].message.content
+            return {"result": content}
+        else:
+            raise Exception("API返回空响应")
+
+    except Exception as e:
+        raise Exception(f"调用自定义模型失败: {str(e)}")
 
 
 def _normalize_candidate_text(text: str) -> List[str]:
@@ -122,14 +206,157 @@ def _normalize_candidate_text(text: str) -> List[str]:
     return unique
 
 
+def _parse_float(value: Any) -> Optional[float]:
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _ensure_str_list(values: Any) -> List[str]:
+    if values is None:
+        return []
+    if isinstance(values, str):
+        return _normalize_candidate_text(values)
+    if isinstance(values, Sequence) and not isinstance(values, (bytes, bytearray)):
+        result: List[str] = []
+        seen: set[str] = set()
+        for item in values:
+            if item is None:
+                continue
+            text = item if isinstance(item, str) else str(item)
+            text = text.strip()
+            if not text:
+                continue
+            key = text.lower()
+            if key not in seen:
+                seen.add(key)
+                result.append(text)
+        return result
+    text = str(values).strip()
+    return [text] if text else []
+
+
+def _extract_json_payload(value: Any) -> Optional[Any]:
+    if value is None:
+        return None
+    if isinstance(value, dict):
+        keys = {key.lower() for key in value.keys()}
+        if {"best_guess", "alternatives"} & keys:
+            return value
+        for key in ("json", "data", "result", "output", "response", "message", "content"):
+            if key in value:
+                nested = _extract_json_payload(value[key])
+                if nested is not None:
+                    return nested
+        return None
+    if isinstance(value, list):
+        for item in value:
+            nested = _extract_json_payload(item)
+            if nested is not None:
+                return nested
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        if "</think>" in text:
+            text = text.rsplit("</think>", 1)[-1]
+        candidates: List[str] = []
+        for match in JSON_BLOCK_PATTERN.finditer(text):
+            candidates.append(match.group(1).strip())
+        candidates.append(text)
+        for candidate in candidates:
+            if not candidate:
+                continue
+            try:
+                return json.loads(candidate)
+            except json.JSONDecodeError:
+                continue
+        return None
+    return None
+
+
+def _coerce_json_guess(payload: Dict[str, Any]) -> Dict[str, Any]:
+    best_guess = payload.get("best_guess") or payload.get("guess") or payload.get("answer")
+    if isinstance(best_guess, list):
+        best_list = _ensure_str_list(best_guess)
+        best_guess = best_list[0] if best_list else None
+        alternatives = best_list[1:]
+    else:
+        alternatives = []
+
+    if best_guess is not None and not isinstance(best_guess, str):
+        best_guess = str(best_guess)
+
+    additional_alternatives = _ensure_str_list(
+        payload.get("alternatives")
+        or payload.get("candidates")
+        or payload.get("others")
+        or payload.get("guesses")
+    )
+
+    if alternatives:
+        existing_lower = {item.lower() for item in alternatives}
+        combined = alternatives + [alt for alt in additional_alternatives if alt.lower() not in existing_lower]
+    else:
+        combined = additional_alternatives
+
+    if not best_guess and combined:
+        best_guess = combined[0]
+        combined = combined[1:]
+
+    confidence = _parse_float(payload.get("confidence") or payload.get("score") or payload.get("probability"))
+    # Note: confidence is no longer used in the output format
+    reason = payload.get("reason") or payload.get("explanation") or payload.get("analysis")
+
+    seen_lower = set()
+    if isinstance(best_guess, str):
+        seen_lower.add(best_guess.lower())
+
+    unique_alternatives: List[str] = []
+    for alt in combined:
+        lower = alt.lower()
+        if lower in seen_lower:
+            continue
+        seen_lower.add(lower)
+        unique_alternatives.append(alt)
+
+    if reason is not None and not isinstance(reason, str):
+        reason = str(reason)
+
+    return {
+        "best_guess": best_guess,
+        "alternatives": unique_alternatives,
+        "reason": reason,
+    }
+
+
 def _extract_guesses(data: Dict[str, Any]) -> Dict[str, Any]:
+    structured = _extract_json_payload(data)
+    if isinstance(structured, list):
+        for item in structured:
+            if isinstance(item, dict):
+                structured = item
+                break
+        else:
+            structured = None
+
+    if isinstance(structured, dict):
+        coerced = _coerce_json_guess(structured)
+        if coerced.get("best_guess") or coerced.get("alternatives"):
+            return coerced
+
     result = data.get("result") or data.get("results") or data.get("data")
     best_guess: Optional[str] = None
     alternatives: List[str] = []
-    confidence: Optional[float] = None
 
     def _maybe_append(value: Any):
-        nonlocal best_guess, alternatives, confidence
+        nonlocal best_guess, alternatives
         if not value:
             return
         if isinstance(value, str):
@@ -144,10 +371,6 @@ def _extract_guesses(data: Dict[str, Any]) -> Dict[str, Any]:
         elif isinstance(value, dict):
             label = value.get("label") or value.get("content") or value.get("text")
             _maybe_append(label)
-            conf_val = value.get("confidence")
-            if isinstance(conf_val, (int, float)):
-                if confidence is None or float(conf_val) > confidence:
-                    confidence = float(conf_val)
         elif isinstance(value, list):
             for item in value:
                 _maybe_append(item)
@@ -171,12 +394,14 @@ def _extract_guesses(data: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "best_guess": best_guess,
         "alternatives": alternatives,
-        "confidence": confidence,
     }
+
+
 def guess_drawing(
     image: str,
     clue: Optional[str] = None,
     config: Optional[Dict[str, Optional[str]]] = None,
+    target: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Call ERNIE model (or a custom endpoint) to guess the drawing content."""
 
@@ -187,12 +412,15 @@ def guess_drawing(
         try:
             data = _call_custom_model(image, prompt, sanitized_config)
             parsed = _extract_guesses(data)
+            best_guess = parsed.get("best_guess")
             return {
                 "success": True,
                 "configured": True,
-                "best_guess": parsed.get("best_guess"),
+                "best_guess": best_guess,
                 "alternatives": parsed.get("alternatives", []),
-                "confidence": parsed.get("confidence"),
+                "reason": parsed.get("reason"),
+                "matched": _is_guess_correct(best_guess, target),
+                "target": target,
                 "raw": data,
                 "provider": "custom",
             }
@@ -202,22 +430,28 @@ def guess_drawing(
                 "configured": True,
                 "best_guess": None,
                 "alternatives": [],
-                "confidence": None,
                 "error": str(exc),
+                "reason": None,
+                "matched": False,  # AI调用失败，无法判断是否匹配
+                "target": target,
                 "provider": "custom",
             }
 
-    token = _get_access_token()
-    if token:
+    # 检查是否有AI Studio API Key
+    api_key = os.getenv("AI_STUDIO_API_KEY")
+    if api_key:
         try:
-            data = _call_ernie_inference(token, image, prompt, sanitized_config.get("model"))
+            data = _call_ernie_inference(image, prompt, sanitized_config.get("model"))
             parsed = _extract_guesses(data)
+            best_guess = parsed.get("best_guess")
             return {
                 "success": True,
                 "configured": True,
-                "best_guess": parsed.get("best_guess"),
+                "best_guess": best_guess,
                 "alternatives": parsed.get("alternatives", []),
-                "confidence": parsed.get("confidence"),
+                "reason": parsed.get("reason"),
+                "matched": _is_guess_correct(best_guess, target),
+                "target": target,
                 "raw": data,
                 "provider": "ernie",
             }
@@ -227,18 +461,22 @@ def guess_drawing(
                 "configured": True,
                 "best_guess": None,
                 "alternatives": [],
-                "confidence": None,
                 "error": str(exc),
+                "reason": None,
+                "matched": False,  # AI调用失败，无法判断是否匹配
+                "target": target,
                 "provider": "ernie",
             }
 
     # fallback heuristic when AI not configured
     return {
-        "success": True,
+        "success": False,
         "configured": False,
-        "best_guess": clue or None,
+        "best_guess": None,
         "alternatives": [],
-        "confidence": None,
-        "raw": {"reason": "AI service not configured, fallback heuristic"},
+        "reason": "AI服务未配置，无法进行图像识别",
+        "matched": False,
+        "target": target,
+        "raw": {"reason": "AI service not configured"},
         "provider": "fallback",
     }

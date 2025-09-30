@@ -1,9 +1,10 @@
-import { Card, Space, Input, Button, List, Avatar, Empty, Typography, Form } from 'antd'
+import { Card, Space, Input, Button, List, Avatar, Empty, Typography, Form, message } from 'antd'
 import type { ChangeEvent } from 'react'
-import DrawBoard from '../DrawBoard'
+import { useRef } from 'react'
+import DrawBoard, { type DrawBoardRef } from '../DrawBoard'
 import GuessResultBlock from './GuessResultBlock'
 import type { GuessPayload } from '../../hooks/useDrawingRoom'
-import { formatRelativeTime } from '../../utils/api'
+import { formatRelativeTime, api } from '../../utils/api'
 
 const { Text } = Typography
 
@@ -16,14 +17,14 @@ export interface ModelConfig {
 
 export interface SingleHistoryEntry {
   id: number
-  clue?: string
+  target: string
   createdAt: number
   guess: GuessPayload
 }
 
 interface SingleTesterProps {
-  clue: string
-  onClueChange: (value: string) => void
+  target: string
+  onTargetChange: (value: string) => void
   onSubmit: (image: string) => void
   submitting: boolean
   onReset: () => void
@@ -31,13 +32,12 @@ interface SingleTesterProps {
   history: SingleHistoryEntry[]
   modelConfig: ModelConfig
   onModelConfigChange: (patch: Partial<ModelConfig>) => void
-  onResetModelConfig: () => void
-  isCustomConfig: boolean
+  onTestConfig?: (image: string) => void
 }
 
 const SingleTester = ({
-  clue,
-  onClueChange,
+  target,
+  onTargetChange,
   onSubmit,
   submitting,
   onReset,
@@ -45,55 +45,71 @@ const SingleTester = ({
   history,
   modelConfig,
   onModelConfigChange,
-  onResetModelConfig,
-  isCustomConfig,
+  onTestConfig,
 }: SingleTesterProps) => {
-  const handleClueChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onClueChange(event.target.value)
-  }
+  const drawBoardRef = useRef<DrawBoardRef>(null)
 
   const handleModelConfigFieldChange = (field: keyof ModelConfig) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    onModelConfigChange({ [field]: event.target.value })
+    const value = event.target.value
+    if (field === 'url' && value && !value.match(/^https?:\/\/.+/)) {
+      message.warning('请输入有效的HTTP或HTTPS URL')
+      return
+    }
+    onModelConfigChange({ [field]: value })
+  }
+
+  const handleTestConfig = () => {
+    if (!onTestConfig) return
+    const image = drawBoardRef.current?.getImage()
+    if (!image) {
+      message.warning('请先在画板上绘制一些内容')
+      return
+    }
+    onTestConfig(image)
+  }
+
+  const handleRandomTarget = async () => {
+    try {
+      const response = await api.get('/ai/random-target')
+      onTargetChange(response.data.target)
+      message.success('已生成随机绘制目标')
+    } catch (error) {
+      message.error('获取随机目标失败')
+      console.error('Random target error:', error)
+    }
   }
 
   return (
     <div className="drawing-single">
       <div className="drawing-single-grid">
         <div className="drawing-single-column drawing-single-column--left">
-          <Card
-            title="模型配置"
-            extra={
-              <Button type="link" size="small" onClick={onResetModelConfig} disabled={!isCustomConfig}>
-                恢复默认
-              </Button>
-            }
-          >
+          <Card title="模型配置">
             <Form layout="vertical">
               <Form.Item label="模型 URL">
                 <Input
-                  placeholder="例如：https://api.example.com/v1/inference"
                   value={modelConfig.url}
                   onChange={handleModelConfigFieldChange('url')}
                   allowClear
+                  placeholder="OpenAI兼容API端点，例如：https://api.openai.com/v1"
                 />
               </Form.Item>
               <Form.Item label="访问密钥">
                 <Input.Password
-                  placeholder="用于鉴权的 API Key"
                   value={modelConfig.key}
                   onChange={handleModelConfigFieldChange('key')}
                   allowClear
+                  placeholder="输入API访问密钥"
                 />
               </Form.Item>
               <Form.Item label="模型名称">
                 <Input
-                  placeholder="例如：ernie-4.5-vl-28b-a3b"
                   value={modelConfig.model}
                   onChange={handleModelConfigFieldChange('model')}
                   allowClear
+                  placeholder="例如：gpt-4o-mini 或 ernie-4.5-8k-preview"
                 />
               </Form.Item>
-              <Form.Item label="提示词">
+              <Form.Item label="自定义提示词">
                 <Input.TextArea
                   placeholder="可选：自定义模型指令"
                   value={modelConfig.prompt}
@@ -101,7 +117,11 @@ const SingleTester = ({
                   autoSize={{ minRows: 3, maxRows: 6 }}
                 />
               </Form.Item>
-              <Text type="secondary">以上配置仅作用于单人测试，并保存在本地浏览器，不会同步至多人房间。</Text>
+              <Form.Item>
+                <Button type="primary" onClick={handleTestConfig} disabled={submitting || !onTestConfig}>
+                  进行猜词
+                </Button>
+              </Form.Item>
             </Form>
           </Card>
           <Card title="AI 猜词结果">
@@ -109,21 +129,23 @@ const SingleTester = ({
           </Card>
         </div>
         <div className="drawing-single-column drawing-single-column--center">
-          <Card title="绘画区（单人测试）">
+          <Card title="绘制目标">
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              <Input
-                value={clue}
-                placeholder="可选线索（例如主题、颜色、动作等）"
-                maxLength={120}
-                allowClear
-                onChange={handleClueChange}
-              />
-              <DrawBoard onSubmit={onSubmit} submitting={submitting} />
-              <Space wrap>
-                <Button onClick={onReset} disabled={!result && history.length === 0 && !clue}>
-                  清空测试内容
-                </Button>
-              </Space>
+              <Space.Compact style={{ width: '100%' }}>
+                <Input
+                  value={target}
+                  placeholder="输入要画的词语（例如：苹果、猫、房子）"
+                  maxLength={50}
+                  allowClear
+                  onChange={(e) => onTargetChange(e.target.value)}
+                />
+                <Button onClick={handleRandomTarget}>随机生成</Button>
+              </Space.Compact>
+            </Space>
+          </Card>
+          <Card title="绘画区">
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              <DrawBoard ref={drawBoardRef} onSubmit={onSubmit} submitting={submitting} />
             </Space>
           </Card>
         </div>
@@ -149,10 +171,10 @@ const SingleTester = ({
                       description={
                         <Space direction="vertical" size="small">
                           <Text>提交时间：{formatRelativeTime(item.createdAt)}</Text>
-                          {item.clue && <Text>线索：{item.clue}</Text>}
+                          <Text>目标词语：{item.target}</Text>
                           <Text>
                             猜测状态：
-                            {item.guess.matched ? '猜中 ✅' : item.guess.success === false ? '失败 ⚠️' : '待确认'}
+                            {item.guess.matched === true ? '猜中 ✅' : item.guess.matched === false ? '未猜中 ❌' : item.guess.success === false ? '失败 ⚠️' : '待确认'}
                           </Text>
                           {item.guess.alternatives && item.guess.alternatives.length > 0 && (
                             <Text type="secondary">

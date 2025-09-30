@@ -3,7 +3,8 @@ import { UserProvider } from './context/UserContext'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Room from './pages/Room'
-import DrawingRoom from './pages/DrawingRoom'
+import MultiplayerGame from './pages/MultiplayerGame'
+import SingleGame from './pages/SingleGame'
 import './App.css'
 
 function App() {
@@ -15,7 +16,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/rooms" element={<Room />} />
-            <Route path="/game" element={<DrawingRoom />} />
+            <Route path="/game" element={<MultiplayerGame />} />
+            <Route path="/game/single" element={<SingleGame />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
