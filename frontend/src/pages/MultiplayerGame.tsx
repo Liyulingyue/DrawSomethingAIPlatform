@@ -125,7 +125,6 @@ function MultiplayerGame() {
   const lastSyncedClue = useRef('')
 
   const [targetInput, setTargetInput] = useState('')
-  const [clueInput, setClueInput] = useState('')
   const [chatInput, setChatInput] = useState('')
 
   useEffect(() => {
@@ -136,8 +135,7 @@ function MultiplayerGame() {
     }
     const serverClue = drawingState?.current_clue ?? ''
     if (serverClue !== lastSyncedClue.current) {
-      setClueInput(serverClue ?? '')
-      lastSyncedClue.current = serverClue ?? ''
+      lastSyncedClue.current = serverClue
     }
   }, [drawingState?.current_target, drawingState?.current_hint, drawingState?.current_clue])
 
@@ -151,6 +149,8 @@ function MultiplayerGame() {
   const guess = drawingState?.ai_result ?? null
   const currentSubmission = drawingState?.current_submission ?? null
   const history = drawingState?.draw_history ?? []
+  const scores = drawingState?.scores ?? {}
+  const currentDrawing = drawingState?.current_drawing ?? null
 
   const statusDescription = useMemo(() => {
     switch (status) {
@@ -175,21 +175,21 @@ function MultiplayerGame() {
 
   const handleConfigureRound = async () => {
     const trimmedTarget = targetInput.trim()
-    const trimmedClue = clueInput.trim()
     if (!trimmedTarget) {
       messageApi.error('提示词不能为空')
       return
     }
     lastSyncedTarget.current = trimmedTarget
-    lastSyncedClue.current = trimmedClue
-    await actions.configureRound(trimmedTarget, trimmedClue || undefined)
-  }
-
-  const handleSelectDrawer = async (value: string) => {
-    await actions.selectDrawer(value)
+    await actions.configureRound(trimmedTarget, undefined)
   }
 
   const handleStartRound = async () => {
+    // 检查是否有成员未整备
+    const unpreparedPlayers = players.filter(player => !readyStatus[player])
+    if (unpreparedPlayers.length > 0) {
+      messageApi.warning(`${unpreparedPlayers.join('、')}未整备`)
+      return
+    }
     await actions.startRound()
   }
 
@@ -208,6 +208,19 @@ function MultiplayerGame() {
     }
     await actions.sendMessage(chatInput)
     setChatInput('')
+  }
+
+  const handleGuessWord = async (guess: string) => {
+    await actions.guess(guess)
+  }
+
+  const handleSkipGuess = async () => {
+    await actions.skipGuess()
+  }
+
+  const handleResetScores = async () => {
+    // 这里可能需要后端API来重置积分
+    messageApi.info('重置积分功能待实现')
   }
 
   const handleLeaveRoom = async () => {
@@ -240,18 +253,19 @@ function MultiplayerGame() {
             currentDrawer={currentDrawer}
             currentRound={currentRound}
             currentTarget={currentTarget}
-            currentClue={currentClue}
             guess={guess}
             currentSubmission={currentSubmission}
             history={history}
             messages={messages}
+            scores={scores}
             username={username}
             isReady={isReady}
             readyStatus={readyStatus}
             statusDescription={statusDescription}
             targetInput={targetInput}
-            clueInput={clueInput}
             chatInput={chatInput}
+            guessStatus={drawingState?.guess_status?.[username || ''] || 'pending'}
+            currentDrawing={currentDrawing}
             state={state}
             modelConfig={modelConfig}
             isLocked={isLocked}
@@ -262,8 +276,10 @@ function MultiplayerGame() {
             onPrepare={handlePrepare}
             onUnprepare={handleUnprepare}
             onGuess={handleGuess}
+            onGuessWord={handleGuessWord}
+            onSkipGuess={handleSkipGuess}
+            onSyncDrawing={actions.syncDrawing}
             onTargetInputChange={setTargetInput}
-            onClueInputChange={setClueInput}
             onChatInputChange={setChatInput}
             onChatKeyDown={handleChatKeyDown}
             onToggleReady={() => {
@@ -272,8 +288,8 @@ function MultiplayerGame() {
             onConfigureRound={() => {
               void handleConfigureRound()
             }}
-            onSelectDrawer={(value) => {
-              void handleSelectDrawer(value)
+            onResetScores={() => {
+              void handleResetScores()
             }}
             onStartRound={() => {
               void handleStartRound()

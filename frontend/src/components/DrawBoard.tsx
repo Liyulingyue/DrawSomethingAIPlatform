@@ -9,6 +9,7 @@ interface DrawBoardProps {
   submitting?: boolean
   disabled?: boolean
   onSubmit?: (image: string) => void
+  onDraw?: (image: string) => void
 }
 
 export interface DrawBoardRef {
@@ -21,7 +22,7 @@ const DEFAULT_COLOR = '#1f1f1f'
 const DEFAULT_SIZE = 6
 const COLOR_PRESETS = ['#1f1f1f', '#f5222d', '#faad14', '#52c41a', '#13c2c2', '#1677ff', '#722ed1', '#ffffff']
 
-function DrawBoard({ width, height, disabled = false }: DrawBoardProps, ref: React.Ref<DrawBoardRef>) {
+function DrawBoard({ width, height, disabled = false, onDraw }: DrawBoardProps, ref: React.Ref<DrawBoardRef>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const contextRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -149,7 +150,15 @@ function DrawBoard({ width, height, disabled = false }: DrawBoardProps, ref: Rea
     ctx.closePath()
     setIsDrawing(false)
     event.currentTarget.releasePointerCapture(event.pointerId)
-  }, [isDrawing])
+
+    // 绘画结束时同步图像数据
+    if (onDraw) {
+      const image = canvasRef.current?.toDataURL('image/png')
+      if (image) {
+        onDraw(image)
+      }
+    }
+  }, [isDrawing, onDraw])
 
   const clearCanvas = useCallback(() => {
     const ctx = contextRef.current

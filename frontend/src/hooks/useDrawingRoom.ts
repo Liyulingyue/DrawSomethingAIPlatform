@@ -42,9 +42,12 @@ export interface DrawingState {
   current_drawer?: string | null
   ready_status?: Record<string, boolean>
   current_submission?: SubmissionPreview | null
+  current_drawing?: string | null
   ai_result?: GuessPayload | null
   ai_guess?: GuessPayload | null
   draw_history?: DrawHistoryItem[]
+  scores?: Record<string, number>
+  guess_status?: Record<string, string>
 }
 
 export interface RoomSummary {
@@ -481,6 +484,77 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
     }
   }, [roomId, username, navigate, stopPolling])
 
+  const guess = useCallback(async (guessText: string) => {
+    if (!roomId || !username) {
+      message.warning('房间或用户名信息缺失')
+      return
+    }
+    try {
+      const response = await api.post('/drawing/guess', {
+        room_id: roomId,
+        username,
+        guess: guessText,
+      })
+      if (!response.data?.success) {
+        message.error(response.data?.message ?? '猜词失败')
+      } else {
+        if (response.data.correct) {
+          message.success('恭喜猜中！')
+          if (response.data.round_finished) {
+            message.info(`目标词是"${response.data.target_word}"，回合结束！`)
+          }
+        } else {
+          message.info('猜错了，继续猜吧！')
+          if (response.data.round_finished) {
+            message.info(`目标词是"${response.data.target_word}"，回合结束！`)
+          }
+        }
+      }
+      await fetchAll()
+    } catch (error) {
+      console.error('猜词失败', error)
+      message.error('猜词失败')
+    }
+  }, [roomId, username, fetchAll])
+
+  const skipGuess = useCallback(async () => {
+    if (!roomId || !username) {
+      message.warning('房间或用户名信息缺失')
+      return
+    }
+    try {
+      const response = await api.post('/drawing/skip_guess', {
+        room_id: roomId,
+        username,
+      })
+      if (!response.data?.success) {
+        message.error(response.data?.message ?? '跳过失败')
+      } else {
+        message.info('已跳过猜词')
+      }
+      await fetchAll()
+    } catch (error) {
+      console.error('跳过猜词失败', error)
+      message.error('跳过猜词失败')
+    }
+  }, [roomId, username, fetchAll])
+
+  const syncDrawing = useCallback(async (image: string) => {
+    if (!roomId || !username) {
+      return
+    }
+    try {
+      await api.post('/drawing/sync_drawing', {
+        room_id: roomId,
+        username,
+        image,
+      })
+      // 不需要显示消息，因为这是实时同步
+    } catch (error) {
+      console.error('同步绘画数据失败', error)
+    }
+  }, [roomId, username])
+
   const combined = useMemo(() => {
     if (!room && !drawingState) {
       return null
@@ -513,6 +587,9 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
       submitDrawing,
       sendMessage,
       leaveRoom,
+      guess,
+      skipGuess,
+      syncDrawing,
     },
     state: {
       readyLoading,

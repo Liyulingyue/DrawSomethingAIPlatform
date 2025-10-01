@@ -71,3 +71,20 @@ class StartRoundRequest(BaseModel):
 class ResetRoundRequest(BaseModel):
     room_id: str
     username: str
+
+
+class GuessWordRequest(BaseModel):
+    room_id: str
+    username: str
+    guess: str = Field(..., max_length=50)
+
+
+class SkipGuessRequest(BaseModel):
+    room_id: str
+    username: str
+
+
+class SyncDrawingRequest(BaseModel):
+    room_id: str
+    username: str
+    image: str  # base64 encoded PNG data URL

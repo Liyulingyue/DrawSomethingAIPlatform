@@ -58,6 +58,8 @@ interface MultiplayerViewProps {
   statusDescription: string
   targetInput: string
   chatInput: string
+  guessStatus: string
+  currentDrawing: string | null
   state: {
     readyLoading: boolean
     configLoading: boolean
@@ -76,6 +78,9 @@ interface MultiplayerViewProps {
   onPrepare: () => void
   onUnprepare: () => void
   onGuess: (image: string) => void
+  onGuessWord: (guess: string) => void
+  onSkipGuess: () => void
+  onSyncDrawing: (image: string) => void
   onTargetInputChange: (value: string) => void
   onChatInputChange: (value: string) => void
   onChatKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
@@ -113,6 +118,8 @@ const MultiplayerView = ({
   statusDescription,
   targetInput,
   chatInput,
+  guessStatus,
+  currentDrawing,
   state,
   modelConfig,
   isLocked,
@@ -123,6 +130,9 @@ const MultiplayerView = ({
   onPrepare,
   onUnprepare,
   onGuess,
+  onGuessWord,
+  onSkipGuess,
+  onSyncDrawing,
   onTargetInputChange,
   onChatInputChange,
   onChatKeyDown,
@@ -241,7 +251,7 @@ const MultiplayerView = ({
                     onChange={handleModelConfigFieldChange('url')}
                     allowClear
                     placeholder="OpenAI兼容API端点，例如：https://api.openai.com/v1"
-                    disabled={isLocked && (status === 'drawing' || status === 'success' || status === 'review')}
+                    disabled={isLocked}
                   />
                 </Form.Item>
                 <Form.Item label="访问密钥">
@@ -250,7 +260,7 @@ const MultiplayerView = ({
                     onChange={handleModelConfigFieldChange('key')}
                     allowClear
                     placeholder="输入API访问密钥"
-                    disabled={isLocked && (status === 'drawing' || status === 'success' || status === 'review')}
+                    disabled={isLocked}
                   />
                 </Form.Item>
                 <Form.Item label="模型名称">
@@ -259,7 +269,7 @@ const MultiplayerView = ({
                     onChange={handleModelConfigFieldChange('model')}
                     allowClear
                     placeholder="例如：gpt-4o-mini 或 ernie-4.5-8k-preview"
-                    disabled={isLocked && (status === 'drawing' || status === 'success' || status === 'review')}
+                    disabled={isLocked}
                   />
                 </Form.Item>
                 <Form.Item label="自定义提示词">
@@ -268,7 +278,7 @@ const MultiplayerView = ({
                     value={modelConfig.prompt}
                     onChange={handleModelConfigFieldChange('prompt')}
                     autoSize={{ minRows: 3, maxRows: 6 }}
-                    disabled={isLocked && (status === 'drawing' || status === 'success' || status === 'review')}
+                    disabled={isLocked}
                   />
                 </Form.Item>
                 <Form.Item>
@@ -305,6 +315,9 @@ const MultiplayerView = ({
                             <Button type="primary" onClick={() => onGuess(currentSubmission!.image)} disabled={!currentSubmission}>
                               进行猜词
                             </Button>
+                            <Button onClick={() => void onSkipGuess()} disabled={guessStatus === 'guessed' || guessStatus === 'skipped'}>
+                              跳过
+                            </Button>
                           </>
                         )}
                       </>
@@ -335,13 +348,12 @@ const MultiplayerView = ({
               <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <DrawBoard
                   disabled={!(status === 'drawing' && currentDrawer === username)}
-                  onSubmit={(image) => {
-                    void onSubmitDrawing(image)
+                  onDraw={(image) => {
+                    void onSyncDrawing(image)
                   }}
-                  submitting={state.submitting}
                 />
                 {status === 'drawing' && currentDrawer === username && (
-                  <Text type="secondary">完成后点击提交，AI 将立即给出猜词结果。</Text>
+                  <Text type="secondary">开始绘画吧，所有人可以实时看到你的作品并随时猜词！</Text>
                 )}
                 {status === 'drawing' && currentDrawer !== username && (
                   <Text type="secondary">绘画者 {currentDrawer ?? '未知'} 正在创作，请耐心等待。</Text>

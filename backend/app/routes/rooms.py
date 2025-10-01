@@ -28,6 +28,10 @@ def init_room():
         "messages": [],
         "current_submission": None,
         "ai_result": None,
+        "scores": {},  # 玩家积分
+        "drawer_queue": [],  # 绘画者队列
+        "current_drawer_index": 0,  # 当前绘画者在队列中的索引
+        "guess_status": {},  # 玩家猜词状态 {username: "pending" | "guessed" | "skipped"}
         "created_at": now,
         "last_activity": now,
         "max_players": 4,

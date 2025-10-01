@@ -7,6 +7,9 @@ from ..models.schemas import (
     SubmitDrawingRequest,
     StartRoundRequest,
     ResetRoundRequest,
+    GuessWordRequest,
+    SkipGuessRequest,
+    SyncDrawingRequest,
 )
 from ..shared import rooms
 from .rooms import update_room_activity
@@ -107,22 +110,45 @@ async def start_round(request: StartRoundRequest):
     if room.get("owner") != request.username:
         return {"success": False, "message": "仅房主可以开始回合"}
 
-    current_target = room.get("current_target") or room.get("current_hint")
-    if not current_target:
-        return {"success": False, "message": "请先设置提示词"}
-    if not room.get("current_drawer"):
-        return {"success": False, "message": "请先指定绘画者"}
-    if not room.get("players"):
+    players = room.get("players", [])
+    if not players:
         return {"success": False, "message": "房间内没有玩家"}
-    if not all(room.setdefault("ready_status", {}).get(player, False) for player in room["players"]):
+    if not all(room.setdefault("ready_status", {}).get(player, False) for player in players):
         return {"success": False, "message": "所有玩家需要先标记整备完毕"}
 
-    room["current_round"] = room.get("current_round", 0) + 1
+    # 初始化绘画者队列（如果还没有初始化）
+    drawer_queue = room.setdefault("drawer_queue", players.copy())
+    if not drawer_queue:
+        drawer_queue = players.copy()
+        room["drawer_queue"] = drawer_queue
+
+    current_drawer_index = room.get("current_drawer_index", 0)
+
+    # 如果所有人都画完了，重置队列
+    if current_drawer_index >= len(drawer_queue):
+        room["current_round"] = room.get("current_round", 0) + 1
+        room["drawer_queue"] = players.copy()  # 重新洗牌队列
+        current_drawer_index = 0
+
+    # 选择当前绘画者
+    current_drawer = drawer_queue[current_drawer_index]
+    room["current_drawer"] = current_drawer
+
+    # 生成随机目标词（这里暂时使用固定词，后面可以改进）
+    import random
+    target_words = ["苹果", "猫", "房子", "汽车", "树", "太阳", "月亮", "星星", "鱼", "鸟"]
+    current_target = random.choice(target_words)
+    room["current_target"] = current_target
+    room["current_hint"] = current_target  # 兼容旧代码
+
+    # 初始化猜词状态
+    room["guess_status"] = {player: "pending" for player in players}
     room["status"] = "drawing"
     room["current_submission"] = None
     room["ai_result"] = None
+
     update_room_activity(request.room_id)
-    return {"success": True, "round": room["current_round"]}
+    return {"success": True, "round": room["current_round"], "drawer": current_drawer, "target": current_target}
 
 
 @router.post("/submit")
@@ -223,9 +249,12 @@ async def get_state(room_id: str):
             "current_drawer": room.get("current_drawer"),
             "ready_status": room.get("ready_status", {}),
             "current_submission": room.get("current_submission"),
+            "current_drawing": room.get("current_drawing"),
             "ai_result": room.get("ai_result"),
             "ai_guess": room.get("ai_result"),
             "draw_history": room.get("draw_history", []),
+            "scores": room.get("scores", {}),
+            "guess_status": room.get("guess_status", {}),
         }
     }
 
@@ -247,5 +276,125 @@ async def reset_round(request: ResetRoundRequest):
     room["ai_result"] = None
     for player in room.get("players", []):
         room.setdefault("ready_status", {})[player] = False
+    update_room_activity(request.room_id)
+    return {"success": True}
+
+
+@router.post("/guess")
+async def guess_word(request: GuessWordRequest):
+    room, error = _ensure_room(request.room_id)
+    if error:
+        return error
+    err = _ensure_player(room, request.username)
+    if err:
+        return err
+
+    if room.get("status") != "drawing":
+        return {"success": False, "message": "当前不在绘画阶段"}
+
+    current_target = room.get("current_target") or room.get("current_hint")
+    if not current_target:
+        return {"success": False, "message": "目标词尚未设置"}
+
+    guess_status = room.setdefault("guess_status", {})
+    
+    # 如果已经跳过，就不能再猜词
+    if guess_status.get(request.username) == "skipped":
+        return {"success": False, "message": "您已经跳过了这幅画"}
+
+    # 检查是否猜中
+    target_normalized = current_target.strip().lower()
+    guess_normalized = request.guess.strip().lower()
+    is_correct = target_normalized in guess_normalized or guess_normalized in target_normalized
+
+    # 更新猜词状态
+    guess_status[request.username] = "guessed"
+
+    # 如果猜中，给积分
+    if is_correct:
+        scores = room.setdefault("scores", {})
+        scores[request.username] = scores.get(request.username, 0) + 1  # 猜中者+1
+        scores[room.get("current_drawer", "")] = scores.get(room.get("current_drawer", ""), 0) + 1  # 绘画者+1
+
+    # 检查是否所有人都猜完了（猜中或跳过）
+    players = room.get("players", [])
+    all_guessed = all(guess_status.get(player) in ["guessed", "skipped"] for player in players)
+
+    if all_guessed:
+        # 所有人都猜完了，进入下一轮
+        drawer_queue = room.get("drawer_queue", [])
+        current_index = room.get("current_drawer_index", 0) + 1
+        room["current_drawer_index"] = current_index
+
+        if current_index >= len(drawer_queue):
+            # 所有人都画完了
+            room["status"] = "finished"
+        else:
+            # 还有人没画，继续下一轮
+            room["status"] = "waiting"  # 等待房主开始下一轮
+
+        update_room_activity(request.room_id)
+        return {
+            "success": True,
+            "correct": is_correct,
+            "target_word": current_target if is_correct else None,
+            "round_finished": True
+        }
+
+    # 如果还没所有人猜完，继续当前回合
+    update_room_activity(request.room_id)
+    return {
+        "success": True,
+        "correct": is_correct,
+        "target_word": current_target if is_correct else None
+    }
+
+
+@router.post("/skip_guess")
+async def skip_guess(request: SkipGuessRequest):
+    room, error = _ensure_room(request.room_id)
+    if error:
+        return error
+    err = _ensure_player(room, request.username)
+    if err:
+        return err
+
+    if room.get("status") != "drawing":
+        return {"success": False, "message": "当前不在绘画阶段"}
+
+    guess_status = room.setdefault("guess_status", {})
+    
+    # 如果已经跳过或猜过，就不能再跳过
+    if guess_status.get(request.username) in ["skipped", "guessed"]:
+        return {"success": False, "message": "您已经跳过或猜过这幅画了"}
+
+    # 更新猜词状态为跳过
+    guess_status[request.username] = "skipped"
+
+    # 跳过不结束回合，继续让其他人猜
+    update_room_activity(request.room_id)
+    return {
+        "success": True
+    }
+
+
+@router.post("/sync_drawing")
+async def sync_drawing(request: SyncDrawingRequest):
+    room, error = _ensure_room(request.room_id)
+    if error:
+        return error
+    err = _ensure_player(room, request.username)
+    if err:
+        return err
+
+    if room.get("status") != "drawing":
+        return {"success": False, "message": "当前不在绘画阶段"}
+
+    if room.get("current_drawer") != request.username:
+        return {"success": False, "message": "仅当前绘画者可以同步绘画数据"}
+
+    # 更新房间的当前绘画数据
+    room["current_drawing"] = request.image
+
     update_room_activity(request.room_id)
     return {"success": True}
