@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layout, message } from 'antd'
 import Navbar from '../components/Navbar'
 import MultiplayerView from '../components/drawing/MultiplayerView'
-import { useDrawingRoom } from '../hooks/useDrawingRoom'
+import { useDrawingRoom, type PlayerStateSnapshot } from '../hooks/useDrawingRoom'
 import './DrawingRoom.css'
 
 const { Content } = Layout
@@ -68,9 +68,17 @@ function MultiplayerGame() {
     }))
   }
 
-  const handleLock = () => {
+  const handleLock = async () => {
+    if (!modelConfig.url.trim()) {
+      messageApi.warning('请先配置模型 API 地址')
+      return
+    }
     if (!modelConfig.key.trim()) {
       messageApi.warning('请先配置API密钥')
+      return
+    }
+    const success = await actions.setModelConfig(modelConfig)
+    if (!success) {
       return
     }
     setIsLocked(true)
@@ -97,8 +105,8 @@ function MultiplayerGame() {
   }
 
   const handleUnprepare = async () => {
-    if (status === 'drawing' || status === 'success' || status === 'review') {
-      messageApi.warning('游戏已开始，无法解除整备')
+    if (status === 'drawing') {
+      messageApi.warning('游戏进行中，无法解除整备')
       return
     }
     setIsPrepared(false)
@@ -106,13 +114,12 @@ function MultiplayerGame() {
     messageApi.success('已解除整备')
   }
 
-  const handleGuess = async (image: string) => {
+  const handleGuess = async (image?: string) => {
     if (!isLocked) {
       messageApi.warning('请先锁定配置')
       return
     }
-    messageApi.info('正在进行AI猜词...')
-    console.log('进行AI猜词，图像数据：', image.substring(0, 50) + '...')
+    await actions.triggerAIGuess(image)
   }
 
   useEffect(() => {
@@ -126,6 +133,10 @@ function MultiplayerGame() {
 
   const [targetInput, setTargetInput] = useState('')
   const [chatInput, setChatInput] = useState('')
+
+  useEffect(() => {
+    setIsPrepared(isReady)
+  }, [isReady])
 
   useEffect(() => {
     const serverTarget = drawingState?.current_target ?? drawingState?.current_hint ?? ''
@@ -145,12 +156,12 @@ function MultiplayerGame() {
   const currentDrawer = combined?.current_drawer ?? null
   const currentRound = combined?.current_round ?? 0
   const currentTarget = drawingState?.current_target ?? drawingState?.current_hint ?? ''
-  const currentClue = drawingState?.current_clue ?? ''
   const guess = drawingState?.ai_result ?? null
   const currentSubmission = drawingState?.current_submission ?? null
   const history = drawingState?.draw_history ?? []
   const scores = drawingState?.scores ?? {}
   const currentDrawing = drawingState?.current_drawing ?? null
+  const playerStates = (drawingState?.player_states ?? combined?.player_states ?? {}) as Record<string, PlayerStateSnapshot>
 
   const statusDescription = useMemo(() => {
     switch (status) {
@@ -258,6 +269,7 @@ function MultiplayerGame() {
             history={history}
             messages={messages}
             scores={scores}
+            playerStates={playerStates}
             username={username}
             isReady={isReady}
             readyStatus={readyStatus}

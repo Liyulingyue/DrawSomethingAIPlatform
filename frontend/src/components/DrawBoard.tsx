@@ -10,6 +10,7 @@ interface DrawBoardProps {
   disabled?: boolean
   onSubmit?: (image: string) => void
   onDraw?: (image: string) => void
+  externalImage?: string | null
 }
 
 export interface DrawBoardRef {
@@ -22,12 +23,13 @@ const DEFAULT_COLOR = '#1f1f1f'
 const DEFAULT_SIZE = 6
 const COLOR_PRESETS = ['#1f1f1f', '#f5222d', '#faad14', '#52c41a', '#13c2c2', '#1677ff', '#722ed1', '#ffffff']
 
-function DrawBoard({ width, height, disabled = false, onDraw }: DrawBoardProps, ref: React.Ref<DrawBoardRef>) {
+function DrawBoard({ width, height, disabled = false, onDraw, externalImage }: DrawBoardProps, ref: React.Ref<DrawBoardRef>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const contextRef = useRef<CanvasRenderingContext2D | null>(null)
   const brushColorRef = useRef(DEFAULT_COLOR)
   const brushSizeRef = useRef(DEFAULT_SIZE)
+  const lastRenderedExternalRef = useRef<string | null>(null)
 
   const [isDrawing, setIsDrawing] = useState(false)
   const [brushColor, setBrushColor] = useState(DEFAULT_COLOR)
@@ -160,6 +162,30 @@ function DrawBoard({ width, height, disabled = false, onDraw }: DrawBoardProps, 
     }
   }, [isDrawing, onDraw])
 
+  const drawImageOnCanvas = useCallback((imageSrc: string) => {
+    const canvas = canvasRef.current
+    const ctx = contextRef.current
+    if (!canvas || !ctx) return
+
+    const imageElement = new Image()
+    imageElement.onload = () => {
+      const { width: displayWidth, height: displayHeight } = canvasSize
+      ctx.save()
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.restore()
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, displayWidth, displayHeight)
+      ctx.drawImage(imageElement, 0, 0, displayWidth, displayHeight)
+      ctx.strokeStyle = brushColorRef.current
+      ctx.lineWidth = brushSizeRef.current
+    }
+    imageElement.onerror = () => {
+      lastRenderedExternalRef.current = null
+    }
+    imageElement.src = imageSrc
+  }, [canvasSize])
+
   const clearCanvas = useCallback(() => {
     const ctx = contextRef.current
     if (!ctx) return
@@ -173,6 +199,24 @@ function DrawBoard({ width, height, disabled = false, onDraw }: DrawBoardProps, 
     ctx.strokeStyle = brushColorRef.current
     ctx.lineWidth = brushSizeRef.current
   }, [canvasSize])
+
+  useEffect(() => {
+    if (!externalImage) {
+      if (disabled && !isDrawing) {
+        lastRenderedExternalRef.current = null
+        clearCanvas()
+      }
+      return
+    }
+    if (!disabled && isDrawing) {
+      return
+    }
+    if (externalImage === lastRenderedExternalRef.current) {
+      return
+    }
+    lastRenderedExternalRef.current = externalImage
+    drawImageOnCanvas(externalImage)
+  }, [externalImage, disabled, isDrawing, drawImageOnCanvas, clearCanvas])
 
   return (
     <div className="draw-board" ref={containerRef} style={{ position: 'relative' }}>
@@ -236,17 +280,26 @@ function DrawBoard({ width, height, disabled = false, onDraw }: DrawBoardProps, 
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            padding: '12px',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
             pointerEvents: 'none',
             borderRadius: '12px',
             zIndex: 10,
           }}
         >
-          <span style={{ color: '#666', fontSize: '16px', fontWeight: 'bold' }}>
+          <span
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              color: '#595959',
+              fontSize: '14px',
+              fontWeight: 600,
+              padding: '6px 12px',
+              borderRadius: '999px',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
+            }}
+          >
             等待绘画阶段
           </span>
         </div>

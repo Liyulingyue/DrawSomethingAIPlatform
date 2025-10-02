@@ -6,6 +6,7 @@ from ..models.schemas import (
     DeleteRoomRequest,
 )
 from ..shared import rooms, used_usernames, ensure_username_registered
+from ..models.state import PlayerState
 import uuid
 import time
 
@@ -20,22 +21,76 @@ def init_room():
         "status": "waiting",  # waiting, ready, drawing, review, success
         "current_round": 0,
         "current_hint": None,
-    "current_target": None,
-    "current_clue": None,
+        "current_target": None,
+        "current_clue": None,
         "current_drawer": None,
-        "ready_status": {},
         "draw_history": [],
         "messages": [],
         "current_submission": None,
         "ai_result": None,
-        "scores": {},  # 玩家积分
         "drawer_queue": [],  # 绘画者队列
         "current_drawer_index": 0,  # 当前绘画者在队列中的索引
-        "guess_status": {},  # 玩家猜词状态 {username: "pending" | "guessed" | "skipped"}
         "created_at": now,
         "last_activity": now,
         "max_players": 4,
+        "player_states": {},
+        "pending_guessers": set(),
+        "guess_tracker": {},
     }
+
+
+def ensure_player_state(room: dict, username: str) -> PlayerState:
+    player_states: dict[str, PlayerState] = room.setdefault("player_states", {})
+    state = player_states.get(username)
+    if state is None:
+        state = PlayerState(username=username)
+        player_states[username] = state
+    return state
+
+
+def export_player_states(room: dict) -> dict[str, dict]:
+    player_states: dict[str, PlayerState] = room.get("player_states", {})
+    return {username: state.to_public_dict() for username, state in player_states.items()}
+
+
+def export_ready_status(room: dict) -> dict[str, bool]:
+    player_states: dict[str, PlayerState] = room.get("player_states", {})
+    return {username: state.is_ready for username, state in player_states.items()}
+
+
+def export_scores(room: dict) -> dict[str, int]:
+    player_states: dict[str, PlayerState] = room.get("player_states", {})
+    return {username: state.score for username, state in player_states.items()}
+
+
+def export_guess_status(room: dict) -> dict[str, str]:
+    player_states: dict[str, PlayerState] = room.get("player_states", {})
+    return {username: state.guess_status for username, state in player_states.items()}
+
+
+def serialize_room(room: dict) -> dict:
+    data = {
+        key: value
+        for key, value in room.items()
+        if key not in {
+            "player_states",
+            "model_config",
+            "model_config_owner",
+            "model_configs",
+            "model_config_updated_at",
+            "model_config_audit",
+            "pending_guessers",
+            "guess_tracker",
+        }
+    }
+    data["players"] = list(room.get("players", []))
+    data["player_states"] = export_player_states(room)
+    data["ready_status"] = export_ready_status(room)
+    data["scores"] = export_scores(room)
+    data["guess_status"] = export_guess_status(room)
+    tracker = room.get("guess_tracker") if isinstance(room.get("guess_tracker"), dict) else {}
+    data["guess_tracker"] = dict(tracker)
+    return data
 
 
 def update_room_activity(room_id: str) -> None:
@@ -117,7 +172,7 @@ async def create_room(request: CreateRoomRequest):
     rooms[room_id] = init_room()
     rooms[room_id]["players"].append(username)
     rooms[room_id]["owner"] = username
-    rooms[room_id]["ready_status"][username] = False
+    ensure_player_state(rooms[room_id], username)
     update_room_activity(room_id)
     return {"success": True, "room_id": room_id}
 
@@ -144,8 +199,15 @@ async def join_room(request: JoinRoomRequest):
     if len(room["players"]) >= room.get("max_players", 4):
         return {"success": False, "message": "房间已满"}
 
+    previous_status = room.get("status")
     room["players"].append(username)
-    room["ready_status"][username] = False
+    ensure_player_state(room, username)
+    pending = room.get("pending_guessers")
+    if isinstance(pending, set):
+        pending.clear()
+    tracker = room.setdefault("guess_tracker", {})
+    if isinstance(tracker, dict):
+        tracker.clear()
     room["status"] = "waiting"
     update_room_activity(room_id)
     return {"success": True, "room_id": room_id}
@@ -156,7 +218,7 @@ async def get_room(room_id: str):
     if room_id not in rooms:
         return {"success": False, "message": "房间不存在"}
     update_room_activity(room_id)
-    return {"success": True, "room": rooms[room_id]}
+    return {"success": True, "room": serialize_room(rooms[room_id])}
 
 
 @router.post("/leave")
@@ -171,7 +233,13 @@ async def leave_room(request: LeaveRoomRequest):
         return {"success": False, "message": "不在房间中"}
 
     room["players"].remove(username)
-    room["ready_status"].pop(username, None)
+    room.setdefault("player_states", {}).pop(username, None)
+    pending = room.get("pending_guessers")
+    if isinstance(pending, set):
+        pending.discard(username)
+    tracker = room.get("guess_tracker")
+    if isinstance(tracker, dict):
+        tracker.pop(username, None)
     if room.get("current_drawer") == username:
         room["current_drawer"] = None
         room["status"] = "waiting"
@@ -180,8 +248,10 @@ async def leave_room(request: LeaveRoomRequest):
         room["current_clue"] = None
         room["current_submission"] = None
         room["ai_result"] = None
+        if isinstance(tracker, dict):
+            tracker.clear()
         for player in room.get("players", []):
-            room["ready_status"][player] = False
+            ensure_player_state(room, player).is_ready = False
     update_room_activity(room_id)
 
     if len(room["players"]) == 0:
@@ -209,5 +279,14 @@ async def delete_room(request: DeleteRoomRequest):
     return {"success": True}
 
 
-__all__ = ["router", "update_room_activity"]
+__all__ = [
+    "router",
+    "update_room_activity",
+    "serialize_room",
+    "ensure_player_state",
+    "export_player_states",
+    "export_ready_status",
+    "export_scores",
+    "export_guess_status",
+]
 

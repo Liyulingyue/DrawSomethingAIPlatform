@@ -18,6 +18,23 @@ export interface GuessPayload {
   reason?: string | null
 }
 
+export interface HumanGuessRecord {
+  player: string
+  guess: string
+  correct: boolean
+  timestamp: number
+}
+
+export interface PlayerStateSnapshot {
+  username: string
+  is_ready: boolean
+  score: number
+  guess_status: string
+  model_configured: boolean
+  ai_guess?: GuessPayload | null
+  ai_guess_at?: number
+}
+
 export interface DrawHistoryItem {
   round: number
   target_word?: string | null
@@ -25,6 +42,8 @@ export interface DrawHistoryItem {
   submitted_at: number
   guess?: GuessPayload | null
   success: boolean
+  human_guesses: HumanGuessRecord[]
+  correct_players?: string[]
 }
 
 export interface SubmissionPreview {
@@ -48,6 +67,7 @@ export interface DrawingState {
   draw_history?: DrawHistoryItem[]
   scores?: Record<string, number>
   guess_status?: Record<string, string>
+  player_states?: Record<string, PlayerStateSnapshot>
 }
 
 export interface RoomSummary {
@@ -61,6 +81,7 @@ export interface RoomSummary {
   current_clue?: string | null
   current_hint?: string | null
   max_players?: number
+  player_states?: Record<string, PlayerStateSnapshot>
 }
 
 export interface ChatMessage {
@@ -115,6 +136,29 @@ function normalizeHistory(items: unknown): DrawHistoryItem[] {
     }
     const item = entry as Record<string, unknown>
     const guess = normalizeGuess(item.guess)
+    const humanGuessesRaw = Array.isArray(item.human_guesses) ? item.human_guesses : []
+    const human_guesses = humanGuessesRaw.map((record) => {
+      if (!record || typeof record !== 'object') {
+        return null
+      }
+      const data = record as Record<string, unknown>
+      const player = typeof data.player === 'string' ? data.player : ''
+      if (!player) {
+        return null
+      }
+      return {
+        player,
+        guess: typeof data.guess === 'string' ? data.guess : '',
+        correct: Boolean(data.correct),
+        timestamp: typeof data.timestamp === 'number' ? data.timestamp : 0,
+      } as HumanGuessRecord
+    }).filter(Boolean) as HumanGuessRecord[]
+
+    const correctPlayersRaw = Array.isArray(item.correct_players) ? item.correct_players : []
+    const correct_players_list = correctPlayersRaw
+      .map((player) => (typeof player === 'string' ? player : null))
+      .filter((player): player is string => Boolean(player))
+
     return {
       round: typeof item.round === 'number' ? item.round : 0,
       target_word: typeof item.target_word === 'string' ? item.target_word : (typeof item.hint === 'string' ? item.hint : null),
@@ -122,8 +166,35 @@ function normalizeHistory(items: unknown): DrawHistoryItem[] {
       submitted_at: typeof item.submitted_at === 'number' ? item.submitted_at : 0,
       guess,
       success: Boolean(item.success),
+      human_guesses,
+      correct_players: correct_players_list.length > 0 ? correct_players_list : undefined,
     } as DrawHistoryItem
   }).filter(Boolean) as DrawHistoryItem[]
+}
+
+function normalizePlayerStates(raw: unknown): Record<string, PlayerStateSnapshot> {
+  if (!raw || typeof raw !== 'object') {
+    return {}
+  }
+  const entries = Object.entries(raw as Record<string, unknown>)
+  const result: Record<string, PlayerStateSnapshot> = {}
+  for (const [username, value] of entries) {
+    if (!value || typeof value !== 'object') {
+      continue
+    }
+    const snapshot = value as Record<string, unknown>
+    const normalizedGuess = normalizeGuess(snapshot.ai_guess)
+    result[username] = {
+      username: typeof snapshot.username === 'string' ? snapshot.username : username,
+      is_ready: Boolean(snapshot.is_ready),
+      score: typeof snapshot.score === 'number' ? snapshot.score : 0,
+      guess_status: typeof snapshot.guess_status === 'string' ? snapshot.guess_status : 'pending',
+      model_configured: Boolean(snapshot.model_configured),
+      ai_guess: normalizedGuess,
+      ai_guess_at: typeof snapshot.ai_guess_at === 'number' ? snapshot.ai_guess_at : undefined,
+    }
+  }
+  return result
 }
 
 export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
@@ -170,7 +241,14 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
 
       if (roomResp.data?.success) {
         const data = roomResp.data.room ?? null
-        setRoom(data)
+        if (data) {
+          setRoom({
+            ...data,
+            player_states: normalizePlayerStates((data as Record<string, unknown>).player_states),
+          } as RoomSummary)
+        } else {
+          setRoom(null)
+        }
       } else if (roomResp.data?.message) {
         message.error(roomResp.data.message)
       }
@@ -178,13 +256,15 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
       if (drawingResp.data?.success) {
         const rawState = drawingResp.data.room ?? null
         if (rawState) {
-          const normalizedGuess = normalizeGuess(rawState.ai_guess ?? rawState.ai_result)
+          const normalizedSharedGuess = normalizeGuess((rawState as Record<string, unknown>).ai_result ?? (rawState as Record<string, unknown>).ai_guess)
           const history = normalizeHistory(rawState.draw_history)
+          const normalizedPlayerStates = normalizePlayerStates(rawState.player_states)
           setDrawingState({
             ...rawState,
-            ai_result: normalizedGuess,
-            ai_guess: normalizedGuess,
+            ai_result: normalizedSharedGuess,
+            ai_guess: normalizedSharedGuess,
             draw_history: history,
+            player_states: normalizedPlayerStates,
           })
         } else {
           setDrawingState(null)
@@ -463,6 +543,12 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
       navigate('/rooms', { replace: true })
       return
     }
+    // 如果房间不存在，直接导航到大厅
+    if (!room && !drawingState) {
+      stopPolling()
+      navigate('/rooms', { replace: true })
+      return
+    }
     setLeaving(true)
     try {
       const response = await api.post('/rooms/leave', {
@@ -482,7 +568,7 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
     } finally {
       setLeaving(false)
     }
-  }, [roomId, username, navigate, stopPolling])
+  }, [roomId, username, room, drawingState, navigate, stopPolling])
 
   const guess = useCallback(async (guessText: string) => {
     if (!roomId || !username) {
@@ -539,6 +625,57 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
     }
   }, [roomId, username, fetchAll])
 
+  const triggerAIGuess = useCallback(async (image?: string) => {
+    if (!roomId || !username) {
+      message.warning('房间或用户名信息缺失')
+      return
+    }
+    try {
+      const response = await api.post('/drawing/ai_guess', {
+        room_id: roomId,
+        username,
+        image: image ?? null,
+      })
+      if (!response.data?.success) {
+        message.error(response.data?.message ?? 'AI 猜词失败')
+      } else {
+        const matched = response.data?.matched
+        if (matched) {
+          message.success('AI 猜对了！')
+        } else {
+          message.info('AI 已完成猜词')
+        }
+      }
+      await fetchAll()
+    } catch (error) {
+      console.error('AI 猜词失败', error)
+      message.error('AI 猜词失败')
+    }
+  }, [roomId, username, fetchAll])
+
+  const setModelConfigOnServer = useCallback(async (config: { url?: string; key?: string; model?: string; prompt?: string }) => {
+    if (!roomId || !username) {
+      message.warning('房间或用户名信息缺失')
+      return false
+    }
+    try {
+      const response = await api.post('/drawing/set_model_config', {
+        room_id: roomId,
+        username,
+        config,
+      })
+      if (!response.data?.success) {
+        message.error(response.data?.message ?? '更新模型配置失败')
+        return false
+      }
+      return true
+    } catch (error) {
+      console.error('更新模型配置失败', error)
+      message.error('更新模型配置失败')
+      return false
+    }
+  }, [roomId, username])
+
   const syncDrawing = useCallback(async (image: string) => {
     if (!roomId || !username) {
       return
@@ -589,6 +726,8 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
       leaveRoom,
       guess,
       skipGuess,
+  triggerAIGuess,
+  setModelConfig: setModelConfigOnServer,
       syncDrawing,
     },
     state: {

@@ -88,3 +88,22 @@ class SyncDrawingRequest(BaseModel):
     room_id: str
     username: str
     image: str  # base64 encoded PNG data URL
+
+
+class TriggerAIGuessRequest(BaseModel):
+    room_id: str
+    username: str
+    image: Optional[str] = None
+
+
+class ModelConfigPayload(BaseModel):
+    url: Optional[str] = Field(default=None, max_length=200)
+    key: Optional[str] = Field(default=None, max_length=200)
+    model: Optional[str] = Field(default=None, max_length=100)
+    prompt: Optional[str] = Field(default=None, max_length=2000)
+
+
+class UpdateModelConfigRequest(BaseModel):
+    room_id: str
+    username: str
+    config: ModelConfigPayload

@@ -23,6 +23,7 @@ import {
   type DrawHistoryItem,
   type ChatMessage,
   type SubmissionPreview,
+  type PlayerStateSnapshot,
 } from '../../hooks/useDrawingRoom'
 import { formatRelativeTime } from '../../utils/api'
 
@@ -52,6 +53,7 @@ interface MultiplayerViewProps {
   history: DrawHistoryItem[]
   messages: ChatMessage[]
   scores: Record<string, number>
+  playerStates: Record<string, PlayerStateSnapshot>
   username: string | null
   isReady: boolean
   readyStatus: Record<string, boolean>
@@ -77,7 +79,7 @@ interface MultiplayerViewProps {
   onUnlock: () => void
   onPrepare: () => void
   onUnprepare: () => void
-  onGuess: (image: string) => void
+  onGuess: (image?: string) => void
   onGuessWord: (guess: string) => void
   onSkipGuess: () => void
   onSyncDrawing: (image: string) => void
@@ -112,6 +114,7 @@ const MultiplayerView = ({
   history,
   messages,
   scores,
+  playerStates,
   username,
   isReady,
   readyStatus,
@@ -186,6 +189,24 @@ const MultiplayerView = ({
     onModelConfigChange({ [field]: value })
   }
 
+  const personalState = username ? playerStates[username] : undefined
+  const personalGuess = personalState?.ai_guess ?? null
+  const displayedGuess = personalGuess ?? guess
+
+  const latestGuessImage = currentDrawing ?? currentSubmission?.image ?? null
+  const previewTitle = currentSubmission ? '最新提交' : status === 'drawing' ? '实时绘制' : '最新画面'
+  const previewDescription = currentSubmission
+    ? `绘画者：${currentSubmission.submitted_by} · ${formatRelativeTime(currentSubmission.submitted_at)} 提交`
+    : currentDrawer
+      ? `绘画者：${currentDrawer} 正在创作`
+      : undefined
+  const isActiveDrawer = status === 'drawing' && currentDrawer === username
+  const boardExternalImage = (!isActiveDrawer || status !== 'drawing') ? latestGuessImage : null
+  const canSkipGuess = ['drawing', 'review', 'success'].includes(status)
+  const personalPlayerState = username ? playerStates[username] : undefined
+  const hasResolvedGuess = personalPlayerState?.guess_status === 'guessed' || personalPlayerState?.guess_status === 'skipped'
+
+
   return (
     <>
       <Card className="drawing-header" variant="borderless">
@@ -216,12 +237,12 @@ const MultiplayerView = ({
             <Button icon={<LogoutOutlined />} onClick={() => void onLeaveRoom()} loading={state.leaving}>
               离开房间
             </Button>
-            <Tooltip title={owner !== username ? "等待房主开启回合" : undefined}>
+            <Tooltip title={owner !== username ? "等待房主开启回合" : status === 'drawing' ? "回合进行中" : undefined}>
               <Button
                 type="primary"
                 icon={<PlayCircleOutlined />}
                 loading={state.startingRound}
-                disabled={owner !== username}
+                disabled={owner !== username || status === 'drawing'}
                 onClick={() => void onStartRound()}
               >
                 开始回合
@@ -284,21 +305,21 @@ const MultiplayerView = ({
                 <Form.Item>
                   <Space wrap>
                     {!isLocked ? (
-                      <Button type="primary" onClick={onLock}>
+                      <Button type="primary" onClick={() => void onLock()}>
                         锁定
                       </Button>
                     ) : (
                       <>
                         <Tooltip title={
-                          status === 'drawing' || status === 'success' || status === 'review'
-                            ? '进行中无法解锁'
+                          status === 'drawing'
+                            ? '绘画阶段暂不支持解锁'
                             : isPrepared
-                              ? '请先解除整备后再解锁'
+                              ? '请先解除整备后解锁'
                               : undefined
                         }>
                           <Button
                             onClick={onUnlock}
-                            disabled={status === 'drawing' || status === 'success' || status === 'review' || isPrepared}
+                            disabled={state.configLoading || state.readyLoading || status === 'drawing'}
                           >
                             解锁
                           </Button>
@@ -309,15 +330,21 @@ const MultiplayerView = ({
                           </Button>
                         ) : (
                           <>
-                            <Button onClick={onUnprepare} disabled={status === 'drawing' || status === 'success' || status === 'review'}>
+                            <Button onClick={onUnprepare} disabled={status === 'drawing' || state.readyLoading}>
                               解除整备
                             </Button>
-                            <Button type="primary" onClick={() => onGuess(currentSubmission!.image)} disabled={!currentSubmission}>
+                            <Button
+                              type="primary"
+                              onClick={() => onGuess(latestGuessImage)}
+                              disabled={!latestGuessImage || status === 'finished' || hasResolvedGuess}
+                            >
                               进行猜词
                             </Button>
-                            <Button onClick={() => void onSkipGuess()} disabled={guessStatus === 'guessed' || guessStatus === 'skipped'}>
-                              跳过
-                            </Button>
+                            {canSkipGuess && (
+                              <Button onClick={() => void onSkipGuess()} disabled={hasResolvedGuess}>
+                                跳过
+                              </Button>
+                            )}
                           </>
                         )}
                       </>
@@ -328,7 +355,7 @@ const MultiplayerView = ({
             </Card>
 
             <Card title="AI 猜词结果">
-              <GuessResultBlock guess={guess} />
+              <GuessResultBlock guess={displayedGuess} />
             </Card>
           </div>
 
@@ -348,6 +375,7 @@ const MultiplayerView = ({
               <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <DrawBoard
                   disabled={!(status === 'drawing' && currentDrawer === username)}
+                  externalImage={boardExternalImage ?? null}
                   onDraw={(image) => {
                     void onSyncDrawing(image)
                   }}
@@ -356,17 +384,19 @@ const MultiplayerView = ({
                   <Text type="secondary">开始绘画吧，所有人可以实时看到你的作品并随时猜词！</Text>
                 )}
                 {status === 'drawing' && currentDrawer !== username && (
-                  <Text type="secondary">绘画者 {currentDrawer ?? '未知'} 正在创作，请耐心等待。</Text>
+                  <Text type="secondary">绘画者 {currentDrawer ?? '未知'} 的画面已实时同步到上方画布，请继续观察并尝试猜词。</Text>
                 )}
               </Space>
 
-              {currentSubmission && (
+              {latestGuessImage && (
                 <div className="drawing-preview">
-                  <Text strong>最新提交：</Text>
-                  <img src={currentSubmission.image} alt="最新作品" />
-                  <Text type="secondary">
-                    绘画者：{currentSubmission.submitted_by} · {formatRelativeTime(currentSubmission.submitted_at)} 提交
-                  </Text>
+                  <Space direction="vertical" size="small">
+                    <Text strong>{previewTitle}</Text>
+                    <img src={latestGuessImage} alt="最新作品" style={{ maxWidth: '100%', height: 'auto' }} />
+                    {previewDescription && (
+                      <Text type="secondary">{previewDescription}</Text>
+                    )}
+                  </Space>
                 </div>
               )}
             </Card>
@@ -409,6 +439,26 @@ const MultiplayerView = ({
                               <Text type="secondary">
                                 备选：{item.guess.alternatives.join(' / ')}
                               </Text>
+                            )}
+                            {item.correct_players && item.correct_players.length > 0 && (
+                              <Text>猜中玩家：{item.correct_players.join('、')}</Text>
+                            )}
+                            {item.human_guesses.length > 0 && (
+                              <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                <Text strong>玩家猜词记录：</Text>
+                                <Space direction="vertical" size={0} style={{ width: '100%' }}>
+                                  {item.human_guesses.map((record) => {
+                                    const isSkip = record.guess === '(skip)'
+                                    const guessLabel = isSkip ? '选择跳过' : record.guess || '未填写'
+                                    const statusIcon = record.correct ? '✅' : isSkip ? '⏭️' : '❌'
+                                    return (
+                                      <Text key={`${item.round}-${record.player}-${record.timestamp}`} type={record.correct ? 'success' : 'secondary'}>
+                                        {record.player}：{guessLabel} · {formatRelativeTime(record.timestamp)} {statusIcon}
+                                      </Text>
+                                    )
+                                  })}
+                                </Space>
+                              </Space>
                             )}
                           </Space>
                         }
