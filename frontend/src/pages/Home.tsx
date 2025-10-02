@@ -23,7 +23,7 @@ function Home() {
           <div className="home-hero-text">
             <Title level={1} className="home-hero-title">你画我猜 AI 协作平台</Title>
             <Paragraph className="home-hero-intro">
-              参考 GomokuAIBattlePlatform 的房间与会话设计，让玩家专注绘画、AI 负责猜词。
+              让玩家专注绘画、AI 负责猜词。
               随时邀请伙伴进入房间，共同帮助模型读懂你的创意。
             </Paragraph>
             <Title level={2} className="home-hero-subtitle">画出线索，交给模型来猜</Title>
@@ -32,11 +32,11 @@ function Home() {
               所有过程都被记录在房间日志中，方便复盘与分享。
             </Paragraph>
             <Space size="middle" wrap>
-              <Link to="/rooms">
-                <Button type="primary" size="large">进入房间大厅</Button>
+              <Link to="/game/single">
+                <Button type="primary" size="large">单人测试</Button>
               </Link>
-              <Link to="/login">
-                <Button size="large">管理我的用户名</Button>
+              <Link to="/rooms">
+                <Button size="large">多人游戏</Button>
               </Link>
             </Space>
           </div>
@@ -57,8 +57,12 @@ function Home() {
             通过多人协作的方式，玩家可以针对同一个目标词不断尝试不同的表达方式，观察 AI 的猜测与反馈。
           </Paragraph>
           <Paragraph className="home-section-paragraph">
-            与 Gomoku 平台相同，我们保留了用户名管理、房主权限、聊天室与历史记录，让整个过程可控、可复盘。
+            我们保留了用户名管理、房主权限、聊天室与历史记录，让整个过程可控、可复盘。
             你可以在友好界面下迭代画面细节，直到模型给出正确答案。
+          </Paragraph>
+          <Paragraph className="home-section-paragraph">
+            和 AI 合作不仅解决了一个人无法游戏的问题，也让你可以随时体验“你画我猜”的乐趣。
+            通过与 AI 的互动，你能更好地认识 AI 能力的边界，发现哪些表达方式容易被模型理解，哪些则是 AI 的盲区。
           </Paragraph>
         </>
       ),
@@ -72,55 +76,55 @@ function Home() {
           <ol className="home-steps">
             <li>
               <Text strong>创建或加入房间：</Text>
-              <span> 房主决定本回合的目标词，可选填线索帮助队友理解主题。</span>
+              <span> 系统将自动生成本回合的目标词，所有玩家准备开始游戏。</span>
             </li>
             <li>
-              <Text strong>选择绘画者：</Text>
-              <span> 在房间面板中直接指定负责绘画的玩家，其余成员辅助提供思路。</span>
+              <Text strong>所有玩家整备：</Text>
+              <span> 所有玩家点击“整备完毕”以准备开始游戏。</span>
             </li>
             <li>
-              <Text strong>整备与开始：</Text>
-              <span> 所有玩家点击“整备完毕”，房主确认后即可开始绘画回合。</span>
+              <Text strong>开始回合：</Text>
+              <span> 房主启动回合，系统自动选择第一位绘画者。</span>
             </li>
             <li>
-              <Text strong>提交作品：</Text>
-              <span> 绘画者将画布提交给 AI，系统会即时给出猜测结果与备选词。</span>
+              <Text strong>绘画与提交：</Text>
+              <span> 绘画者作画并提交给 AI，系统会即时给出猜测结果与备选词。</span>
+            </li>
+            <li>
+              <Text strong>AI 猜测与轮换：</Text>
+              <span> AI 根据画面进行推理，如果所有猜测者完成，则轮换到下一位绘画者。</span>
             </li>
           </ol>
           <Paragraph className="home-section-tip" type="secondary">
-            小提示：如果模型没能猜中，可继续补充细节或重新绘制，房主可随时重置回合以换词或轮换绘画者。
+            小提示：绘画者按顺序轮流承担，每回合结束后自动轮换。如果模型没能猜中，可继续补充细节或重新绘制，房主可重置回合重新开始。
           </Paragraph>
         </>
       ),
     },
     {
       key: 'flow',
-      className: 'home-slide home-slide--single',
-      content: (
-        <>
-          <Title level={2} className="home-section-title">房间内有哪些协作组件？</Title>
-          <ul className="home-list">
-            <li>玩家列表与准备状态，方便房主确认整备情况并分配绘画者。</li>
-            <li>实时画板，支持压力感画笔、颜色与粗细切换，并适配高分屏。</li>
-            <li>AI 猜测面板，展示主猜、备选答案、置信度与匹配进度。</li>
-            <li>回合历史记录，保留每次提交的目标词、猜测以及成功与否。</li>
-            <li>内置聊天窗口，团队可以同步交流绘画思路与下一步计划。</li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      key: 'ai',
-      className: 'home-slide home-slide--multi',
+      className: 'home-slide home-slide--ai',
       content: (
         <>
           <Title level={2} className="home-section-title">AI 接入与自定义能力</Title>
+          <Paragraph className="home-section-paragraph">
+            本项目专为<strong>多模态大模型</strong>设计，用于理解绘画内容而非简单的文本补全。请注意：对话补全模型（如 GPT-3.5）无法处理图像输入，请务必选择支持视觉理解的模型。
+          </Paragraph>
+          <Title level={3} className="home-section-subtitle">如何获取 API 密钥</Title>
+          <Paragraph className="home-section-paragraph">
+            访问 <a href="https://aistudio.baidu.com/account/accessToken" target="_blank" rel="noopener noreferrer">百度 AI Studio</a> 获取您的 API 密钥。
+            系统默认集成百度文心视觉语言模型，您也可以配置其他兼容的多模态模型服务。
+          </Paragraph>
+          <Title level={3} className="home-section-subtitle">支持的模型列表</Title>
+          <Paragraph className="home-section-paragraph">
+            详细的可用模型请参考 <a href="https://ai.baidu.com/ai-doc/AISTUDIO/rm344erns" target="_blank" rel="noopener noreferrer">百度 AI 模型文档</a>。
+            推荐使用支持图像输入的视觉语言模型，如文心一言 VL 或类似的多模态大模型。
+          </Paragraph>
           <ul className="home-list">
-            <li>默认集成百度文心视觉语言模型，支持自定义接入点和凭证配置。</li>
-            <li>提示词（线索）只作为可选信息，AI 必须依靠画面来给出答案。</li>
-            <li>前端与后端均复用 Gomoku 的轮询与容错设计，保证多人协作稳定。</li>
-            <li>若未配置真实服务，系统会保留线索但不会提前泄露目标词。</li>
-            <li>所有响应数据均在浏览器内呈现，方便你进行可视化和下一步评估。</li>
+            <li>支持自定义 API 端点和凭证配置，灵活接入不同模型服务。</li>
+            <li>提示词（线索）仅作为可选辅助信息，AI 主要依靠画面内容进行推理。</li>
+            <li>前端与后端采用轮询与容错设计，确保多人协作的稳定性。</li>
+            <li>所有响应数据在浏览器本地呈现，便于可视化和评估结果。</li>
           </ul>
         </>
       ),
