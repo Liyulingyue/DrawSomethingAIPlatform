@@ -1,0 +1,380 @@
+.level-set-container {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  padding-top: 4rem; /* 为顶部按钮留出空间 */
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.level-set-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.level-set-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: white;
+  text-align: center;
+  margin: 0;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.level-set-subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.level-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.level-card {
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.level-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* 锁定状态的卡片 */
+.level-card-locked {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.level-card-locked:hover {
+  transform: translateY(0);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 锁定遮罩层 */
+.level-card-lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  gap: 0.5rem;
+}
+
+.level-card-lock-icon {
+  font-size: 2.5rem;
+  color: #bfbfbf;
+}
+
+.level-card-lock-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #8c8c8c;
+}
+
+.level-card-icon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.level-card-title {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.level-card-description {
+  font-size: 1rem;
+  color: #7f8c8d;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* 按钮容器 */
+.level-card-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 0 0.5rem;
+}
+
+.level-card-button {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.level-card-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.level-card-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.level-card-difficulty {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+}
+
+.difficulty-简单 {
+  background: #d4edda;
+  color: #155724;
+}
+
+.difficulty-中等 {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.difficulty-困难 {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.difficulty-专家 {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.difficulty-休闲 {
+  background: #e7e7ff;
+  color: #4a4a9e;
+}
+
+.difficulty-限时 {
+  background: #ffe5d9;
+  color: #8b4513;
+}
+
+/* 选关弹窗样式 */
+.level-select-modal .ant-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 8px 0 0;
+  padding: 1.5rem;
+}
+
+.level-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.level-modal-icon {
+  font-size: 2rem;
+}
+
+.level-select-modal .ant-modal-content {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.level-modal-content {
+  padding: 1.5rem 0.5rem;
+}
+
+.level-modal-description {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.level-keywords-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.level-keyword-tag {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  border: 2px solid #1890ff;
+  background: white;
+  color: #1890ff;
+}
+
+.level-keyword-tag:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 16px rgba(24, 144, 255, 0.3);
+  background: #1890ff;
+  color: white;
+}
+
+.level-keyword-tag .anticon {
+  margin-right: 0.5rem;
+}
+
+/* 已完成的关键词样式 */
+.level-keyword-completed {
+  border-color: #52c41a !important;
+  color: #52c41a !important;
+  background: #f6ffed !important;
+}
+
+.level-keyword-completed:hover {
+  background: #52c41a !important;
+  color: white !important;
+  box-shadow: 0 8px 16px rgba(82, 196, 26, 0.3) !important;
+}
+
+/* 未完成的关键词样式 */
+.level-keyword-incomplete {
+  border-color: #d9d9d9 !important;
+  color: #595959 !important;
+  background: #ffffff !important;
+}
+
+.level-keyword-incomplete:hover {
+  background: #1890ff !important;
+  color: white !important;
+  border-color: #1890ff !important;
+  box-shadow: 0 8px 16px rgba(24, 144, 255, 0.3) !important;
+}
+
+.level-no-keywords {
+  text-align: center;
+  color: #999;
+  font-size: 1rem;
+  padding: 2rem;
+}
+
+/* 自定义关卡操作按钮 */
+.level-card-custom-actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.level-card:hover .level-card-custom-actions {
+  opacity: 1;
+}
+
+.level-card-edit-btn,
+.level-card-delete-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.level-card-edit-btn:hover {
+  background: #1890ff;
+  color: white;
+  transform: scale(1.1);
+}
+
+.level-card-delete-btn:hover {
+  background: #ff4d4f;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* 自定义关卡配置弹窗样式 */
+.level-config-modal .ant-modal-content {
+  border-radius: 8px;
+}
+
+.level-config-modal .ant-form-item {
+  margin-bottom: 1.25rem;
+}
+
+.level-config-modal .ant-input,
+.level-config-modal .ant-input-textarea,
+.level-config-modal .ant-select-selector {
+  border-radius: 6px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .level-set-container {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .level-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .level-set-subtitle {
+    margin-bottom: 2rem;
+  }
+
+  .level-keywords-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .level-keyword-tag {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .level-set-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .level-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .level-card {
+    max-width: 100%;
+  }
+}

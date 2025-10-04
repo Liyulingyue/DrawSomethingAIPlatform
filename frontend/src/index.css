@@ -34,3 +34,15 @@ button {
 #root {
   min-height: 100vh;
 }
+
+/* 确保 Ant Design 的 Modal 和 Message 组件在最顶层 */
+.ant-modal-root,
+.ant-modal-mask,
+.ant-modal-wrap,
+.ant-message {
+  z-index: 9999 !important;
+}
+
+.ant-app {
+  min-height: 100vh;
+}

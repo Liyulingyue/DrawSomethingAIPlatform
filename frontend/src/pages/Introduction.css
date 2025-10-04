@@ -1,0 +1,303 @@
+.introduction-container {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  padding-top: 4rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.introduction-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* 标题区域 */
+.introduction-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.introduction-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.introduction-subtitle {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  margin-bottom: 0.5rem;
+  opacity: 0.95;
+  animation: fadeInDown 1s ease-out;
+}
+
+.introduction-description {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  opacity: 0.9;
+  animation: fadeInDown 1.2s ease-out;
+}
+
+/* 卡片样式 */
+.introduction-card {
+  background: white;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.introduction-card .ant-card-body {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.section-title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: #1f1f1f;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title .anticon {
+  color: #667eea;
+  font-size: 1.2em;
+}
+
+.section-content {
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* 功能特性网格 */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature-item h3 {
+  font-size: 1.3rem;
+  color: #1f1f1f;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+.feature-item p {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* 使用指南 */
+.guide-content {
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.guide-content p {
+  margin-bottom: 0.8rem;
+  color: #333;
+}
+
+.guide-content ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.guide-content li {
+  margin-bottom: 0.5rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.guide-content code {
+  background: #e8eaf6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  color: #667eea;
+  font-size: 0.9em;
+}
+
+.guide-content a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.guide-content a:hover {
+  text-decoration: underline;
+}
+
+.tip {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 0.8rem 1rem;
+  margin-top: 1rem;
+  border-radius: 4px;
+  color: #e65100;
+}
+
+/* 提示技巧网格 */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.tip-item {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fff8e1 0%, #fffaf0 100%);
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.tip-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(255, 152, 0, 0.15);
+}
+
+.tip-emoji {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.tip-item p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 底部按钮 */
+.introduction-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 3rem 0 2rem;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  min-width: 140px;
+  height: 48px;
+  border-radius: 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.action-button.ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.action-button.ant-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* 版权信息 */
+.introduction-footer {
+  text-align: center;
+  padding: 2rem 0;
+  color: white;
+  opacity: 0.9;
+}
+
+.introduction-footer p {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+/* 动画 */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .introduction-container {
+    padding: 1.5rem 0.75rem;
+    padding-top: 3.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tips-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .introduction-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .introduction-container {
+    padding: 1rem 0.5rem;
+    padding-top: 3rem;
+  }
+
+  .introduction-card .ant-card-body {
+    padding: 1.2rem;
+  }
+}

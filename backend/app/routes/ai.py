@@ -48,3 +48,71 @@ async def get_random_target():
     """Get a random drawing target for single player testing."""
     target = random.choice(DRAWING_TARGETS)
     return {"target": target}
+
+
+class TestConnectionRequest(BaseModel):
+    url: str
+    key: str
+    model: str
+
+
+@router.post("/test-connection")
+async def test_ai_connection(req: TestConnectionRequest):
+    """Test AI service connection with provided configuration."""
+    try:
+        from openai import OpenAI
+        
+        # 创建 OpenAI 客户端
+        client = OpenAI(
+            api_key=req.key,
+            base_url=req.url
+        )
+        
+        # 发送简单的测试消息
+        response = client.chat.completions.create(
+            model=req.model,
+            messages=[
+                {"role": "user", "content": "Hello!"}
+            ],
+            max_tokens=50,
+            temperature=0.1
+        )
+        
+        # 检查响应
+        if response.choices and len(response.choices) > 0:
+            reply = response.choices[0].message.content
+            if reply and reply.strip():
+                return {
+                    "success": True,
+                    "message": f"AI 服务连接正常！回复: \"{reply.strip()}\""
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "连接成功但未收到有效回复"
+                }
+        else:
+            return {
+                "success": False,
+                "message": "连接成功但响应格式异常"
+            }
+            
+    except Exception as e:
+        error_msg = str(e)
+        
+        # 提供更友好的错误信息
+        if "401" in error_msg or "authentication" in error_msg.lower():
+            friendly_msg = "API Key 无效或已过期"
+        elif "404" in error_msg or "not found" in error_msg.lower():
+            friendly_msg = "API 端点不存在，请检查 URL 配置"
+        elif "timeout" in error_msg.lower():
+            friendly_msg = "连接超时，请检查网络或 URL"
+        elif "connection" in error_msg.lower():
+            friendly_msg = "网络连接失败，请检查 URL 和网络状态"
+        else:
+            friendly_msg = f"连接失败: {error_msg}"
+            
+        return {
+            "success": False,
+            "message": friendly_msg
+        }

@@ -1,0 +1,247 @@
+.level-config-container {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  padding-top: 4rem; /* 为顶部按钮留出空间 */
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.level-config-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 页面标题 */
+.level-config-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: white;
+  text-align: center;
+  margin: 0;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.level-config-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: fit-content;
+  margin: 0.75rem auto 2rem;
+  padding: 0.35rem 1.5rem;
+  font-size: 1rem;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.level-config-back-btn:hover,
+.level-config-back-btn:focus {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.level-config-back-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+/* 表单卡片 */
+.level-config-form-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  margin-bottom: 3rem;
+}
+
+.level-config-form-card .ant-card-body {
+  padding: 2rem;
+}
+
+.level-config-form-card .ant-form-item {
+  margin-bottom: 1.5rem;
+}
+
+.level-config-form-card .ant-form-item-label > label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #262626;
+}
+
+.level-config-form-card .ant-input,
+.level-config-form-card .ant-input-textarea,
+.level-config-form-card .ant-select-selector {
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.level-config-form-card .ant-form-item-extra {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #8c8c8c;
+}
+
+/* 关卡列表 */
+.level-config-list {
+  margin-top: 3rem;
+}
+
+.level-config-list-title {
+  font-size: 1.8rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.level-config-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* 关卡卡片 */
+.level-config-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.level-config-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.level-config-card-editing {
+  border: 2px solid #1890ff;
+  box-shadow: 0 8px 20px rgba(24, 144, 255, 0.3);
+}
+
+.level-config-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.level-config-card-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.level-config-card-info {
+  flex: 1;
+}
+
+.level-config-card-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+  color: #262626;
+}
+
+.level-config-card-id {
+  font-size: 0.85rem;
+  color: #8c8c8c;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.level-config-card-description {
+  font-size: 0.95rem;
+  color: #595959;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.level-config-card-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 32px;
+}
+
+.level-config-card-keywords .ant-tag {
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.level-config-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.level-config-card-actions .ant-btn {
+  flex: 1;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .level-config-container {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .level-config-content {
+    max-width: 100%;
+  }
+
+  .level-config-form-card .ant-card-body {
+    padding: 1.5rem;
+  }
+
+  .level-config-back-btn {
+    margin-bottom: 1.5rem;
+  }
+
+  .level-config-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .level-config-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .level-config-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .level-config-form-card .ant-card-body {
+    padding: 1rem;
+  }
+
+  .level-config-back-btn {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding: 0.3rem 1.1rem;
+  }
+
+  .level-config-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .level-config-card-icon {
+    font-size: 2.5rem;
+  }
+}

@@ -1,0 +1,175 @@
+.mobile-draw-board {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 0.75rem;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.mobile-draw-board-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #f8f9ff;
+  flex-shrink: 0;
+}
+
+.mobile-draw-board-controls {
+  flex: 1;
+  min-width: 200px;
+}
+
+.mobile-draw-board-label {
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.65);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.mobile-draw-board-colors {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mobile-draw-board-color {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  background-clip: padding-box;
+  touch-action: manipulation;
+}
+
+.mobile-draw-board-color:active,
+.mobile-draw-board-color.active {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.mobile-draw-board-size-control {
+  flex: 1;
+  min-width: 150px;
+}
+
+.mobile-draw-board-slider {
+  width: 120px;
+  min-width: 100px;
+}
+
+.mobile-draw-board-canvas-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* border: 2px solid #000000; */
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+  /* 防止移动端页面滚动 */
+  overscroll-behavior: contain;
+}
+
+.mobile-draw-board-canvas {
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* 防止长按菜单 */
+  -webkit-touch-callout: none;
+  /* 防止双击缩放 */
+  -webkit-tap-highlight-color: transparent;
+  /* 确保指针事件被正确处理 */
+  pointer-events: auto;
+}
+
+/* 移动设备优化 */
+@media (max-width: 768px) {
+  .mobile-draw-board {
+    gap: 0.5rem;
+  }
+
+  .mobile-draw-board-toolbar {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .mobile-draw-board-controls {
+    min-width: 180px;
+  }
+
+  .mobile-draw-board-label {
+    font-size: 0.85rem;
+  }
+
+  .mobile-draw-board-color {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mobile-draw-board-slider {
+    width: 100px;
+    min-width: 80px;
+  }
+
+  .mobile-draw-board-size-control {
+    min-width: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-draw-board-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-draw-board-controls {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .mobile-draw-board-size-control {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .mobile-draw-board-slider {
+    width: 100%;
+    flex: 1;
+  }
+
+  .mobile-draw-board-color {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* 确保在触摸设备上不会出现选择高亮 */
+.mobile-draw-board *::selection {
+  background: transparent;
+}
+
+.mobile-draw-board *::-moz-selection {
+  background: transparent;
+}

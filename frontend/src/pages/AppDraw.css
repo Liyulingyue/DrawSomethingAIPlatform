@@ -1,0 +1,281 @@
+.app-draw-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  /* 防止移动设备页面滚动 */
+  touch-action: pan-y;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 标题区域 */
+.app-draw-title-section {
+  flex: 0 0 auto;
+  padding: 1.5rem 1rem 1rem 1rem;
+  background: transparent;
+  text-align: center;
+}
+
+.app-draw-page-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: white;
+  margin: 0;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 目标词区域 */
+.app-draw-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: transparent;
+  z-index: 10;
+  /* 防止触摸穿透 */
+  touch-action: auto;
+}
+
+.app-draw-target-word {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.target-word-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  min-width: 70px;
+}
+
+.target-word-input {
+  flex: 1;
+  border-radius: 8px;
+}
+
+/* 底部区域 - 提交猜词按钮 */
+.app-draw-submit-section {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  background: transparent;
+  z-index: 10;
+  touch-action: auto;
+}
+
+.submit-guess-button {
+  min-width: 200px;
+  height: 50px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  transition: all 0.3s ease;
+}
+
+.submit-guess-button:hover {
+  background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.5);
+}
+
+.submit-guess-button:active {
+  transform: translateY(0);
+}
+
+/* 底部版权信息 */
+.app-draw-footer {
+  flex: 0 0 auto;
+  padding: 1rem;
+  background: transparent;
+  text-align: center;
+}
+
+.app-draw-copyright {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.app-draw-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+  font-weight: bold;
+}
+
+.app-draw-toolbar {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toolbar-placeholder {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 40px;
+  /* 预留给未来按钮的空间 */
+}
+
+/* 画板内容区域 - 占据剩余空间 */
+.app-draw-content {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  /* 防止画板区域页面滚动 */
+  touch-action: none;
+  overscroll-behavior: contain;
+  /* 确保占据剩余高度 */
+  overflow: hidden;
+}
+
+/* 确保 MobileDrawBoard 组件适应容器 */
+.app-draw-content .mobile-draw-board {
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  max-height: 100%;
+}
+
+/* 响应式设计 - 平板 */
+@media (max-width: 768px) {
+  .app-draw-title-section {
+    padding: 1.25rem 0.75rem 0.75rem 0.75rem;
+  }
+
+  .app-draw-page-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .app-draw-header {
+    padding: 0.75rem;
+  }
+
+  .app-draw-submit-section {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .app-draw-footer {
+    padding: 0.75rem;
+  }
+
+  .app-draw-content {
+    padding: 0.75rem;
+  }
+
+  .target-word-label {
+    font-size: 0.9rem;
+    min-width: 60px;
+  }
+
+  .app-draw-target-word {
+    gap: 0.5rem;
+  }
+
+  .submit-guess-button {
+    min-width: 180px;
+    height: 48px;
+    font-size: 1rem;
+  }
+
+  .app-draw-copyright {
+    font-size: 0.8rem;
+  }
+}
+
+/* 响应式设计 - 手机 */
+@media (max-width: 480px) {
+  .app-draw-title-section {
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+  }
+
+  .app-draw-page-title {
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+  }
+
+  .app-draw-header {
+    padding: 0.5rem;
+  }
+
+  .app-draw-submit-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .app-draw-footer {
+    padding: 0.5rem;
+  }
+
+  .app-draw-content {
+    padding: 0.5rem;
+  }
+
+  .app-draw-target-word {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .target-word-label {
+    font-size: 0.85rem;
+    min-width: unset;
+  }
+
+  .submit-guess-button {
+    min-width: 160px;
+    height: 46px;
+    font-size: 0.95rem;
+  }
+
+  .app-draw-copyright {
+    font-size: 0.75rem;
+  }
+}
+
+/* 横屏模式优化 */
+@media (orientation: landscape) and (max-height: 600px) {
+  .app-draw-header {
+    padding: 0.5rem;
+  }
+
+  .app-draw-content {
+    padding: 0.5rem;
+  }
+
+  .app-draw-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* 防止iOS Safari的橡皮筋效果 */
+body.drawing-active {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}

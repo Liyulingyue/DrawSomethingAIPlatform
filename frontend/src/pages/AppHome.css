@@ -1,0 +1,231 @@
+.app-home-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-home-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  padding: 2rem 1rem;
+}
+
+.app-home-header {
+  text-align: center;
+}
+
+.app-home-title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 1rem;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.02em;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.app-home-subtitle {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  margin: 0.5rem 0 0 0;
+  padding: 0 1rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  animation: fadeInDown 1s ease-out;
+}
+
+.app-home-hint {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 1rem 0 0 0;
+  padding: 0.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: inline-block;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  animation: fadeInDown 1.2s ease-out, pulse 2s ease-in-out 2s infinite;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+.app-home-buttons {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0 1rem;
+  animation: fadeInUp 1s ease-out;
+}
+
+.app-home-button {
+  min-width: 160px;
+  height: 60px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.app-home-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.app-home-button:active {
+  transform: translateY(-2px);
+}
+
+/* Ant Design 按钮样式覆盖 */
+.app-home-button.ant-btn-primary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+}
+
+.app-home-button.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+}
+
+.app-home-button.ant-btn-default {
+  background: white;
+  border: 2px solid white;
+  color: #667eea;
+}
+
+.app-home-button.ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: white;
+  color: #764ba2;
+}
+
+/* AI 配置按钮特殊样式 */
+.app-home-button-config.ant-btn-default {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid transparent;
+  color: white;
+}
+
+.app-home-button-config.ant-btn-default:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  border-color: transparent;
+  color: white;
+}
+
+/* 使用说明按钮特殊样式 */
+.app-home-button-info.ant-btn-default {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  border: 2px solid transparent;
+  color: white;
+}
+
+.app-home-button-info.ant-btn-default:hover {
+  background: linear-gradient(135deg, #fee140 0%, #fa709a 100%);
+  border-color: transparent;
+  color: white;
+}
+
+/* 动画效果 */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .app-home-container {
+    gap: 2rem;
+  }
+
+  .app-home-title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .app-home-subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+  }
+
+  .app-home-hint {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    padding: 0.4rem 1.2rem;
+  }
+
+  .app-home-buttons {
+    gap: 1.5rem;
+  }
+
+  .app-home-button {
+    min-width: 140px;
+    height: 50px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-home-container {
+    gap: 1.5rem;
+  }
+
+  .app-home-title {
+    font-size: clamp(1.2rem, 5vw, 2rem);
+  }
+
+  .app-home-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .app-home-button {
+    width: 100%;
+    min-width: unset;
+    height: 50px;
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,238 @@
+.config-ai-container {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  padding-top: 4rem; /* 为顶部按钮留出空间 */
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.config-ai-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.config-ai-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.config-ai-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: white;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.config-ai-subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.config-ai-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+}
+
+.config-ai-form {
+  margin-top: 1rem;
+}
+
+.config-ai-form .ant-form-item-label > label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.config-input {
+  border-radius: 8px;
+}
+
+.config-ai-actions {
+  margin-top: 2rem;
+  margin-bottom: 0;
+}
+
+.config-ai-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.config-test-button {
+  min-width: 120px;
+  height: 48px;
+  border-radius: 24px;
+  font-weight: 600;
+  border: 2px solid #52c41a;
+  color: #52c41a;
+  transition: all 0.3s ease;
+}
+
+.config-test-button:hover {
+  border-color: #73d13d;
+  color: #73d13d;
+  background: rgba(82, 196, 26, 0.1);
+}
+
+.config-reset-button {
+  min-width: 120px;
+  height: 48px;
+  border-radius: 24px;
+  font-weight: 600;
+  border: 2px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.config-reset-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.config-save-button {
+  min-width: 140px;
+  height: 48px;
+  border-radius: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.config-save-button:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.config-save-button:active {
+  transform: translateY(0);
+}
+
+.config-ai-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.config-ai-note {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.config-ai-help {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.config-ai-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.config-ai-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* 响应式设计 - 平板 */
+@media (max-width: 768px) {
+  .config-ai-container {
+    padding: 1.5rem 0.75rem;
+    padding-top: 3.5rem;
+  }
+
+  .config-ai-card {
+    padding: 1.5rem;
+  }
+
+  .config-ai-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+
+  .config-ai-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+  }
+
+  .config-ai-buttons {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .config-test-button,
+  .config-reset-button,
+  .config-save-button {
+    min-width: 100px;
+    height: 44px;
+  }
+}
+
+/* 响应式设计 - 手机 */
+@media (max-width: 480px) {
+  .config-ai-container {
+    padding: 1rem 0.5rem;
+    padding-top: 3rem;
+  }
+
+  .config-ai-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .config-ai-title {
+    font-size: clamp(1.3rem, 5vw, 2rem);
+  }
+
+  .config-ai-subtitle {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+  }
+
+  .config-ai-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .config-test-button,
+  .config-reset-button,
+  .config-save-button {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .config-ai-note {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* 表单验证样式 */
+.config-ai-form .ant-form-item-has-error .ant-input,
+.config-ai-form .ant-form-item-has-error .ant-input-password {
+  border-color: #ff4d4f;
+}
+
+.config-ai-form .ant-form-item-has-error .ant-input:focus,
+.config-ai-form .ant-form-item-has-error .ant-input-password:focus {
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+/* 成功输入样式 */
+.config-ai-form .ant-input:focus,
+.config-ai-form .ant-input-password:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
