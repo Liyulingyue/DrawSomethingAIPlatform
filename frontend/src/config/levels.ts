@@ -7,6 +7,7 @@ export interface LevelConfig {
   status: 'available' | 'coming-soon'
   difficulty?: string
   keywords?: string[]  // 该关卡的关键词列表
+  clue?: string        // 提示信息
 }
 
 // 关卡配置数据
@@ -19,6 +20,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
     status: 'available',
     difficulty: '简单',
     keywords: ['苹果', '香蕉', '太阳', '月亮', '星星', '房子', '树', '花', '猫', '狗'],
+    clue: '',
   },
   {
     id: 'animals',
@@ -28,24 +30,37 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
     status: 'available',
     difficulty: '中等',
     keywords: ['大象', '长颈鹿', '狮子', '老虎', '熊猫', '兔子', '猴子', '企鹅', '海豚', '蝴蝶'],
+    clue: '一种动物',
   },
   {
     id: 'vehicles',
     title: '交通工具',
     description: '各种交通工具',
     icon: '🚗',
-    status: 'coming-soon',
+    status: 'available',
     difficulty: '中等',
-    keywords: [],
+    keywords: ['汽车', '自行车', '火车', '飞机', '轮船', '摩托车', '公交车', '地铁', '直升机', '帆船'],
+    clue: '一种交通工具或载具',
   },
   {
     id: 'sports',
     title: '体育运动',
     description: '各种运动项目',
     icon: '⚽',
-    status: 'coming-soon',
+    status: 'available',
     difficulty: '中等',
-    keywords: [],
+    keywords: ['足球', '篮球', '乒乓球', '羽毛球', '网球', '游泳', '跑步', '跳绳', '滑冰', '骑车'],
+    clue: '一种体育运动或运动项目',
+  },
+  {
+    id: 'idioms',
+    title: '四字成语',
+    description: '富有画面感的中国成语',
+    icon: '📚',
+    status: 'available',
+    difficulty: '困难',
+    keywords: ['愚公移山', '精卫填海', '守株待兔', '画蛇添足', '井底之蛙', '对牛弹琴', '鹤立鸡群', '狐假虎威', '亡羊补牢', '刻舟求剑'],
+    clue: '一个四字成语，请通过画面猜测其含义',
   }
 ]
 

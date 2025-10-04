@@ -14,6 +14,7 @@ function AppDraw() {
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [targetWord, setTargetWord] = useState('')
+  const [clue, setClue] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   // 防止移动设备页面滚动
@@ -76,6 +77,7 @@ function AppDraw() {
       const requestBody: {
         image: string
         target: string
+        clue?: string
         config?: {
           url?: string
           key?: string
@@ -85,6 +87,12 @@ function AppDraw() {
       } = {
         image,
         target: targetWord.trim(),
+      }
+
+      // 如果用户输入了线索，则传递给后端
+      if (clue.trim()) {
+        requestBody.clue = clue.trim()
+        console.log('📝 使用用户提供的线索:', clue.trim())
       }
 
       // 如果有自定义 AI 配置，则使用
@@ -299,6 +307,16 @@ function AppDraw() {
               value={targetWord}
               onChange={(e) => setTargetWord(e.target.value)}
               className="target-word-input"
+              size="large"
+            />
+          </div>
+          <div className="app-draw-clue">
+            <label className="clue-label">猜词线索：</label>
+            <Input
+              placeholder="可选，例如：这是一种动物"
+              value={clue}
+              onChange={(e) => setClue(e.target.value)}
+              className="clue-input"
               size="large"
             />
           </div>

@@ -106,6 +106,7 @@ function ChallengeDraw() {
       const requestBody: {
         image: string
         target: string
+        clue?: string
         config?: {
           url?: string
           key?: string
@@ -115,6 +116,12 @@ function ChallengeDraw() {
       } = {
         image,
         target: keyword,
+      }
+
+      // 如果关卡配置中有 clue，则传递给后端
+      if (levelConfig?.clue) {
+        requestBody.clue = levelConfig.clue
+        console.log('📝 使用关卡提示信息:', levelConfig.clue)
       }
 
       // 如果有自定义 AI 配置，则使用

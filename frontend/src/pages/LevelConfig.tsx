@@ -84,6 +84,7 @@ function LevelConfig() {
         description: values.description,
         icon: values.icon,
         keywords: keywordsArray,
+        clue: values.clue?.trim() || undefined,
         status: 'available'
       }
 
@@ -125,7 +126,8 @@ function LevelConfig() {
       title: level.title,
       description: level.description,
       icon: level.icon,
-      keywords: level.keywords?.join(', ') || ''
+      keywords: level.keywords?.join(', ') || '',
+      clue: level.clue || ''
     })
     // 滚动到表单顶部
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -248,6 +250,18 @@ function LevelConfig() {
                 <Input.TextArea 
                   placeholder="猫, 狗, 兔子, 大象, 长颈鹿" 
                   rows={5}
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="clue"
+                label="提示信息（可选）"
+                extra="该提示会传递给 AI 辅助识别，但不会在绘画页面显示给玩家"
+              >
+                <Input.TextArea 
+                  placeholder="例如: 这些都是常见的宠物动物" 
+                  rows={3}
                   size="large"
                 />
               </Form.Item>

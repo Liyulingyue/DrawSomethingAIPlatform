@@ -36,7 +36,8 @@
 .app-draw-header {
   flex: 0 0 auto;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 1rem;
   background: transparent;
   z-index: 10;
@@ -62,6 +63,29 @@
 }
 
 .target-word-input {
+  flex: 1;
+  border-radius: 8px;
+}
+
+/* 猜词线索区域 */
+.app-draw-clue {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.clue-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  min-width: 70px;
+}
+
+.clue-input {
   flex: 1;
   border-radius: 8px;
 }
@@ -193,7 +217,16 @@
     min-width: 60px;
   }
 
+  .clue-label {
+    font-size: 0.9rem;
+    min-width: 60px;
+  }
+
   .app-draw-target-word {
+    gap: 0.5rem;
+  }
+
+  .app-draw-clue {
     gap: 0.5rem;
   }
 
@@ -240,7 +273,18 @@
     gap: 0.5rem;
   }
 
+  .app-draw-clue {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
   .target-word-label {
+    font-size: 0.85rem;
+    min-width: unset;
+  }
+
+  .clue-label {
     font-size: 0.85rem;
     min-width: unset;
   }
