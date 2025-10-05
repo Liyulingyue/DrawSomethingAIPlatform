@@ -199,6 +199,60 @@
   margin: 0;
 }
 
+/* GitHub 反馈卡片 */
+.feedback-card {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+  border: 2px solid #ffa39e;
+  animation: fadeInUp 1s ease-out, pulse 2s ease-in-out 1.5s infinite;
+}
+
+.feedback-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.feedback-icon {
+  font-size: 4rem;
+  color: #ff4d4f;
+  flex-shrink: 0;
+}
+
+.feedback-text {
+  flex: 1;
+}
+
+.feedback-title {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  color: #ff4d4f;
+  margin: 0 0 0.5rem 0;
+  font-weight: bold;
+}
+
+.feedback-description {
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  color: #333;
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+.feedback-button {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  border: none;
+  height: 42px;
+  border-radius: 21px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+  transition: all 0.3s ease;
+}
+
+.feedback-button:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+}
+
 /* 底部按钮 */
 .introduction-actions {
   display: flex;
@@ -281,6 +335,16 @@
     gap: 0.8rem;
   }
 
+  .feedback-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .feedback-icon {
+    font-size: 3rem;
+  }
+
   .introduction-actions {
     flex-direction: column;
     align-items: stretch;
@@ -299,5 +363,13 @@
 
   .introduction-card .ant-card-body {
     padding: 1.2rem;
+  }
+
+  .feedback-icon {
+    font-size: 2.5rem;
+  }
+
+  .feedback-content {
+    gap: 1rem;
   }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button, Card, Collapse } from 'antd'
-import { HomeOutlined, QuestionCircleOutlined, RocketOutlined, BulbOutlined, SettingOutlined } from '@ant-design/icons'
+import { HomeOutlined, QuestionCircleOutlined, RocketOutlined, BulbOutlined, SettingOutlined, GithubOutlined, BugOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -155,6 +155,31 @@ function Introduction() {
               <div className="tip-item">
                 <span className="tip-emoji">🔄</span>
                 <p>失败了不要气馁，根据 AI 反馈改进你的作品</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* GitHub 反馈提示 */}
+          <Card className="introduction-card feedback-card" bordered={false}>
+            <div className="feedback-content">
+              <div className="feedback-icon">
+                <BugOutlined />
+              </div>
+              <div className="feedback-text">
+                <h3 className="feedback-title">发现问题？有改进建议？</h3>
+                <p className="feedback-description">
+                  欢迎前往 GitHub 项目页面反馈 Bug、提出建议或贡献代码！
+                </p>
+                <Button
+                  type="primary"
+                  icon={<GithubOutlined />}
+                  href="https://github.com/Liyulingyue/DrawSomethingAIPlatform"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="feedback-button"
+                >
+                  前往 GitHub 反馈
+                </Button>
               </div>
             </div>
           </Card>

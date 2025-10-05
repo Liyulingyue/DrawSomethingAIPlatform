@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'antd'
-import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined } from '@ant-design/icons'
+import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -31,6 +31,15 @@ function AppHome() {
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <SidebarTrigger onClick={() => setSidebarOpen(true)} isDark />
+      <a 
+        href="https://github.com/Liyulingyue/DrawSomethingAIPlatform" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="github-link"
+        title="查看项目源码"
+      >
+        <GithubOutlined />
+      </a>
       <div className="app-home-container">
         <div className="app-home-content">
           <div className="app-home-header">
