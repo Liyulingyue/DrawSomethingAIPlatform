@@ -193,6 +193,71 @@ EXPOSE 8002
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
 ```
 
+### 🔄 自动热更新机制
+
+为了在部署后自动同步最新代码，项目提供了一个基于 Git 的热更新工具。该工具会按配置的时间间隔执行 `git fetch` / `git pull` 并触发部署脚本，实现每 10 分钟 / 1 小时一次的自动更新。
+
+#### 组件概览
+
+- `scripts/auto_update.py`：主调度脚本，按计划检查仓库是否有新提交。
+- `scripts/auto_update_config.json`：调度配置，描述每个任务的仓库位置、分支、间隔和更新后需要执行的命令。
+- `scripts/restart_backend.py`：在后台重启后端服务，确保不会阻塞调度器。
+
+#### 配置文件示例
+
+```json
+{
+  "default_branch": "main",
+  "default_interval": "10m",
+  "jobs": [
+    {
+      "name": "fullstack",
+      "repo_path": "..",
+      "interval": "10m",
+      "post_update": [
+        {
+          "cmd": ["python", "-m", "pip", "install", "-r", "requirements.txt"],
+          "cwd": "../backend"
+        },
+        {
+          "cmd": ["python", "restart_backend.py"],
+          "cwd": "."
+        },
+        {
+          "cmd": ["npm", "install"],
+          "cwd": "../frontend"
+        },
+        {
+          "cmd": ["npm", "run", "build"],
+          "cwd": "../frontend"
+        }
+      ]
+    }
+  ]
+}
+```
+
+> 📝 提示：单仓库场景下推荐使用单一 Job（示例中每 10 分钟轮询一次），即可确保只执行一次 `git fetch` / `git pull`，再顺序触发后端和前端的部署命令。`post_update` 支持字符串或对象配置；对于需要后台启动的脚本（例如重启服务），请使用对象形式并确保命令能够快速结束。
+
+#### 启动热更新调度
+
+```powershell
+cd scripts
+python auto_update.py --verbose
+```
+
+- `--verbose`：输出更详细的日志，便于排查问题。
+- `--once`：只运行一次轮询，通常用于调试。
+- `--job backend`：只运行指定任务，参数可重复以组合多个任务。
+
+建议在 Windows 环境下将该命令注册为计划任务，或在 Linux 服务器中借助 systemd / cron 持久运行。
+
+#### 自定义部署命令
+
+- 若需额外的构建或迁移步骤，可在配置文件中追加命令。
+- 对于需要停机更新的服务，可编写自定义脚本并在 `post_update` 中调用。
+- `scripts/restart_backend.py` 使用 PID 文件确保不会产生僵尸进程，若部署在其他环境，可参考该脚本编写自定义的重启逻辑。
+
 ### 环境变量配置
 
 #### 必需环境变量

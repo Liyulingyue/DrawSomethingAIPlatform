@@ -1,0 +1,29 @@
+{
+  "default_branch": "main",
+  "default_interval": "10m",
+  "jobs": [
+    {
+      "name": "fullstack",
+      "repo_path": "..",
+      "interval": "10m",
+      "post_update": [
+        {
+          "cmd": ["python", "-m", "pip", "install", "-r", "requirements.txt"],
+          "cwd": "../backend"
+        },
+        {
+          "cmd": ["python", "restart_backend.py"],
+          "cwd": "."
+        },
+        {
+          "cmd": ["npm", "install"],
+          "cwd": "../frontend"
+        },
+        {
+          "cmd": ["npm", "run", "build"],
+          "cwd": "../frontend"
+        }
+      ]
+    }
+  ]
+}
