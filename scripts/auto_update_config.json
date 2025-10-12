@@ -8,11 +8,11 @@
       "interval": "10m",
       "post_update": [
         {
-          "cmd": ["backend/.venv/Scripts/python.exe", "-m", "pip", "install", "-r", "requirements.txt"],
+          "cmd": [".venv/Scripts/python.exe", "-m", "pip", "install", "-r", "requirements.txt"],
           "cwd": "../backend"
         },
         {
-          "cmd": ["backend/.venv/Scripts/python.exe", "restart_backend.py"],
+          "cmd": ["../backend/.venv/Scripts/python.exe", "restart_backend.py"],
           "cwd": "."
         },
         {
