@@ -145,7 +145,7 @@ def parse_interval(value: Union[str, int, float]) -> int:
     return seconds
 
 
-def run_command(command: Command, *, label: str = "command") -> Tuple[int, str, str]:
+def run_command(command: Command, *, label: str = "command", timeout: Optional[int] = None) -> Tuple[int, str, str]:
     cwd = command.cwd or Path.cwd()
     if not cwd.exists():
         raise FileNotFoundError(f"Working directory does not exist: {cwd}")
@@ -161,21 +161,26 @@ def run_command(command: Command, *, label: str = "command") -> Tuple[int, str, 
         cmd_to_run = command.cmd
 
     logger.debug("Running %s in %s: %s", label, cwd, cmd_to_run)
-    proc = subprocess.run(
-        cmd_to_run,
-        cwd=str(cwd),
-        shell=shell,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0:
-        logger.error("%s failed (exit %s)\nstdout: %s\nstderr: %s", label, proc.returncode, proc.stdout, proc.stderr)
-    else:
-        logger.debug("%s succeeded: %s", label, proc.stdout.strip())
-    return proc.returncode, proc.stdout, proc.stderr
+    try:
+        proc = subprocess.run(
+            cmd_to_run,
+            cwd=str(cwd),
+            shell=shell,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+            timeout=timeout,
+        )
+        if proc.returncode != 0:
+            logger.error("%s failed (exit %s)\nstdout: %s\nstderr: %s", label, proc.returncode, proc.stdout, proc.stderr)
+        else:
+            logger.debug("%s succeeded: %s", label, proc.stdout.strip())
+        return proc.returncode, proc.stdout, proc.stderr
+    except subprocess.TimeoutExpired:
+        logger.warning("%s timed out after %d seconds", label, timeout)
+        return -1, "", f"Command timed out after {timeout} seconds"
 
 
 def ensure_clean_worktree(repo_path: Path, job_name: str) -> bool:
@@ -194,8 +199,9 @@ def fetch_remote(job: Job) -> Optional[str]:
         return None
 
     fetch_cmd = Command(cmd=["git", "fetch"], cwd=job.repo_path, shell=False)
-    code, stdout, stderr = run_command(fetch_cmd, label=f"[{job.name}] git fetch")
+    code, stdout, stderr = run_command(fetch_cmd, label=f"[{job.name}] git fetch", timeout=30)
     if code != 0:
+        logger.warning("[%s] Git fetch failed (exit %s), skipping update check. Error: %s", job.name, code, stderr.strip())
         return None
 
     for command in job.post_fetch_commands:
@@ -222,8 +228,9 @@ def rev_parse(repo_path: Path, ref: str, job_name: str) -> Optional[str]:
 
 def pull_updates(job: Job) -> bool:
     pull_cmd = Command(cmd=["git", "pull", "--rebase"], cwd=job.repo_path, shell=False)
-    code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull")
+    code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull", timeout=60)
     if code != 0:
+        logger.warning("[%s] Git pull failed (exit %s), skipping update. Error: %s", job.name, code, stderr.strip())
         return False
 
     for command in job.post_update_commands:
