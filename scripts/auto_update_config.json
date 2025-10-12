@@ -8,23 +8,11 @@
       "interval": "10m",
       "post_update": [
         {
-          "cmd": ["docker-compose", "up", "-d"],
+          "cmd": ["docker-compose", "down"],
           "cwd": ".."
         },
         {
-          "cmd": ["docker-compose", "build", "backend"],
-          "cwd": ".."
-        },
-        {
-          "cmd": ["docker-compose", "up", "-d", "backend"],
-          "cwd": ".."
-        },
-        {
-          "cmd": ["docker-compose", "exec", "frontend", "npm", "install"],
-          "cwd": ".."
-        },
-        {
-          "cmd": ["docker-compose", "restart", "frontend"],
+          "cmd": ["docker-compose", "up", "-d", "--build"],
           "cwd": ".."
         }
       ]
