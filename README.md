@@ -203,9 +203,17 @@ cd DrawSomethingAIPlatform
 # 可选：设置 AI 环境变量（如果不使用前端配置）
 echo "AI_STUDIO_API_KEY=your_api_key_here" > .env
 
+# 生产环境：创建 frontend/.env.production 文件配置 API 地址
+echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
+
 # 启动服务
 docker-compose up -d
 ```
+
+> **生产部署说明**：
+> - 确保 `frontend/.env.production` 文件包含正确的生产环境 API 地址
+> - 如果使用域名访问，请配置反向代理（如 Nginx）转发到相应端口
+> - 建议在生产环境中使用 HTTPS 并配置 SSL 证书
 
 服务将在以下端口启动：
 - 后端：`http://localhost:8002`
@@ -394,6 +402,25 @@ python auto_update.py --start --verbose
 - 前端 API 基础地址：通过 `.env` 文件配置
 - 开发环境：`VITE_API_BASE_URL=http://localhost:8002`
 - 生产环境：请在 `.env.production` 中设置实际地址
+
+#### 🔧 环境配置文件
+
+**开发环境** (`.env`)：
+```bash
+# 可选：设置 AI API 密钥（如果不使用前端配置）
+AI_STUDIO_API_KEY=your_api_key_here
+```
+
+**生产环境** (`frontend/.env.production`)：
+```bash
+# 生产环境后端 API 地址
+VITE_API_BASE_URL=https://your-production-domain.com/api
+```
+
+> **注意**：
+> - `frontend/.env.production` 文件会被 Vite 自动加载用于生产构建
+> - Docker 部署时，确保将 `frontend/.env.production` 文件放在 frontend 目录下
+> - 如果使用自动更新脚本，请确保生产环境的 `frontend/.env.production` 文件已正确配置
 
 ## 📚 API 文档
 
