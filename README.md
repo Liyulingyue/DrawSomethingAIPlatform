@@ -252,6 +252,10 @@ docker-compose down
       "interval": "10m",
       "post_update": [
         {
+          "cmd": ["docker-compose", "up", "-d"],
+          "cwd": ".."
+        },
+        {
           "cmd": ["docker-compose", "build", "backend"],
           "cwd": ".."
         },
