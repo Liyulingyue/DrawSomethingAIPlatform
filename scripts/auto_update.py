@@ -239,11 +239,9 @@ def worker(job: Job, stop_event: threading.Event, run_once: bool, start_mode: bo
     )
 
     if start_mode:
-        # Run initial update on start
+        # Run initial update on start (always pull to ensure post_update runs)
         try:
-            remote = fetch_remote(job)
-            if remote:
-                pull_updates(job)
+            pull_updates(job)
         except Exception:  # pragma: no cover - defensive
             logger.exception("[%s] Unexpected error during initial update.", job.name)
 
