@@ -92,12 +92,26 @@ python run.py
 # 打开新终端，进入前端目录
 cd frontend
 
+# 配置环境变量（重要）
+cp .env.development.example .env.development  # 开发环境
+cp .env.production.example .env.production   # 生产环境（如果需要）
+
+# 编辑环境变量文件，根据需要修改配置
+# .env.development: 开发环境配置
+# .env.production: 生产环境配置
+
 # 安装依赖
 npm install
 
 # 启动开发服务器
 npm run dev
 ```
+
+> 📝 **环境变量说明**：
+> - `.env.development.example` 和 `.env.production.example` 是配置模板
+> - 复制到 `.env.development` 或 `.env.production` 并修改实际值
+> - 这些文件已被 `.gitignore` 排除，不会提交到版本控制
+> - 主要配置项：`VITE_API_BASE_URL`（后端API地址）
 
 前端将在 `http://localhost:5173` 启动。
 
@@ -211,7 +225,9 @@ docker-compose up -d
 ```
 
 > **生产部署说明**：
-> - 确保 `frontend/.env.production` 文件包含正确的生产环境 API 地址
+> - **环境变量配置**：确保 `frontend/.env.production` 文件存在并包含正确的生产环境 API 地址
+>   - 复制 `frontend/.env.production.example` 到 `frontend/.env.production`
+>   - 修改 `VITE_API_BASE_URL` 为实际的生产后端地址
 > - 如果使用域名访问，请配置反向代理（如 Nginx）转发到相应端口
 > - 建议在生产环境中使用 HTTPS 并配置 SSL 证书
 
@@ -366,11 +382,35 @@ python auto_update.py --start --verbose
 
 ### 环境变量配置
 
-#### 必需环境变量
+#### 前端环境变量
 
-无
+项目使用以下环境变量文件进行配置：
 
-#### 可选环境变量
+- **开发环境**: `frontend/.env.development`
+- **生产环境**: `frontend/.env.production`
+- **配置模板**: `frontend/.env.development.example` 和 `frontend/.env.production.example`
+
+##### 必需环境变量
+
+- `VITE_API_BASE_URL`: 后端 API 基础地址
+  - 开发环境：`http://localhost:8002`
+  - 生产环境：`https://your-production-domain.com`
+
+##### 配置步骤
+
+1. 复制示例文件：
+   ```bash
+   cp frontend/.env.development.example frontend/.env.development
+   cp frontend/.env.production.example frontend/.env.production
+   ```
+
+2. 根据部署环境修改 `VITE_API_BASE_URL` 的值
+
+> **注意**：实际的环境变量文件（`.env.development` 和 `.env.production`）已被 `.gitignore` 排除，不会提交到版本控制。
+
+#### 后端环境变量
+
+##### 可选环境变量
 
 - `AI_STUDIO_API_KEY`: 百度 AI Studio 访问令牌（可选，用于后备 AI 服务）
   - 如果前端未配置自定义 AI 服务，将使用此密钥调用百度文心一言 API
