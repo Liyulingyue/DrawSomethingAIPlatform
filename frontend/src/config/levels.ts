@@ -49,7 +49,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
     icon: '⚽',
     status: 'available',
     difficulty: '中等',
-    keywords: ['足球', '篮球', '乒乓球', '羽毛球', '网球', '游泳', '跑步', '跳绳', '滑冰', '骑车'],
+    keywords: ['足球', '篮球', '乒乓球', '羽毛球', '网球', '游泳', '跑步', '跳绳', '滑冰', '跳高'],
     clue: '一种体育运动或运动项目',
   },
   {
@@ -61,6 +61,16 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
     difficulty: '困难',
     keywords: ['愚公移山', '精卫填海', '守株待兔', '画蛇添足', '井底之蛙', '对牛弹琴', '鹤立鸡群', '狐假虎威', '亡羊补牢', '刻舟求剑'],
     clue: '一个四字成语，请通过画面猜测其含义',
+  },
+  {
+    id: 'chinese-festivals',
+    title: '中国节日',
+    description: '传统节日和文化习俗',
+    icon: '🎊',
+    status: 'available',
+    difficulty: '中等',
+    keywords: ['春节', '元宵节', '清明节', '端午节', '中秋节', '重阳节', '七夕节', '中元节', '腊八节', '除夕'],
+    clue: '中国传统节日',
   }
 ]
 
