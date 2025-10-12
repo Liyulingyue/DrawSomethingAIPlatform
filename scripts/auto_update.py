@@ -188,9 +188,19 @@ def ensure_clean_worktree(repo_path: Path, job_name: str) -> bool:
     code, stdout, _ = run_command(status_cmd, label=f"[{job_name}] git status")
     if code != 0:
         return False
+
     if stdout.strip():
-        logger.warning("[%s] Skipping update: repository has uncommitted changes.", job_name)
-        return False
+        logger.warning("[%s] Repository has uncommitted changes: %s", job_name, stdout.strip())
+        logger.info("[%s] Auto-stashing uncommitted changes before update...", job_name)
+
+        # 自动暂存未提交的更改
+        stash_cmd = Command(cmd=["git", "stash", "push", "-m", f"auto-update-{int(time.time())}"], cwd=repo_path, shell=False)
+        code, stdout, stderr = run_command(stash_cmd, label=f"[{job_name}] git stash")
+        if code != 0:
+            logger.error("[%s] Failed to stash changes: %s", job_name, stderr.strip())
+            return False
+        logger.info("[%s] Successfully stashed uncommitted changes", job_name)
+
     return True
 
 
@@ -199,7 +209,7 @@ def fetch_remote(job: Job) -> Optional[str]:
         return None
 
     fetch_cmd = Command(cmd=["git", "fetch"], cwd=job.repo_path, shell=False)
-    code, stdout, stderr = run_command(fetch_cmd, label=f"[{job.name}] git fetch", timeout=30)
+    code, stdout, stderr = run_command(fetch_cmd, label=f"[{job.name}] git fetch", timeout=60)
     if code != 0:
         logger.warning("[%s] Git fetch failed (exit %s), skipping update check. Error: %s", job.name, code, stderr.strip())
         return None
@@ -228,13 +238,34 @@ def rev_parse(repo_path: Path, ref: str, job_name: str) -> Optional[str]:
 
 def pull_updates(job: Job) -> bool:
     pull_cmd = Command(cmd=["git", "pull", "--rebase"], cwd=job.repo_path, shell=False)
-    code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull", timeout=60)
+    code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull", timeout=120)
     if code != 0:
         logger.warning("[%s] Git pull failed (exit %s), skipping update. Error: %s", job.name, code, stderr.strip())
         return False
 
     for command in job.post_update_commands:
         run_command(command, label=f"[{job.name}] post-update command")
+
+    # 检查是否有自动暂存的更改需要恢复
+    stash_list_cmd = Command(cmd=["git", "stash", "list"], cwd=job.repo_path, shell=False)
+    code, stdout, _ = run_command(stash_list_cmd, label=f"[{job.name}] git stash list")
+    if code == 0 and stdout.strip():
+        # 查找最新的auto-update stash
+        stashes = stdout.strip().split('\n')
+        auto_stash = None
+        for stash in stashes:
+            if 'auto-update-' in stash:
+                auto_stash = stash.split(':')[0]  # 获取stash名称，如stash@{0}
+                break
+
+        if auto_stash:
+            logger.info("[%s] Restoring auto-stashed changes: %s", job.name, auto_stash)
+            pop_cmd = Command(cmd=["git", "stash", "pop", auto_stash], cwd=job.repo_path, shell=False)
+            code, stdout, stderr = run_command(pop_cmd, label=f"[{job.name}] git stash pop")
+            if code == 0:
+                logger.info("[%s] Successfully restored stashed changes", job.name)
+            else:
+                logger.warning("[%s] Failed to restore stashed changes: %s", job.name, stderr.strip())
 
     logger.info("[%s] Update applied successfully.", job.name)
     return True
