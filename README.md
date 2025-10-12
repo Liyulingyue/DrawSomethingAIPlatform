@@ -193,6 +193,17 @@ EXPOSE 8002
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
 ```
 
+#### 4. 自动热更新部署
+
+对于持续运行的应用，可使用自动热更新脚本：
+
+```powershell
+cd scripts
+python auto_update.py --start --verbose
+```
+
+这将执行初始代码更新、依赖安装和服务启动，然后持续监控仓库变化并自动更新。
+
 
 ### 🔄 自动热更新机制
 
@@ -217,11 +228,11 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
       "interval": "10m",
       "post_update": [
         {
-          "cmd": ["python", "-m", "pip", "install", "-r", "requirements.txt"],
+          "cmd": ["backend/.venv/Scripts/python.exe", "-m", "pip", "install", "-r", "requirements.txt"],
           "cwd": "../backend"
         },
         {
-          "cmd": ["python", "restart_backend.py"],
+          "cmd": ["backend/.venv/Scripts/python.exe", "restart_backend.py"],
           "cwd": "."
         },
         {
@@ -238,7 +249,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
 }
 ```
 
-> 📝 提示：单仓库场景下推荐使用单一 Job（示例中每 10 分钟轮询一次），即可确保只执行一次 `git fetch` / `git pull`，再顺序触发后端和前端的部署命令。`post_update` 支持字符串或对象配置；对于需要后台启动的脚本（例如重启服务），请使用对象形式并确保命令能够快速结束。
+> 📝 提示：单仓库场景下推荐使用单一 Job（示例中每 10 分钟轮询一次），即可确保只执行一次 `git fetch` / `git pull`，再顺序触发后端和前端的部署命令。`post_update` 支持字符串或对象配置；对于需要后台启动的脚本（例如重启服务），请使用对象形式并确保命令能够快速结束。脚本会自动检测并使用 `backend/.venv` 虚拟环境中的 Python，避免系统环境污染。
 
 #### 启动热更新调度
 
@@ -249,6 +260,7 @@ python auto_update.py --verbose
 
 - `--verbose`：输出更详细的日志，便于排查问题。
 - `--once`：只运行一次轮询，通常用于调试。
+- `--start`：运行初始更新并启动服务，然后持续监控（推荐用于生产启动）。
 - `--job backend`：只运行指定任务，参数可重复以组合多个任务。
 
 建议在 Windows 环境下将该命令注册为计划任务，或在 Linux 服务器中借助 systemd / cron 持久运行。

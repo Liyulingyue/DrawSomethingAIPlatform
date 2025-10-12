@@ -230,13 +230,22 @@ def pull_updates(job: Job) -> bool:
     return True
 
 
-def worker(job: Job, stop_event: threading.Event, run_once: bool) -> None:
+def worker(job: Job, stop_event: threading.Event, run_once: bool, start_mode: bool = False) -> None:
     logger.info(
         "[%s] Worker started (branch=%s, interval=%ss)",
         job.name,
         job.branch,
         job.interval_seconds,
     )
+
+    if start_mode:
+        # Run initial update on start
+        try:
+            remote = fetch_remote(job)
+            if remote:
+                pull_updates(job)
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("[%s] Unexpected error during initial update.", job.name)
 
     while not stop_event.is_set():
         try:
@@ -290,6 +299,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         help="Path to configuration JSON file.",
     )
     parser.add_argument("--once", action="store_true", help="Run a single update cycle and exit")
+    parser.add_argument("--start", action="store_true", help="Run initial update and start services, then monitor continuously")
     parser.add_argument("--job", action="append", help="Run only specific job names (can repeat)")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     args = parser.parse_args(list(argv) if argv is not None else None)
@@ -320,7 +330,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
 
     threads = []
     for job in jobs:
-        thread = threading.Thread(target=worker, args=(job, stop_event, args.once), daemon=True)
+        thread = threading.Thread(target=worker, args=(job, stop_event, args.once, args.start), daemon=True)
         thread.start()
         threads.append(thread)
 
