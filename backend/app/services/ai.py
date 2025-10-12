@@ -119,7 +119,7 @@ def _build_instruction(clue: Optional[str], custom_prompt: Optional[str]) -> str
     if custom_prompt and custom_prompt.strip():
         sections.append(custom_prompt.strip())
     if clue:
-        sections.append(f"参考线索：{clue}")
+        sections.append(f"猜词的参考线索：{clue}")
     sections.append(FORMAT_INSTRUCTIONS)
     return "\n\n".join(section for section in sections if section)
 
