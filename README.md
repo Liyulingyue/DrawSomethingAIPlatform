@@ -9,8 +9,14 @@ DrawSomething AI Platform 是一个基于 AI 的多人协作你画我猜游戏�
 - **🤖 AI 驱动的猜词识别**：集成多模态大模型，自动识别绘画内容
 - **👥 多人实时协作**：支持多人在线绘画与实时协作猜词
 - **🎨 专业画板工具**：支持压力感画笔、颜色选择、画笔粗细调节
-- **📱 移动端优化体验**：全新 `/app` 路由提供专为移动设备优化的界面
-- **🎯 闯关模式**：挑战不同难度的关卡，支持自定义关卡创建
+- **📱 移动端优化体验**：全新 `/app` 路由提供专为移动设备优化```
+> 💡 **配置说明**：
+> - `repo_path`: Git 仓库的相对路径
+> - `interval`: 检查间隔（如 "10m" 表示10分钟，"1h" 表示1小时）
+> - `post_update`: 更新后执行的命令列表，按顺序执行以确保依赖关系**配置说明**：
+> - `repo_path`: Git 仓库的相对路径
+> - `interval`: 检查间隔（如 "10m" 表示10分钟，"1h" 表示1小时）
+> - `post_update`: 更新后执行的命令列表，按顺序执行以确保依赖关系*🎯 闯关模式**：挑战不同难度的关卡，支持自定义关卡创建
 - **🔧 灵活配置**：支持多种 AI 模型服务（百度文心、OpenAI 等）
 - **📊 游戏统计**：完整的回合历史记录和成功率统计
 
@@ -70,8 +76,8 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 # 安装依赖
 pip install -r requirements.txt
 
-# 设置环境变量（必需）
-export AI_STUDIO_API_KEY="your_baidu_api_key_here"
+# 设置环境变量（可选，用于 AI 功能）
+export AI_STUDIO_API_KEY="your_baidu_api_key_here"  # 可选：如果前端未配置 AI 服务
 
 # 启动后端服务
 python run.py
@@ -124,7 +130,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export AI_STUDIO_API_KEY="your_key"
+export AI_STUDIO_API_KEY="your_key"  # 可选：用于后备 AI 服务
 python run.py
 ```
 
@@ -159,7 +165,7 @@ cd backend
 pip install -r requirements.txt
 
 # 设置生产环境变量
-export AI_STUDIO_API_KEY="your_production_key"
+export AI_STUDIO_API_KEY="your_production_key"  # 可选：用于后备 AI 服务
 export ENVIRONMENT="production"
 
 # 使用生产服务器运行
@@ -180,42 +186,94 @@ npm run preview
 # 部署 dist 目录到你的 Web 服务器
 ```
 
-#### 3. 使用 Docker 部署（可选）
+#### 4. Docker 部署（推荐）
 
-```dockerfile
-# Dockerfile 示例
-FROM python:3.9-slim
-WORKDIR /app
-COPY backend/requirements.txt .
-RUN pip install -r requirements.txt
-COPY backend/ .
-EXPOSE 8002
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
+使用 Docker Compose 进行容器化部署，提供更好的隔离和易管理性。
+
+**环境要求**：
+- Docker 和 Docker Compose
+
+**快速启动**：
+```bash
+# 克隆项目
+git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
+cd DrawSomethingAIPlatform
+
+# 可选：设置 AI 环境变量（如果不使用前端配置）
+echo "AI_STUDIO_API_KEY=your_api_key_here" > .env
+
+# 启动服务
+docker-compose up -d
 ```
 
-#### 4. 自动热更新部署
+服务将在以下端口启动：
+- 后端：`http://localhost:8002`
+- 前端：`http://localhost:5173`
 
-对于持续运行的应用，可使用自动热更新脚本：
-
+**热更新**：
+使用自动热更新脚本实现无人值守的代码同步：
 ```powershell
 cd scripts
 python auto_update.py --start --verbose
 ```
+脚本会自动检测代码变更、重新构建容器并重启服务，确保生产环境始终运行最新版本。
 
-这将执行初始代码更新、依赖安装和服务启动，然后持续监控仓库变化并自动更新。
+**停止服务**：
+```bash
+docker-compose down
+```
 
 
 ### 🔄 自动热更新机制
 
-为了在部署后自动同步最新代码，项目提供了一个基于 Git 的热更新工具。该工具会按配置的时间间隔执行 `git fetch` / `git pull` 并触发部署脚本，实现每 10 分钟 / 1 小时一次的自动更新。
+项目提供基于 Git 的自动热更新工具，专为 Docker 部署环境优化。该工具按配置的时间间隔检查代码更新，自动拉取最新代码并重启容器，实现无人值守的持续部署。
 
-#### 组件概览
+#### 🎯 适用场景
 
-- `scripts/auto_update.py`：主调度脚本，按计划检查仓库是否有新提交。
-- `scripts/auto_update_config.json`：调度配置，描述每个任务的仓库位置、分支、间隔和更新后需要执行的命令。
-- `scripts/restart_backend.py`：在后台重启后端服务，确保不会阻塞调度器。
+- **生产环境部署**：确保服务始终运行最新版本
+- **无人值守更新**：服务器端自动更新，无需手动干预
+- **容器化管理**：充分利用 Docker 的隔离和自动化优势
 
-#### 配置文件示例
+#### 🛠️ 组件概览
+
+- `scripts/auto_update.py`：主调度脚本，负责定时检查和执行更新
+- `scripts/auto_update_config.json`：配置文件，定义更新任务和执行命令
+
+#### ⚙️ 配置示例
+
+```json
+{
+  "default_branch": "main",
+  "default_interval": "10m",
+  "jobs": [
+    {
+      "name": "fullstack",
+      "repo_path": "..",
+      "interval": "10m",
+      "post_update": [
+        {
+          "cmd": ["docker-compose", "build", "backend"],
+          "cwd": ".."
+        },
+        {
+          "cmd": ["docker-compose", "up", "-d", "backend"],
+          "cwd": ".."
+        },
+        {
+          "cmd": ["docker-compose", "exec", "frontend", "npm", "install"],
+          "cwd": ".."
+        },
+        {
+          "cmd": ["docker-compose", "restart", "frontend"],
+          "cwd": ".."
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### 📝 本地部署配置示例
 
 ```json
 {
@@ -249,56 +307,81 @@ python auto_update.py --start --verbose
 }
 ```
 
-> 📝 提示：单仓库场景下推荐使用单一 Job（示例中每 10 分钟轮询一次），即可确保只执行一次 `git fetch` / `git pull`，再顺序触发后端和前端的部署命令。`post_update` 支持字符串或对象配置；对于需要后台启动的脚本（例如重启服务），请使用对象形式并确保命令能够快速结束。脚本会自动检测并使用 `backend/.venv` 虚拟环境中的 Python，避免系统环境污染。
+> � **配置说明**：
+> - `repo_path`: Git 仓库的相对路径
+> - `interval`: 检查间隔（如 "10m" 表示10分钟，"1h" 表示1小时）
+> - `post_update`: 更新后执行的命令列表
+> - Docker 部署使用 `docker-compose` 命令管理容器
+> - 本地部署使用虚拟环境中的 Python 和直接的 npm 命令
 
-#### 启动热更新调度
+#### 🚀 启动热更新调度
 
 ```powershell
 cd scripts
-python auto_update.py --verbose
+python auto_update.py --start --verbose
 ```
 
-- `--verbose`：输出更详细的日志，便于排查问题。
-- `--once`：只运行一次轮询，通常用于调试。
-- `--start`：运行初始更新并启动服务，然后持续监控（推荐用于生产启动）。
-- `--job backend`：只运行指定任务，参数可重复以组合多个任务。
+**参数说明**：
+- `--verbose`：输出详细日志，便于排查问题
+- `--once`：仅执行一次更新检查（调试用）
+- `--start`：执行初始更新并启动服务，然后持续监控（推荐用于生产）
+- `--job <name>`：仅运行指定任务（可重复使用以组合多个任务）
 
-建议在 Windows 环境下将该命令注册为计划任务，或在 Linux 服务器中借助 systemd / cron 持久运行。
+**运行方式**：
+- **Windows**：注册为计划任务
+- **Linux**：使用 systemd 或 cron 持久运行
+- **Docker**：在容器中作为后台进程运行
 
-#### 自定义部署命令
+#### 🔧 自定义部署命令
 
-- 若需额外的构建或迁移步骤，可在配置文件中追加命令。
-- 对于需要停机更新的服务，可编写自定义脚本并在 `post_update` 中调用。
-- `scripts/restart_backend.py` 使用 PID 文件确保不会产生僵尸进程，若部署在其他环境，可参考该脚本编写自定义的重启逻辑。
+**Docker 部署命令**：
+- `docker-compose build <service>`：重新构建指定服务
+- `docker-compose up -d <service>`：启动/重启指定服务
+- `docker-compose exec <service> <command>`：在运行中的容器中执行命令
+- `docker-compose restart <service>`：重启指定服务
+
+**本地部署命令**：
+- 后端：使用虚拟环境中的 Python 执行更新和重启
+- 前端：直接使用 npm 进行依赖安装和构建
+- 支持 PID 文件管理，确保服务正确重启
+
+**配置建议**：
+- 单仓库场景推荐单一 Job，避免重复的 git 操作
+- `post_update` 命令按执行顺序排列
+- 使用对象格式配置命令，支持 `cwd`（工作目录）和 `cmd`（命令）
+- 确保命令能够快速完成，避免阻塞调度器
 
 ### 环境变量配置
 
 #### 必需环境变量
 
-- `AI_STUDIO_API_KEY`: 百度 AI Studio 访问令牌
+无
 
 #### 可选环境变量
 
-- `ENVIRONMENT`: 运行环境（development/production）
-- `PORT`: 后端服务端口（默认 8002）
+- `AI_STUDIO_API_KEY`: 百度 AI Studio 访问令牌（可选，用于后备 AI 服务）
+  - 如果前端未配置自定义 AI 服务，将使用此密钥调用百度文心一言 API
+  - 获取方式：https://aistudio.baidu.com/account/accessToken
 
 ## ⚙️ 配置说明
 
 ### AI 模型配置
 
-本项目支持多种 AI 模型服务：
+本项目支持灵活的 AI 模型配置：
 
-#### 默认配置（百度文心一言）
+#### 主要配置方式（推荐）
+通过前端界面配置 AI 服务：
+- 访问 `/app/configAI` 页面
+- 支持 OpenAI 兼容的 API 接口
+- 配置包括：API 端点、访问密钥、模型名称、自定义提示词
+
+#### 后备配置方式
+设置环境变量 `AI_STUDIO_API_KEY`：
 - **API 端点**: `https://aistudio.baidu.com/llm/lmapi/v3`
 - **推荐模型**: `ernie-4.5-vl-28b-a3b`
 - **获取密钥**: https://aistudio.baidu.com/account/accessToken
 
-#### 自定义配置
-前端支持配置 OpenAI 兼容的 API：
-- 模型 URL：API 端点地址
-- 访问密钥：API 密钥
-- 模型名称：模型标识符
-- 自定义提示词：可选的提示词模板
+> **注意**：系统优先使用前端配置的 AI 服务。如果前端未配置任何 AI 服务，则自动回退到环境变量配置的百度文心一言 API。
 
 ### 前后端联调
 

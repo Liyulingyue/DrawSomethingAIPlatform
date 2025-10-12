@@ -8,20 +8,20 @@
       "interval": "10m",
       "post_update": [
         {
-          "cmd": [".venv/Scripts/python.exe", "-m", "pip", "install", "-r", "requirements.txt"],
-          "cwd": "../backend"
+          "cmd": ["docker-compose", "build", "backend"],
+          "cwd": ".."
         },
         {
-          "cmd": ["../backend/.venv/Scripts/python.exe", "restart_backend.py"],
-          "cwd": "."
+          "cmd": ["docker-compose", "up", "-d", "backend"],
+          "cwd": ".."
         },
         {
-          "cmd": ["npm", "install"],
-          "cwd": "../frontend"
+          "cmd": ["docker-compose", "exec", "frontend", "npm", "install"],
+          "cwd": ".."
         },
         {
-          "cmd": ["npm", "run", "build"],
-          "cwd": "../frontend"
+          "cmd": ["docker-compose", "restart", "frontend"],
+          "cwd": ".."
         }
       ]
     }

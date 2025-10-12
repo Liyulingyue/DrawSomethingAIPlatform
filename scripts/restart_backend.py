@@ -112,7 +112,9 @@ def start_backend(args: argparse.Namespace) -> None:
 def main(argv: Optional[Iterable[str]] = None) -> int:
     args = parse_args(argv)
     # Auto-detect venv Python if available
-    venv_python = BACKEND_DIR / ".venv" / "Scripts" / "python.exe"
+    venv_bin = "Scripts" if os.name == "nt" else "bin"
+    venv_exe = "python.exe" if os.name == "nt" else "python"
+    venv_python = BACKEND_DIR / ".venv" / venv_bin / venv_exe
     if venv_python.exists() and args.python == PYTHON_EXECUTABLE:
         args.python = venv_python
     try:

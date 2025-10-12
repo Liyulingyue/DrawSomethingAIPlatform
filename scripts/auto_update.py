@@ -43,6 +43,9 @@ class Command:
             cmd = raw.get("cmd") or raw.get("command")
             if cmd is None:
                 raise ConfigurationError("Command entries must include 'cmd' or 'command'.")
+            # Handle cross-platform venv paths
+            if isinstance(cmd, list):
+                cmd = [part.replace("Scripts/python.exe", "bin/python") if isinstance(part, str) else part for part in cmd]
             cwd_raw = raw.get("cwd")
             cwd = base_dir / cwd_raw if isinstance(cwd_raw, str) else base_dir
             shell_raw = raw.get("shell")
