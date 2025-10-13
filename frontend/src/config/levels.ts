@@ -71,6 +71,16 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
     difficulty: '中等',
     keywords: ['春节', '元宵节', '清明节', '端午节', '中秋节', '重阳节', '七夕节', '中元节', '腊八节', '除夕'],
     clue: '中国传统节日',
+  },
+  {
+    id: 'pokemon',
+    title: '宝可梦',
+    description: '神奇的宝可梦世界',
+    icon: '⚡',
+    status: 'available',
+    difficulty: '困难',
+    keywords: ['皮卡丘', '杰尼龟', '小火龙', '妙蛙种子', '喷火龙', '水箭龟', '妙蛙花', '雷丘', '风速狗', '尼多王'],
+    clue: '一种宝可梦',
   }
 ]
 

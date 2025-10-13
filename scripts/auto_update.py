@@ -280,11 +280,37 @@ def worker(job: Job, stop_event: threading.Event, run_once: bool, start_mode: bo
     )
 
     if start_mode:
+        # Backup environment files before update
+        env_files_to_backup = [
+            job.repo_path / "frontend" / ".env.development",
+            job.repo_path / "frontend" / ".env.production",
+            job.repo_path / ".env.development",
+            job.repo_path / ".env.production",
+        ]
+        backed_up_files = {}
+        
+        for env_file in env_files_to_backup:
+            if env_file.exists():
+                try:
+                    content = env_file.read_text(encoding="utf-8")
+                    backed_up_files[env_file] = content
+                    logger.info("[%s] Backed up environment file: %s", job.name, env_file)
+                except Exception as e:
+                    logger.warning("[%s] Failed to backup %s: %s", job.name, env_file, e)
+        
         # Run initial update on start (always pull to ensure post_update runs)
         try:
             pull_updates(job)
         except Exception:  # pragma: no cover - defensive
             logger.exception("[%s] Unexpected error during initial update.", job.name)
+        
+        # Restore backed up environment files
+        for env_file, content in backed_up_files.items():
+            try:
+                env_file.write_text(content, encoding="utf-8")
+                logger.info("[%s] Restored environment file: %s", job.name, env_file)
+            except Exception as e:
+                logger.error("[%s] Failed to restore %s: %s", job.name, env_file, e)
 
     while not stop_event.is_set():
         try:
