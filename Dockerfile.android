@@ -1,0 +1,78 @@
+# Android APK 构建 Dockerfile
+# 基于官方 Android SDK 镜像
+
+FROM thyrlian/android-sdk:latest
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装 Node.js 和 npm
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 验证安装
+RUN node --version && npm --version
+
+# 安装 Gradle (如果镜像中没有)
+RUN if ! command -v gradle &> /dev/null; then \
+    wget https://services.gradle.org/distributions/gradle-8.0-bin.zip && \
+    unzip gradle-8.0-bin.zip -d /opt && \
+    ln -s /opt/gradle-8.0/bin/gradle /usr/bin/gradle && \
+    rm gradle-8.0-bin.zip; \
+    fi
+
+# 设置 Android SDK 环境变量
+ENV ANDROID_HOME=/opt/android-sdk
+ENV PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
+
+# 接受 Android SDK 许可
+RUN yes | sdkmanager --licenses || true
+
+# 安装必要的 Android SDK 组件
+RUN sdkmanager --update && \
+    sdkmanager "platform-tools" \
+    "platforms;android-33" \
+    "build-tools;33.0.0" \
+    "cmdline-tools;latest" && \
+    sdkmanager --list
+
+# 复制项目文件
+COPY frontend/package*.json ./frontend/
+COPY frontend/tsconfig*.json ./frontend/
+COPY frontend/vite.config.ts ./frontend/
+COPY frontend/index.html ./frontend/
+COPY frontend/eslint.config.js ./frontend/
+
+# 安装前端依赖
+WORKDIR /app/frontend
+RUN npm install
+
+# 复制前端源代码
+COPY frontend/src ./src
+COPY frontend/public ./public
+
+# 构建前端
+RUN npm run build
+
+# 安装 Capacitor
+RUN npm install @capacitor/core @capacitor/cli @capacitor/android
+
+# 复制 Capacitor 配置
+COPY frontend/capacitor.config.ts ./
+
+# 添加 Android 平台
+RUN npx cap add android || true
+
+# 同步 Android 项目
+RUN npx cap sync android
+
+# 设置构建脚本
+COPY scripts/docker-build-apk.sh /usr/local/bin/build-apk.sh
+RUN chmod +x /usr/local/bin/build-apk.sh
+
+# 默认命令:构建 Debug APK
+CMD ["build-apk.sh", "debug"]
