@@ -243,8 +243,33 @@ def pull_updates(job: Job) -> bool:
         logger.warning("[%s] Git pull failed (exit %s), skipping update. Error: %s", job.name, code, stderr.strip())
         return False
 
+    # Backup environment files before post_update
+    env_files_to_backup = [
+        job.repo_path / "frontend" / ".env.development",
+        job.repo_path / "frontend" / ".env.production",
+        job.repo_path / ".env.development",
+        job.repo_path / ".env.production",
+    ]
+    backed_up_files = {}
+    for env_file in env_files_to_backup:
+        if env_file.exists():
+            try:
+                content = env_file.read_text(encoding="utf-8")
+                backed_up_files[env_file] = content
+                logger.info("[%s] Backed up environment file: %s", job.name, env_file)
+            except Exception as e:
+                logger.warning("[%s] Failed to backup %s: %s", job.name, env_file, e)
+
     for command in job.post_update_commands:
         run_command(command, label=f"[{job.name}] post-update command")
+
+    # Restore backed up environment files
+    for env_file, content in backed_up_files.items():
+        try:
+            env_file.write_text(content, encoding="utf-8")
+            logger.info("[%s] Restored environment file: %s", job.name, env_file)
+        except Exception as e:
+            logger.error("[%s] Failed to restore %s: %s", job.name, env_file, e)
 
     # 检查是否有自动暂存的更改需要恢复
     stash_list_cmd = Command(cmd=["git", "stash", "list"], cwd=job.repo_path, shell=False)
