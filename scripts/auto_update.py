@@ -237,7 +237,7 @@ def rev_parse(repo_path: Path, ref: str, job_name: str) -> Optional[str]:
 
 
 def pull_updates(job: Job) -> bool:
-    pull_cmd = Command(cmd=["git", "pull", "--rebase"], cwd=job.repo_path, shell=False)
+    pull_cmd = Command(cmd=["git", "pull"], cwd=job.repo_path, shell=False)
     code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull", timeout=120)
     if code != 0:
         logger.warning("[%s] Git pull failed (exit %s), skipping update. Error: %s", job.name, code, stderr.strip())
