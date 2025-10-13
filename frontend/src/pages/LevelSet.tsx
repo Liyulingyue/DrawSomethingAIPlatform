@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, message, Button, Modal, Tag, FloatButton } from 'antd'
+import { Card, message, Button, Modal, Tag } from 'antd'
 import { LockOutlined, PlayCircleOutlined, UnorderedListOutlined, CheckCircleOutlined, CheckCircleFilled, PlusOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -132,6 +132,11 @@ function LevelSet() {
                   <span className="level-card-lock-text">待更新...</span>
                 </div>
               )}
+              {level.difficulty && (
+                <div className="level-card-difficulty-badge">
+                  {level.difficulty}
+                </div>
+              )}
               <div className="level-card-icon">{level.icon}</div>
               <h3 className="level-card-title">{level.title}</h3>
               <p className="level-card-description">{level.description}</p>
@@ -156,19 +161,25 @@ function LevelSet() {
               </div>
             </Card>
           ))}
+          
+          {/* 创建自定义关卡卡片 */}
+          <Card
+            hoverable
+            className="level-card level-card-create"
+            onClick={() => navigate('/app/my-custom-levels')}
+          >
+            <div className="level-card-create-content">
+              <PlusOutlined className="level-card-create-icon" />
+              <h3 className="level-card-create-title">我的自定义关卡</h3>
+              <p className="level-card-create-description">
+                查看和管理你的自定义关卡
+              </p>
+            </div>
+          </Card>
         </div>
         <AppFooter className="app-footer-light" />
       </div>
       </div>
-
-      {/* 右下角悬浮按钮 - 添加自定义关卡 */}
-      <FloatButton
-        icon={<PlusOutlined />}
-        type="primary"
-        tooltip="添加自定义关卡"
-        onClick={() => navigate('/app/level-config')}
-        style={{ right: 24, bottom: 24 }}
-      />
 
       {/* 选关弹窗 */}
       <Modal

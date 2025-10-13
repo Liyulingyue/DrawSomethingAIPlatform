@@ -32,9 +32,9 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       label: '闯关模式',
     },
     {
-      key: '/app/level-config',
+      key: '/app/my-custom-levels',
       icon: <PlusOutlined />,
-      label: '自定义关卡',
+      label: '我的自定义关卡',
     },
     {
       key: '/app/draw',

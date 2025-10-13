@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Form, Input, Select, Button, message, Card, Space, Modal, Tag } from 'antd'
-import { SaveOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Form, Input, Select, Button, message, Card } from 'antd'
+import { SaveOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -56,14 +56,38 @@ const saveCustomLevels = (levels: LevelConfig[]): void => {
 function LevelConfig() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [customLevels, setCustomLevels] = useState<LevelConfig[]>(getCustomLevels())
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingLevelId, setEditingLevelId] = useState<string | null>(null)
   const [form] = Form.useForm()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
-    // 组件加载时重置表单为新建模式
-    form.setFieldsValue({ icon: '🎨' })
-  }, [form])
+    // 检查是否有编辑参数
+    const editId = searchParams.get('edit')
+    if (editId) {
+      // 查找要编辑的关卡
+      const levelToEdit = customLevels.find(level => level.id === editId)
+      if (levelToEdit) {
+        setEditingLevelId(editId)
+        form.setFieldsValue({
+          id: levelToEdit.id,
+          title: levelToEdit.title,
+          description: levelToEdit.description,
+          icon: levelToEdit.icon,
+          difficulty: levelToEdit.difficulty || '休闲',
+          keywords: levelToEdit.keywords?.join(', ') || '',
+          clue: levelToEdit.clue || ''
+        })
+      } else {
+        message.warning('未找到要编辑的关卡')
+        navigate('/app/my-custom-levels')
+      }
+    } else {
+      // 新建模式
+      setEditingLevelId(null)
+      form.setFieldsValue({ icon: '🎨', difficulty: '休闲' })
+    }
+  }, [searchParams, customLevels, form, navigate])
 
   // 保存关卡
   const handleSave = () => {
@@ -85,20 +109,25 @@ function LevelConfig() {
         icon: values.icon,
         keywords: keywordsArray,
         clue: values.clue?.trim() || undefined,
-        status: 'available'
+        status: 'available',
+        difficulty: values.difficulty || '休闲'
       }
 
       let updatedCustomLevels: LevelConfig[]
 
-      if (editingIndex !== null) {
-        // 编辑现有关卡
-        updatedCustomLevels = [...customLevels]
-        updatedCustomLevels[editingIndex] = newLevel
-        message.success('关卡更新成功！')
-        setEditingIndex(null)
+      if (editingLevelId) {
+        // 编辑模式：更新现有关卡
+        const existingIndex = customLevels.findIndex(level => level.id === editingLevelId)
+        if (existingIndex !== -1) {
+          updatedCustomLevels = [...customLevels]
+          updatedCustomLevels[existingIndex] = newLevel
+          message.success('关卡更新成功！')
+        } else {
+          message.error('未找到要更新的关卡')
+          return
+        }
       } else {
-        // 新建关卡
-        // 检查ID是否已存在
+        // 新建模式：检查ID是否已存在
         const idExists = customLevels.some(level => level.id === newLevel.id)
         if (idExists) {
           message.error('关卡ID已存在，请使用其他ID')
@@ -107,63 +136,15 @@ function LevelConfig() {
         updatedCustomLevels = [...customLevels, newLevel]
         message.success('关卡创建成功！')
       }
-
+      
       saveCustomLevels(updatedCustomLevels)
       setCustomLevels(updatedCustomLevels)
-      form.resetFields()
-      form.setFieldsValue({ icon: '🎨' })
+      
+      // 跳转回自定义关卡列表
+      navigate('/app/my-custom-levels')
     }).catch(error => {
       console.error('表单验证失败:', error)
     })
-  }
-
-  // 编辑关卡
-  const handleEdit = (index: number) => {
-    const level = customLevels[index]
-    setEditingIndex(index)
-    form.setFieldsValue({
-      id: level.id,
-      title: level.title,
-      description: level.description,
-      icon: level.icon,
-      keywords: level.keywords?.join(', ') || '',
-      clue: level.clue || ''
-    })
-    // 滚动到表单顶部
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // 删除关卡
-  const handleDelete = (index: number) => {
-    const level = customLevels[index]
-    Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除关卡"${level.title}"吗？此操作不可恢复。`,
-      okText: '确认删除',
-      okType: 'danger',
-      cancelText: '取消',
-      onOk: () => {
-        const updatedCustomLevels = customLevels.filter((_, i) => i !== index)
-        saveCustomLevels(updatedCustomLevels)
-        setCustomLevels(updatedCustomLevels)
-        message.success('关卡已删除')
-        
-        // 如果删除的是正在编辑的关卡，重置表单
-        if (editingIndex === index) {
-          setEditingIndex(null)
-          form.resetFields()
-          form.setFieldsValue({ icon: '🎨' })
-        }
-      }
-    })
-  }
-
-  // 取消编辑
-  const handleCancel = () => {
-    setEditingIndex(null)
-    form.resetFields()
-    form.setFieldsValue({ icon: '🎨' })
-    message.info('已取消编辑')
   }
 
   return (
@@ -175,16 +156,25 @@ function LevelConfig() {
         <div className="level-config-content">
           {/* 页面标题 */}
           <h1 className="level-config-title">
-            {editingIndex !== null ? '编辑自定义关卡' : '创建自定义关卡'}
+            {editingLevelId ? '编辑自定义关卡' : '创建自定义关卡'}
           </h1>
-          <Button
-            className="level-config-back-btn"
-            type="primary"
-            ghost
-            onClick={() => navigate('/app/level-set')}
-          >
-            ← 返回闯关模式页面
-          </Button>
+          
+          <div className="level-config-nav-buttons">
+            <Button
+              type="primary"
+              ghost
+              onClick={() => navigate('/app/level-set')}
+            >
+              ← 返回闯关模式
+            </Button>
+            <Button
+              type="primary"
+              ghost
+              onClick={() => navigate('/app/my-custom-levels')}
+            >
+              📝 我的自定义关卡
+            </Button>
+          </div>
 
           {/* 关卡配置表单 */}
           <Card className="level-config-form-card">
@@ -200,12 +190,12 @@ function LevelConfig() {
                   { required: true, message: '请输入关卡ID' },
                   { pattern: /^[a-z0-9-]+$/, message: 'ID只能包含小写字母、数字和连字符' }
                 ]}
-                extra={editingIndex !== null ? '编辑模式下ID不可修改' : '建议格式: custom-xxx，例如: custom-animals'}
+                extra={editingLevelId ? '编辑模式下ID不可修改' : '建议格式: custom-xxx，例如: custom-animals'}
               >
                 <Input 
                   placeholder="例如: custom-animals" 
-                  disabled={editingIndex !== null}
                   size="large"
+                  disabled={!!editingLevelId}
                 />
               </Form.Item>
 
@@ -242,6 +232,24 @@ function LevelConfig() {
               </Form.Item>
 
               <Form.Item
+                name="difficulty"
+                label="关卡难度"
+                rules={[{ required: true, message: '请选择关卡难度' }]}
+              >
+                <Select
+                  placeholder="选择难度等级"
+                  size="large"
+                  options={[
+                    { label: '简单', value: '简单' },
+                    { label: '中等', value: '中等' },
+                    { label: '困难', value: '困难' },
+                    { label: '专家', value: '专家' },
+                    { label: '休闲', value: '休闲' },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item
                 name="keywords"
                 label="关键词列表"
                 rules={[{ required: true, message: '请输入至少一个关键词' }]}
@@ -267,74 +275,18 @@ function LevelConfig() {
               </Form.Item>
 
               <Form.Item>
-                <Space size="middle">
-                  <Button 
-                    type="primary" 
-                    icon={<SaveOutlined />} 
-                    onClick={handleSave}
-                    size="large"
-                  >
-                    {editingIndex !== null ? '更新关卡' : '创建关卡'}
-                  </Button>
-                  {editingIndex !== null && (
-                    <Button 
-                      onClick={handleCancel}
-                      size="large"
-                    >
-                      取消编辑
-                    </Button>
-                  )}
-                </Space>
+                <Button 
+                  type="primary" 
+                  icon={<SaveOutlined />} 
+                  onClick={handleSave}
+                  size="large"
+                  block
+                >
+                  {editingLevelId ? '保存修改' : '创建关卡'}
+                </Button>
               </Form.Item>
             </Form>
           </Card>
-
-          {/* 已创建的关卡列表 */}
-          {customLevels.length > 0 && (
-            <div className="level-config-list">
-              <h2 className="level-config-list-title">
-                <PlusOutlined /> 我的自定义关卡 ({customLevels.length})
-              </h2>
-              <div className="level-config-cards">
-                {customLevels.map((level, index) => (
-                  <Card
-                    key={level.id}
-                    className={`level-config-card ${editingIndex === index ? 'level-config-card-editing' : ''}`}
-                  >
-                    <div className="level-config-card-header">
-                      <div className="level-config-card-icon">{level.icon}</div>
-                      <div className="level-config-card-info">
-                        <h3 className="level-config-card-title">{level.title}</h3>
-                        <p className="level-config-card-id">ID: {level.id}</p>
-                      </div>
-                    </div>
-                    <p className="level-config-card-description">{level.description}</p>
-                    <div className="level-config-card-keywords">
-                      {level.keywords?.map((keyword, idx) => (
-                        <Tag key={idx} color="blue">{keyword}</Tag>
-                      ))}
-                    </div>
-                    <div className="level-config-card-actions">
-                      <Button
-                        type="primary"
-                        onClick={() => handleEdit(index)}
-                        disabled={editingIndex === index}
-                      >
-                        编辑
-                      </Button>
-                      <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(index)}
-                      >
-                        删除
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
         <AppFooter className="app-footer-light" />
       </div>

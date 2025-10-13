@@ -1,0 +1,241 @@
+.my-custom-levels-container {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  padding-top: 4rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.my-custom-levels-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 页面标题 */
+.my-custom-levels-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: white;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 导航按钮 */
+.my-custom-levels-nav-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.my-custom-levels-nav-buttons .ant-btn {
+  min-width: 150px;
+  height: 40px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.my-custom-levels-nav-buttons .ant-btn:hover,
+.my-custom-levels-nav-buttons .ant-btn:focus {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 关卡卡片网格 */
+.my-custom-levels-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+/* 单个关卡卡片 */
+.my-custom-level-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  background: white;
+  position: relative;
+}
+
+.my-custom-level-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+.my-custom-level-card .ant-card-body {
+  position: relative;
+  z-index: 1;
+}
+
+.my-custom-level-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.my-custom-level-card-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.my-custom-level-card-info {
+  flex: 1;
+}
+
+.my-custom-level-card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+  color: #2c3e50;
+}
+
+.my-custom-level-card-id {
+  font-size: 0.85rem;
+  color: #8c8c8c;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.my-custom-level-card-description {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.my-custom-level-card-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  min-height: 32px;
+}
+
+.my-custom-level-card-keywords .ant-tag {
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.my-custom-level-card-clue {
+  font-size: 0.9rem;
+  color: #595959;
+  background: #f0f0f0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.my-custom-level-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+  position: relative;
+  z-index: 10;
+}
+
+.my-custom-level-card-actions .ant-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  position: relative;
+  z-index: 10;
+}
+
+/* 空状态 */
+.my-custom-levels-empty {
+  background: white;
+  border-radius: 16px;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  margin: 2rem 0;
+}
+
+.my-custom-levels-empty-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.my-custom-levels-empty h3 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.my-custom-levels-empty p {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .my-custom-levels-container {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .my-custom-levels-content {
+    max-width: 100%;
+  }
+
+  .my-custom-levels-nav-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .my-custom-levels-nav-buttons .ant-btn {
+    width: 100%;
+  }
+
+  .my-custom-levels-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .my-custom-levels-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-custom-levels-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .my-custom-level-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .my-custom-level-card-icon {
+    font-size: 2.5rem;
+  }
+
+  .my-custom-levels-empty {
+    padding: 3rem 1.5rem;
+  }
+
+  .my-custom-levels-empty-icon {
+    font-size: 4rem;
+  }
+}

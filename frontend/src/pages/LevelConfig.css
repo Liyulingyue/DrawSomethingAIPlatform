@@ -24,36 +24,36 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.level-config-back-btn {
+/* 导航按钮 */
+.level-config-nav-buttons {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  width: fit-content;
+  gap: 1rem;
   margin: 0.75rem auto 2rem;
-  padding: 0.35rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.level-config-nav-buttons .ant-btn {
+  min-width: 150px;
+  height: 40px;
+  border-radius: 20px;
+  font-weight: 600;
   font-size: 1rem;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.8) !important;
   background: rgba(255, 255, 255, 0.12) !important;
-  border-radius: 999px;
   backdrop-filter: blur(8px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
-.level-config-back-btn:hover,
-.level-config-back-btn:focus {
+.level-config-nav-buttons .ant-btn:hover,
+.level-config-nav-buttons .ant-btn:focus {
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.95) !important;
   background: rgba(255, 255, 255, 0.22) !important;
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
-}
-
-.level-config-back-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* 表单卡片 */

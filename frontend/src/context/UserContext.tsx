@@ -58,6 +58,20 @@ export function UserProvider({ children }: UserProviderProps) {
   }, [])
 
   useEffect(() => {
+    // 对于 /app 路由下的页面,使用纯前端模式,不需要后端登录
+    const isAppRoute = window.location.pathname.startsWith('/app')
+    
+    if (isAppRoute) {
+      // 纯前端模式:使用本地存储的用户名或生成临时用户名
+      const localUsername = safeGetItem('username') || `访客${Date.now().toString().slice(-6)}`
+      setUsername(localUsername)
+      setSessionId('local-session')
+      safeSetItem('username', localUsername)
+      setInitializing(false)
+      return
+    }
+
+    // 其他路由:尝试使用后端登录
     const storedSession = safeGetItem('sessionId')
     const storedUsername = safeGetItem('username')
 
