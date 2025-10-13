@@ -15,7 +15,6 @@ import signal
 import subprocess
 import sys
 import threading
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple, Union
@@ -26,75 +25,6 @@ logger = logging.getLogger("auto_update")
 
 class ConfigurationError(RuntimeError):
     """Raised when the configuration file is invalid."""
-
-
-ENV_FILE_REL_PATHS = [
-    Path("frontend/.env.development"),
-    Path("frontend/.env.production"),
-    Path(".env.development"),
-    Path(".env.production"),
-]
-PERSISTENT_BACKUP_DIRNAME = ".auto_update_backups"
-
-
-def _env_backup_dir(repo_path: Path) -> Path:
-    return repo_path / PERSISTENT_BACKUP_DIRNAME
-
-
-def _relative_env_path(repo_path: Path, env_path: Path) -> Path:
-    try:
-        return env_path.relative_to(repo_path)
-    except ValueError:  # pragma: no cover - defensive
-        return env_path.name and Path(env_path.name) or Path(".env")
-
-
-def _store_persistent_backup(repo_path: Path, env_path: Path, content: str) -> None:
-    relative = _relative_env_path(repo_path, env_path)
-    backup_path = _env_backup_dir(repo_path) / relative
-    backup_path.parent.mkdir(parents=True, exist_ok=True)
-    backup_path.write_text(content, encoding="utf-8")
-
-
-def _load_persistent_backup(repo_path: Path, env_path: Path) -> Optional[str]:
-    relative = _relative_env_path(repo_path, env_path)
-    backup_path = _env_backup_dir(repo_path) / relative
-    if backup_path.exists():
-        try:
-            return backup_path.read_text(encoding="utf-8")
-        except Exception:  # pragma: no cover - defensive
-            logger.warning("Failed to read persistent backup for %s", env_path)
-    return None
-
-
-def backup_env_files(repo_path: Path, job_name: str) -> Dict[Path, str]:
-    backups: Dict[Path, str] = {}
-    for relative in ENV_FILE_REL_PATHS:
-        env_file = repo_path / relative
-        if env_file.exists():
-            try:
-                content = env_file.read_text(encoding="utf-8")
-                backups[env_file] = content
-                _store_persistent_backup(repo_path, env_file, content)
-                logger.info("[%s] Backed up environment file: %s", job_name, env_file)
-            except Exception as exc:
-                logger.warning("[%s] Failed to backup %s: %s", job_name, env_file, exc)
-    return backups
-
-
-def restore_env_files(repo_path: Path, job_name: str, backups: Dict[Path, str]) -> None:
-    for relative in ENV_FILE_REL_PATHS:
-        env_file = repo_path / relative
-        content = backups.get(env_file)
-        if content is None:
-            content = _load_persistent_backup(repo_path, env_file)
-        if content is None:
-            continue
-        try:
-            env_file.parent.mkdir(parents=True, exist_ok=True)
-            env_file.write_text(content, encoding="utf-8")
-            logger.info("[%s] Restored environment file: %s", job_name, env_file)
-        except Exception as exc:
-            logger.error("[%s] Failed to restore %s: %s", job_name, env_file, exc)
 
 
 @dataclass
@@ -259,16 +189,7 @@ def ensure_clean_worktree(repo_path: Path, job_name: str) -> bool:
         return False
 
     if stdout.strip():
-        logger.warning("[%s] Repository has uncommitted changes: %s", job_name, stdout.strip())
-        logger.info("[%s] Auto-stashing uncommitted changes before update...", job_name)
-
-        # 自动暂存未提交的更改
-        stash_cmd = Command(cmd=["git", "stash", "push", "-m", f"auto-update-{int(time.time())}"], cwd=repo_path, shell=False)
-        code, stdout, stderr = run_command(stash_cmd, label=f"[{job_name}] git stash")
-        if code != 0:
-            logger.error("[%s] Failed to stash changes: %s", job_name, stderr.strip())
-            return False
-        logger.info("[%s] Successfully stashed uncommitted changes", job_name)
+        logger.warning("[%s] Repository has uncommitted changes (continuing without auto-stash): %s", job_name, stdout.strip())
 
     return True
 
@@ -306,44 +227,14 @@ def rev_parse(repo_path: Path, ref: str, job_name: str) -> Optional[str]:
 
 
 def pull_updates(job: Job) -> bool:
-    backed_up_files = backup_env_files(job.repo_path, job.name)
     pull_cmd = Command(cmd=["git", "pull"], cwd=job.repo_path, shell=False)
     code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull", timeout=120)
     if code != 0:
         logger.warning("[%s] Git pull failed (exit %s), skipping update. Error: %s", job.name, code, stderr.strip())
-        restore_env_files(job.repo_path, job.name, backed_up_files)
         return False
 
-    # Restore immediately after git operations so subsequent commands work with intact env files
-    restore_env_files(job.repo_path, job.name, backed_up_files)
-
-    try:
-        for command in job.post_update_commands:
-            run_command(command, label=f"[{job.name}] post-update command")
-    finally:
-        # Ensure environment files remain available even if post-update commands altered them
-        restore_env_files(job.repo_path, job.name, backed_up_files)
-
-    # 检查是否有自动暂存的更改需要恢复
-    stash_list_cmd = Command(cmd=["git", "stash", "list"], cwd=job.repo_path, shell=False)
-    code, stdout, _ = run_command(stash_list_cmd, label=f"[{job.name}] git stash list")
-    if code == 0 and stdout.strip():
-        # 查找最新的auto-update stash
-        stashes = stdout.strip().split('\n')
-        auto_stash = None
-        for stash in stashes:
-            if 'auto-update-' in stash:
-                auto_stash = stash.split(':')[0]  # 获取stash名称，如stash@{0}
-                break
-
-        if auto_stash:
-            logger.info("[%s] Restoring auto-stashed changes: %s", job.name, auto_stash)
-            pop_cmd = Command(cmd=["git", "stash", "pop", auto_stash], cwd=job.repo_path, shell=False)
-            code, stdout, stderr = run_command(pop_cmd, label=f"[{job.name}] git stash pop")
-            if code == 0:
-                logger.info("[%s] Successfully restored stashed changes", job.name)
-            else:
-                logger.warning("[%s] Failed to restore stashed changes: %s", job.name, stderr.strip())
+    for command in job.post_update_commands:
+        run_command(command, label=f"[{job.name}] post-update command")
 
     logger.info("[%s] Update applied successfully.", job.name)
     return True
