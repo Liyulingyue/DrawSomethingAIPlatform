@@ -28,6 +28,75 @@ class ConfigurationError(RuntimeError):
     """Raised when the configuration file is invalid."""
 
 
+ENV_FILE_REL_PATHS = [
+    Path("frontend/.env.development"),
+    Path("frontend/.env.production"),
+    Path(".env.development"),
+    Path(".env.production"),
+]
+PERSISTENT_BACKUP_DIRNAME = ".auto_update_backups"
+
+
+def _env_backup_dir(repo_path: Path) -> Path:
+    return repo_path / PERSISTENT_BACKUP_DIRNAME
+
+
+def _relative_env_path(repo_path: Path, env_path: Path) -> Path:
+    try:
+        return env_path.relative_to(repo_path)
+    except ValueError:  # pragma: no cover - defensive
+        return env_path.name and Path(env_path.name) or Path(".env")
+
+
+def _store_persistent_backup(repo_path: Path, env_path: Path, content: str) -> None:
+    relative = _relative_env_path(repo_path, env_path)
+    backup_path = _env_backup_dir(repo_path) / relative
+    backup_path.parent.mkdir(parents=True, exist_ok=True)
+    backup_path.write_text(content, encoding="utf-8")
+
+
+def _load_persistent_backup(repo_path: Path, env_path: Path) -> Optional[str]:
+    relative = _relative_env_path(repo_path, env_path)
+    backup_path = _env_backup_dir(repo_path) / relative
+    if backup_path.exists():
+        try:
+            return backup_path.read_text(encoding="utf-8")
+        except Exception:  # pragma: no cover - defensive
+            logger.warning("Failed to read persistent backup for %s", env_path)
+    return None
+
+
+def backup_env_files(repo_path: Path, job_name: str) -> Dict[Path, str]:
+    backups: Dict[Path, str] = {}
+    for relative in ENV_FILE_REL_PATHS:
+        env_file = repo_path / relative
+        if env_file.exists():
+            try:
+                content = env_file.read_text(encoding="utf-8")
+                backups[env_file] = content
+                _store_persistent_backup(repo_path, env_file, content)
+                logger.info("[%s] Backed up environment file: %s", job_name, env_file)
+            except Exception as exc:
+                logger.warning("[%s] Failed to backup %s: %s", job_name, env_file, exc)
+    return backups
+
+
+def restore_env_files(repo_path: Path, job_name: str, backups: Dict[Path, str]) -> None:
+    for relative in ENV_FILE_REL_PATHS:
+        env_file = repo_path / relative
+        content = backups.get(env_file)
+        if content is None:
+            content = _load_persistent_backup(repo_path, env_file)
+        if content is None:
+            continue
+        try:
+            env_file.parent.mkdir(parents=True, exist_ok=True)
+            env_file.write_text(content, encoding="utf-8")
+            logger.info("[%s] Restored environment file: %s", job_name, env_file)
+        except Exception as exc:
+            logger.error("[%s] Failed to restore %s: %s", job_name, env_file, exc)
+
+
 @dataclass
 class Command:
     cmd: Union[str, List[str]]
@@ -237,39 +306,23 @@ def rev_parse(repo_path: Path, ref: str, job_name: str) -> Optional[str]:
 
 
 def pull_updates(job: Job) -> bool:
+    backed_up_files = backup_env_files(job.repo_path, job.name)
     pull_cmd = Command(cmd=["git", "pull"], cwd=job.repo_path, shell=False)
     code, stdout, stderr = run_command(pull_cmd, label=f"[{job.name}] git pull", timeout=120)
     if code != 0:
         logger.warning("[%s] Git pull failed (exit %s), skipping update. Error: %s", job.name, code, stderr.strip())
+        restore_env_files(job.repo_path, job.name, backed_up_files)
         return False
 
-    # Backup environment files before post_update
-    env_files_to_backup = [
-        job.repo_path / "frontend" / ".env.development",
-        job.repo_path / "frontend" / ".env.production",
-        job.repo_path / ".env.development",
-        job.repo_path / ".env.production",
-    ]
-    backed_up_files = {}
-    for env_file in env_files_to_backup:
-        if env_file.exists():
-            try:
-                content = env_file.read_text(encoding="utf-8")
-                backed_up_files[env_file] = content
-                logger.info("[%s] Backed up environment file: %s", job.name, env_file)
-            except Exception as e:
-                logger.warning("[%s] Failed to backup %s: %s", job.name, env_file, e)
+    # Restore immediately after git operations so subsequent commands work with intact env files
+    restore_env_files(job.repo_path, job.name, backed_up_files)
 
-    for command in job.post_update_commands:
-        run_command(command, label=f"[{job.name}] post-update command")
-
-    # Restore backed up environment files
-    for env_file, content in backed_up_files.items():
-        try:
-            env_file.write_text(content, encoding="utf-8")
-            logger.info("[%s] Restored environment file: %s", job.name, env_file)
-        except Exception as e:
-            logger.error("[%s] Failed to restore %s: %s", job.name, env_file, e)
+    try:
+        for command in job.post_update_commands:
+            run_command(command, label=f"[{job.name}] post-update command")
+    finally:
+        # Ensure environment files remain available even if post-update commands altered them
+        restore_env_files(job.repo_path, job.name, backed_up_files)
 
     # 检查是否有自动暂存的更改需要恢复
     stash_list_cmd = Command(cmd=["git", "stash", "list"], cwd=job.repo_path, shell=False)
@@ -305,37 +358,11 @@ def worker(job: Job, stop_event: threading.Event, run_once: bool, start_mode: bo
     )
 
     if start_mode:
-        # Backup environment files before update
-        env_files_to_backup = [
-            job.repo_path / "frontend" / ".env.development",
-            job.repo_path / "frontend" / ".env.production",
-            job.repo_path / ".env.development",
-            job.repo_path / ".env.production",
-        ]
-        backed_up_files = {}
-        
-        for env_file in env_files_to_backup:
-            if env_file.exists():
-                try:
-                    content = env_file.read_text(encoding="utf-8")
-                    backed_up_files[env_file] = content
-                    logger.info("[%s] Backed up environment file: %s", job.name, env_file)
-                except Exception as e:
-                    logger.warning("[%s] Failed to backup %s: %s", job.name, env_file, e)
-        
         # Run initial update on start (always pull to ensure post_update runs)
         try:
             pull_updates(job)
         except Exception:  # pragma: no cover - defensive
             logger.exception("[%s] Unexpected error during initial update.", job.name)
-        
-        # Restore backed up environment files
-        for env_file, content in backed_up_files.items():
-            try:
-                env_file.write_text(content, encoding="utf-8")
-                logger.info("[%s] Restored environment file: %s", job.name, env_file)
-            except Exception as e:
-                logger.error("[%s] Failed to restore %s: %s", job.name, env_file, e)
 
     while not stop_event.is_set():
         try:
