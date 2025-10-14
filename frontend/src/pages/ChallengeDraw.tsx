@@ -9,6 +9,7 @@ import AppFooter from '../components/AppFooter'
 import { getLevelById } from '../config/levels'
 import { api } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
+import { generatePoster, downloadPoster } from '../utils/posterGenerator'
 import './ChallengeDraw.css'
 
 // 本地存储 key
@@ -34,6 +35,29 @@ function ChallengeDraw() {
   const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+
+  const share = async (targetKeyword: string, guessResult: string, aiModel?: string) => {
+    const image = drawBoardRef.current?.getImage()
+    if (!image) {
+      message.error('无法获取画作')
+      return
+    }
+
+    try {
+      const posterDataUrl = await generatePoster({
+        drawingImage: image,
+        targetKeyword,
+        guessResult,
+        aiModel: aiModel || '默认模型'
+      })
+      
+      downloadPoster(posterDataUrl, `ai-drawing-poster-${targetKeyword}.png`)
+      message.success('海报已生成并下载！')
+    } catch (error) {
+      console.error('生成海报失败:', error)
+      message.error('生成海报失败，请重试')
+    }
+  }
 
   // 从 URL 参数获取关卡信息
   const searchParams = new URLSearchParams(location.search)
@@ -147,6 +171,9 @@ function ChallengeDraw() {
       const bestGuess = result.best_guess || ''
       const alternatives = result.alternatives || []
       
+      // 获取AI模型信息用于分享
+      const aiModel = requestBody.config?.model || '默认模型'
+      
       // 检查目标词是否被猜中的词包含
       const isCorrect = 
         bestGuess.toLowerCase().includes(targetNormalized) ||
@@ -163,7 +190,7 @@ function ChallengeDraw() {
         
         if (isLastKeyword) {
           // 通关成功弹窗
-          modal.success({
+          const modalInstance = modal.success({
             title: '🎉 恭喜通关！',
             content: (
               <div style={{ 
@@ -211,16 +238,22 @@ function ChallengeDraw() {
               </div>
             ),
             width: 520,
-            okText: '返回选关',
-            onOk: () => {
-              // 标记关键词为已完成
-              markKeywordCompleted(levelId, keyword)
-              navigate('/app/level-set')
-            }
+            footer: (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <Button onClick={() => {
+                  share(keyword, bestGuess, aiModel)
+                }}>分享画作</Button>
+                <Button type="primary" onClick={() => {
+                  markKeywordCompleted(levelId, keyword)
+                  modalInstance.destroy()
+                  navigate('/app/level-set')
+                }}>返回选关</Button>
+              </div>
+            ),
           })
         } else {
           // 单关成功弹窗
-          modal.success({
+          const modalInstance = modal.success({
             title: '🎉 挑战成功！',
             content: (
               <div style={{ 
@@ -268,12 +301,18 @@ function ChallengeDraw() {
               </div>
             ),
             width: 520,
-            okText: '下一关',
-            onOk: () => {
-              // 标记关键词为已完成
-              markKeywordCompleted(levelId, keyword)
-              handleNextKeyword()
-            }
+            footer: (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <Button onClick={() => {
+                  share(keyword, bestGuess, aiModel)
+                }}>分享画作</Button>
+                <Button type="primary" onClick={() => {
+                  markKeywordCompleted(levelId, keyword)
+                  modalInstance.destroy()
+                  handleNextKeyword()
+                }}>下一关</Button>
+              </div>
+            ),
           })
         }
         message.success('挑战成功！')
