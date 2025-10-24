@@ -1,6 +1,9 @@
 import time
 import uuid
 
+# Gallery configuration
+GALLERY_DIR = "Source/gallery"
+
 # 全局存储
 used_usernames: set[str] = set()
 user_sessions: dict[str, dict[str, float | str]] = {}

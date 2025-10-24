@@ -8,6 +8,7 @@ import {
   CloseOutlined,
   InfoCircleOutlined,
   PlusOutlined,
+  PictureOutlined,
 } from '@ant-design/icons'
 import './AppSidebar.css'
 
@@ -40,6 +41,11 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       key: '/app/draw',
       icon: <EditOutlined />,
       label: '自由绘画',
+    },
+    {
+      key: '/app/gallery',
+      icon: <PictureOutlined />,
+      label: '画廊',
     },
     {
       key: '/app/introduction',

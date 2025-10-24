@@ -14,6 +14,7 @@ import Login from './pages/Login'
 import Room from './pages/Room'
 import MultiplayerGame from './pages/MultiplayerGame'
 import SingleGame from './pages/SingleGame'
+import Gallery from './pages/Gallery'
 import './App.css'
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
               <Route path="/app/challenge-draw" element={<ChallengeDraw />} />
               <Route path="/app/introduction" element={<Introduction />} />
               <Route path="/app/configAI" element={<ConfigAI />} />
+              <Route path="/app/gallery" element={<Gallery />} />
               <Route path="/login" element={<Login />} />
               <Route path="/rooms" element={<Room />} />
               <Route path="/game" element={<MultiplayerGame />} />

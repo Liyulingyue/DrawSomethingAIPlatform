@@ -186,6 +186,19 @@
   color: white;
 }
 
+/* 画廊按钮特殊样式 */
+.app-home-button-gallery.ant-btn-default {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  border: 2px solid transparent;
+  color: white;
+}
+
+.app-home-button-gallery.ant-btn-default:hover {
+  background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%);
+  border-color: transparent;
+  color: white;
+}
+
 /* 动画效果 */
 @keyframes fadeInDown {
   from {

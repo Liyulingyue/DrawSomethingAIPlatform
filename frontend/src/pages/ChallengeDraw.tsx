@@ -1,13 +1,13 @@
 import { useRef, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Button, App } from 'antd'
-import { CheckCircleOutlined, CloseCircleOutlined, TrophyOutlined } from '@ant-design/icons'
+import { Button, App, Modal, Form, Input } from 'antd'
+import { CheckCircleOutlined, CloseCircleOutlined, TrophyOutlined, PictureOutlined } from '@ant-design/icons'
 import MobileDrawBoard, { type MobileDrawBoardRef } from '../components/MobileDrawBoard'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getLevelById } from '../config/levels'
-import { api } from '../utils/api'
+import { api, API_BASE_URL } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
 import { generatePoster, downloadPoster } from '../utils/posterGenerator'
 import './ChallengeDraw.css'
@@ -33,6 +33,8 @@ function ChallengeDraw() {
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [showGalleryModal, setShowGalleryModal] = useState(false)
+  const [galleryName, setGalleryName] = useState('佚名')
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -239,15 +241,26 @@ function ChallengeDraw() {
             ),
             width: 520,
             footer: (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <Button onClick={() => {
-                  share(keyword, bestGuess, aiModel)
-                }}>分享画作</Button>
-                <Button type="primary" onClick={() => {
-                  markKeywordCompleted(levelId, keyword)
-                  modalInstance.destroy()
-                  navigate('/app/level-set')
-                }}>返回选关</Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                <Button
+                  icon={<PictureOutlined />}
+                  onClick={() => {
+                    modalInstance.destroy()
+                    setShowGalleryModal(true)
+                  }}
+                >
+                  发布到画廊
+                </Button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Button onClick={() => {
+                    share(keyword, bestGuess, aiModel)
+                  }}>分享画作</Button>
+                  <Button type="primary" onClick={() => {
+                    markKeywordCompleted(levelId, keyword)
+                    modalInstance.destroy()
+                    navigate('/app/level-set')
+                  }}>返回选关</Button>
+                </div>
               </div>
             ),
           })
@@ -302,15 +315,26 @@ function ChallengeDraw() {
             ),
             width: 520,
             footer: (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <Button onClick={() => {
-                  share(keyword, bestGuess, aiModel)
-                }}>分享画作</Button>
-                <Button type="primary" onClick={() => {
-                  markKeywordCompleted(levelId, keyword)
-                  modalInstance.destroy()
-                  handleNextKeyword()
-                }}>下一关</Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                <Button
+                  icon={<PictureOutlined />}
+                  onClick={() => {
+                    modalInstance.destroy()
+                    setShowGalleryModal(true)
+                  }}
+                >
+                  发布到画廊
+                </Button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Button onClick={() => {
+                    share(keyword, bestGuess, aiModel)
+                  }}>分享画作</Button>
+                  <Button type="primary" onClick={() => {
+                    markKeywordCompleted(levelId, keyword)
+                    modalInstance.destroy()
+                    handleNextKeyword()
+                  }}>下一关</Button>
+                </div>
               </div>
             ),
           })
@@ -430,6 +454,45 @@ function ChallengeDraw() {
     }
   }
 
+  const handlePublishToGallery = async () => {
+    const image = drawBoardRef.current?.getImage()
+    if (!image) {
+      message.warning('请先完成绘画')
+      return
+    }
+
+    try {
+      // 生成分享海报
+      const posterDataUrl = await generatePoster({
+        drawingImage: image,
+        targetKeyword: keyword,
+        guessResult: `目标词：${keyword}`,
+        aiModel: 'DrawSomethingAI'
+      })
+
+      // 将 dataUrl 转换为 base64 格式发送到后端
+      const response = await fetch(`${API_BASE_URL}/gallery/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: posterDataUrl,
+          name: galleryName.trim() || '佚名'
+        })
+      })
+
+      if (response.ok) {
+        message.success('成功发布到画廊！')
+        setShowGalleryModal(false)
+        setGalleryName('佚名')
+      } else {
+        throw new Error('发布失败')
+      }
+    } catch (error) {
+      console.error('发布到画廊失败:', error)
+      message.error('发布失败，请稍后重试')
+    }
+  }
+
   const handleNextKeyword = () => {
     if (!levelConfig || !levelConfig.keywords || levelConfig.keywords.length === 0) {
       message.warning('该关卡暂无更多关键词')
@@ -537,6 +600,28 @@ function ChallengeDraw() {
 
         <AppFooter className="app-footer-light" />
       </div>
+
+      <Modal
+        title="发布到画廊"
+        open={showGalleryModal}
+        onOk={handlePublishToGallery}
+        onCancel={() => setShowGalleryModal(false)}
+        okText="发布"
+        cancelText="取消"
+      >
+        <Form layout="vertical">
+          <Form.Item label="您的名称">
+            <Input
+              value={galleryName}
+              onChange={(e) => setGalleryName(e.target.value)}
+              placeholder="输入您的名称（默认佚名）"
+            />
+          </Form.Item>
+          <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>
+            您的精彩绘画将被分享到画廊，让更多人欣赏您的艺术作品！
+          </p>
+        </Form>
+      </Modal>
     </>
   )
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'antd'
-import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined } from '@ant-design/icons'
+import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined, PictureOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -25,6 +25,10 @@ function AppHome() {
 
   const handleIntroduction = () => {
     navigate('/app/introduction')
+  }
+
+  const handleGallery = () => {
+    navigate('/app/gallery')
   }
 
   return (
@@ -65,6 +69,15 @@ function AppHome() {
           className="app-home-button"
         >
           自由绘画
+        </Button>
+        <Button
+          type="default"
+          size="large"
+          icon={<PictureOutlined />}
+          onClick={handleGallery}
+          className="app-home-button app-home-button-gallery"
+        >
+          画廊
         </Button>
         <Button
           type="default"

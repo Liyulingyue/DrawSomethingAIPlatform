@@ -219,3 +219,8 @@ pids
 
 # DynamoDB Local files
 .dynamodb/
+
+# Gallery images and data (but keep .gitkeep)
+/backend/Source/*
+!/backend/Source/.gitkeep
+!/backend/Source/gallery/.gitkeep

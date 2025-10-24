@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
-import { Input, Button, App } from 'antd'
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
+import { Input, Button, App, Modal, Form } from 'antd'
+import { CheckCircleOutlined, CloseCircleOutlined, PictureOutlined } from '@ant-design/icons'
 import MobileDrawBoard, { type MobileDrawBoardRef } from '../components/MobileDrawBoard'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -16,6 +16,10 @@ function AppDraw() {
   const [targetWord, setTargetWord] = useState('')
   const [clue, setClue] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [galleryName, setGalleryName] = useState('佚名')
+  const [showSuccessGalleryModal, setShowSuccessGalleryModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [successModalData, setSuccessModalData] = useState<any>(null)
 
   // 防止移动设备页面滚动
   useEffect(() => {
@@ -125,55 +129,13 @@ function AppDraw() {
 
       if (isCorrect) {
         // 显示成功弹窗
-        modal.success({
-          title: '🎉 绘画成功！',
-          content: (
-            <div style={{ 
-              maxHeight: '60vh', 
-              overflowY: 'auto', 
-              overflowX: 'hidden',
-              padding: '16px 0' 
-            }}>
-              <p style={{ marginBottom: '12px', fontSize: '16px' }}>
-                <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                AI 成功识别出了你的绘画！
-              </p>
-              <div style={{ 
-                background: '#f6ffed', 
-                border: '1px solid #b7eb8f', 
-                borderRadius: '6px', 
-                padding: '12px',
-                marginTop: '12px'
-              }}>
-                <p style={{ margin: '0 0 8px 0' }}><strong>目标词:</strong> {targetWord}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别:</strong> {bestGuess}</p>
-                {alternatives.length > 0 && (
-                  <p style={{ margin: '0 0 8px 0' }}>
-                    <strong>备选答案:</strong> {alternatives.join(', ')}
-                  </p>
-                )}
-                <div style={{ 
-                  margin: '0', 
-                  paddingTop: '8px', 
-                  borderTop: '1px dashed #b7eb8f',
-                  maxHeight: '200px',
-                  overflowY: 'auto',
-                  wordBreak: 'break-word'
-                }}>
-                  <strong>AI 分析:</strong>
-                  <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                    {result.reason || '无额外分析'}
-                  </p>
-                </div>
-              </div>
-              <p style={{ margin: '12px 0 0 0', color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>
-                💡 继续在画板上自由创作吧！
-              </p>
-            </div>
-          ),
-          width: 500,
-          okText: '继续绘画'
+        setSuccessModalData({
+          targetWord,
+          bestGuess,
+          alternatives,
+          reason: result.reason
         })
+        setShowSuccessModal(true)
         message.success('绘画识别成功！')
       } else {
         // 显示失败弹窗
@@ -288,6 +250,36 @@ function AppDraw() {
     }
   }
 
+  const handlePublishToGallery = async () => {
+    const image = drawBoardRef.current?.getImage()
+    if (!image) {
+      message.warning('请先完成绘画')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/gallery/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image,
+          name: galleryName.trim() || '佚名'
+        })
+      })
+
+      if (response.ok) {
+        message.success('成功发布到画廊！')
+        setShowSuccessGalleryModal(false)
+        setGalleryName('佚名')
+      } else {
+        throw new Error('发布失败')
+      }
+    } catch (error) {
+      console.error('发布到画廊失败:', error)
+      message.error('发布失败，请稍后重试')
+    }
+  }
+
   return (
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -346,6 +338,101 @@ function AppDraw() {
 
         <AppFooter />
       </div>
+
+      <Modal
+        title="🎉 恭喜！发布到画廊"
+        open={showSuccessGalleryModal}
+        onOk={handlePublishToGallery}
+        onCancel={() => setShowSuccessGalleryModal(false)}
+        okText="发布"
+        cancelText="取消"
+      >
+        <Form layout="vertical">
+          <Form.Item label="您的名称">
+            <Input
+              value={galleryName}
+              onChange={(e) => setGalleryName(e.target.value)}
+              placeholder="输入您的名称（默认佚名）"
+            />
+          </Form.Item>
+          <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>
+            您的精彩绘画将被分享到画廊，让更多人欣赏您的艺术作品！
+          </p>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="🎉 绘画成功！"
+        open={showSuccessModal}
+        onCancel={() => setShowSuccessModal(false)}
+        footer={null}
+        width={500}
+        closable={true}
+        maskClosable={true}
+      >
+        {successModalData && (
+          <div style={{ 
+            maxHeight: '60vh', 
+            overflowY: 'auto', 
+            overflowX: 'hidden',
+            padding: '16px 0' 
+          }}>
+            <p style={{ marginBottom: '12px', fontSize: '16px' }}>
+              <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
+              AI 成功识别出了你的绘画！
+            </p>
+            <div style={{ 
+              background: '#f6ffed', 
+              border: '1px solid #b7eb8f', 
+              borderRadius: '6px', 
+              padding: '12px',
+              marginTop: '12px'
+            }}>
+              <p style={{ margin: '0 0 8px 0' }}><strong>目标词:</strong> {successModalData.targetWord}</p>
+              <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别:</strong> {successModalData.bestGuess}</p>
+              {successModalData.alternatives && successModalData.alternatives.length > 0 && (
+                <p style={{ margin: '0 0 8px 0' }}>
+                  <strong>备选答案:</strong> {successModalData.alternatives.join(', ')}
+                </p>
+              )}
+              <div style={{ 
+                margin: '0', 
+                paddingTop: '8px', 
+                borderTop: '1px dashed #b7eb8f',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                wordBreak: 'break-word'
+              }}>
+                <strong>AI 分析:</strong>
+                <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
+                  {successModalData.reason || '无额外分析'}
+                </p>
+              </div>
+            </div>
+            <div style={{ margin: '16px 0 0 0', textAlign: 'center' }}>
+              <Button
+                type="primary"
+                icon={<PictureOutlined />}
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  setShowSuccessGalleryModal(true)
+                }}
+                style={{ marginRight: '8px' }}
+              >
+                发布到画廊
+              </Button>
+              <Button
+                onClick={() => setShowSuccessModal(false)}
+              >
+                继续绘画
+              </Button>
+            </div>
+            <p style={{ margin: '12px 0 0 0', color: '#52c41a', fontSize: '14px', fontWeight: 500, textAlign: 'center' }}>
+              💡 继续在画板上自由创作吧！
+            </p>
+          </div>
+        )}
+      </Modal>
     </>
   )
 }
