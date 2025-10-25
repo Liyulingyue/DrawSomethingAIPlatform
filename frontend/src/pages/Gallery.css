@@ -18,6 +18,7 @@
   padding: 1.5rem 1rem 1rem 1rem;
   background: transparent;
   text-align: center;
+  position: relative;
 }
 
 .gallery-page-title {
@@ -26,6 +27,36 @@
   margin: 0;
   font-weight: bold;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-filter-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  color: #595959;
+  border: none;
+}
+
+.gallery-filter-button:hover {
+  background: #f5f5f5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  color: #667eea;
+}
+
+.gallery-filter-button:active {
+  transform: scale(0.95);
 }
 
 /* 画廊内容区域 */
@@ -85,6 +116,33 @@
   font-size: 1.1rem;
 }
 
+.gallery-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  flex-direction: row-reverse; /* 反转顺序，让心形按钮在右边 */
+}
+
+.gallery-like-button {
+  transition: transform 0.2s ease;
+}
+
+.gallery-like-button:hover {
+  transform: scale(1.1);
+}
+
+.gallery-like-button:active {
+  transform: scale(0.95);
+  animation: heartPulse 0.3s ease;
+}
+
+@keyframes heartPulse {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
 .gallery-timestamp {
   margin: 0;
   font-size: 0.9rem;
@@ -134,6 +192,14 @@
   .gallery-page-title {
     font-size: clamp(1.5rem, 5vw, 2rem);
   }
+
+  .gallery-filter-button {
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -151,6 +217,14 @@
   }
 
   .gallery-empty p {
+    font-size: 1rem;
+  }
+
+  .gallery-filter-button {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
     font-size: 1rem;
   }
 }

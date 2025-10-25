@@ -41,7 +41,8 @@ async def save_to_gallery(request: SaveGalleryRequest):
     gallery.append({
         "filename": filename,
         "name": request.name,
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "likes": 0
     })
 
     # Maintain max 100 images - clean up on every insert, max 2 deletions per insert
@@ -63,12 +64,40 @@ async def save_to_gallery(request: SaveGalleryRequest):
 
     return {"message": "Saved to gallery"}
 
+@router.post("/like/{filename}")
+async def like_gallery_item(filename: str):
+    if not os.path.exists(GALLERY_JSON):
+        raise HTTPException(status_code=404, detail="Gallery not found")
+
+    with open(GALLERY_JSON, "r", encoding="utf-8") as f:
+        gallery = json.load(f)
+
+    # Find and update the item
+    for item in gallery:
+        if item["filename"] == filename:
+            item["likes"] = (item.get("likes", 0) + 1)
+            break
+    else:
+        raise HTTPException(status_code=404, detail="Gallery item not found")
+
+    # Save updated gallery data
+    with open(GALLERY_JSON, "w", encoding="utf-8") as f:
+        json.dump(gallery, f, ensure_ascii=False, indent=2)
+
+    return {"message": "Liked successfully", "likes": item["likes"]}
+
 @router.get("/list")
 async def get_gallery_list():
-    if os.path.exists(GALLERY_JSON):
-        with open(GALLERY_JSON, "r", encoding="utf-8") as f:
-            gallery = json.load(f)
-        # Sort by timestamp descending (newest first)
-        gallery.sort(key=lambda x: x["timestamp"], reverse=True)
-        return gallery
-    return []
+    if not os.path.exists(GALLERY_JSON):
+        return []
+
+    with open(GALLERY_JSON, "r", encoding="utf-8") as f:
+        gallery = json.load(f)
+
+    # Sort by timestamp (newest first) and ensure likes field exists
+    gallery.sort(key=lambda x: x["timestamp"], reverse=True)
+    for item in gallery:
+        if "likes" not in item:
+            item["likes"] = 0
+
+    return gallery

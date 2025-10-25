@@ -245,7 +245,6 @@ function ChallengeDraw() {
                 <Button
                   icon={<PictureOutlined />}
                   onClick={() => {
-                    modalInstance.destroy()
                     setShowGalleryModal(true)
                   }}
                 >
@@ -319,7 +318,6 @@ function ChallengeDraw() {
                 <Button
                   icon={<PictureOutlined />}
                   onClick={() => {
-                    modalInstance.destroy()
                     setShowGalleryModal(true)
                   }}
                 >
@@ -484,6 +482,7 @@ function ChallengeDraw() {
         message.success('成功发布到画廊！')
         setShowGalleryModal(false)
         setGalleryName('佚名')
+        // 发布成功后，成功弹窗保持打开状态，让用户可以继续选择下一关
       } else {
         throw new Error('发布失败')
       }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal } from 'antd';
+import { Modal, Dropdown, Button } from 'antd';
+import { HeartFilled, FilterOutlined } from '@ant-design/icons';
 import { API_BASE_URL } from '../utils/api';
 import AppSidebar from '../components/AppSidebar';
 import SidebarTrigger from '../components/SidebarTrigger';
@@ -10,6 +11,7 @@ interface GalleryItem {
   filename: string;
   name: string;
   timestamp: string;
+  likes: number;
 }
 
 const Gallery: React.FC = () => {
@@ -18,6 +20,7 @@ const Gallery: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc'>('time-desc');
 
   useEffect(() => {
     fetchGalleryItems();
@@ -28,7 +31,13 @@ const Gallery: React.FC = () => {
       const response = await fetch(`${API_BASE_URL}/gallery/list`);
       if (response.ok) {
         const data = await response.json();
-        setGalleryItems(data);
+        // Ensure each item has a likes field
+        const itemsWithLikes = data.map((item: any) => ({
+          ...item,
+          likes: item.likes || 0
+        }));
+        const sortedItems = sortGalleryItems(itemsWithLikes);
+        setGalleryItems(sortedItems);
       } else {
         console.error('Failed to fetch gallery items');
       }
@@ -36,6 +45,78 @@ const Gallery: React.FC = () => {
       console.error('Error fetching gallery items:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const sortGalleryItems = (items: GalleryItem[], sortType?: 'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc') => {
+    const currentSortBy = sortType || sortBy;
+    return [...items].sort((a, b) => {
+      switch (currentSortBy) {
+        case 'time-desc':
+          return b.timestamp.localeCompare(a.timestamp);
+        case 'time-asc':
+          return a.timestamp.localeCompare(b.timestamp);
+        case 'likes-desc':
+          return b.likes - a.likes;
+        case 'likes-asc':
+          return a.likes - b.likes;
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const handleSortChange = (value: 'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc') => {
+    setSortBy(value);
+    const sortedItems = sortGalleryItems(galleryItems, value);
+    setGalleryItems(sortedItems);
+  };
+
+  const sortMenuItems = [
+    {
+      key: 'time-desc',
+      label: '最新优先',
+      onClick: () => handleSortChange('time-desc')
+    },
+    {
+      key: 'time-asc',
+      label: '最早优先',
+      onClick: () => handleSortChange('time-asc')
+    },
+    {
+      key: 'likes-desc',
+      label: '点赞最多',
+      onClick: () => handleSortChange('likes-desc')
+    },
+    {
+      key: 'likes-asc',
+      label: '点赞最少',
+      onClick: () => handleSortChange('likes-asc')
+    }
+  ];
+
+  const handleLike = async (filename: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/gallery/like/${filename}`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // Update local state with the new likes count and re-sort
+        setGalleryItems(prevItems => {
+          const updatedItems = prevItems.map(item =>
+            item.filename === filename
+              ? { ...item, likes: result.likes }
+              : item
+          );
+          return sortGalleryItems(updatedItems);
+        });
+      } else {
+        console.error('Failed to like gallery item');
+      }
+    } catch (error) {
+      console.error('Error liking gallery item:', error);
     }
   };
 
@@ -47,6 +128,18 @@ const Gallery: React.FC = () => {
         {/* 标题区域 */}
         <div className="gallery-title-section">
           <h1 className="gallery-page-title">画廊</h1>
+          <Dropdown
+            menu={{ items: sortMenuItems }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
+            <Button
+              type="text"
+              icon={<FilterOutlined />}
+              className="gallery-filter-button"
+              aria-label="排序筛选"
+            />
+          </Dropdown>
         </div>
 
         {/* 画廊内容区域 */}
@@ -67,7 +160,31 @@ const Gallery: React.FC = () => {
                   />
                   <div className="gallery-info">
                     <p className="gallery-name">{item.name}</p>
-                    <p className="gallery-timestamp">{item.timestamp}</p>
+                    <div className="gallery-stats">
+                      <button
+                        className="gallery-like-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(item.filename);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: '#ff4d4f',
+                          fontSize: '16px'
+                        }}
+                      >
+                        <HeartFilled />
+                        <span style={{ fontSize: '14px', color: '#666' }}>
+                          {item.likes || 0}
+                        </span>
+                      </button>
+                      <p className="gallery-timestamp">{item.timestamp}</p>
+                    </div>
                   </div>
                 </div>
               ))}
