@@ -6,9 +6,11 @@ import { api } from '../utils/api'
 interface UserContextValue {
   username: string
   sessionId: string
+  isAdmin: boolean
   initializing: boolean
   loading: boolean
   login: () => Promise<{ success: boolean; username?: string; message?: string }>
+  adminLogin: (username: string, password: string) => Promise<{ success: boolean; username?: string; message?: string }>
   updateUsername: (newUsername: string) => Promise<{ success: boolean; username?: string; message?: string }>
   suggestUsername: () => Promise<{ success: boolean; username?: string; message?: string }>
 }
@@ -39,6 +41,7 @@ const safeSetItem = (key: string, value: string) => {
 export function UserProvider({ children }: UserProviderProps) {
   const [username, setUsername] = useState('')
   const [sessionId, setSessionId] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [loading, setLoading] = useState(false)
 
@@ -66,6 +69,7 @@ export function UserProvider({ children }: UserProviderProps) {
       const localUsername = safeGetItem('username') || `访客${Date.now().toString().slice(-6)}`
       setUsername(localUsername)
       setSessionId('local-session')
+      setIsAdmin(safeGetItem('isAdmin') === 'true')
       safeSetItem('username', localUsername)
       setInitializing(false)
       return
@@ -74,10 +78,12 @@ export function UserProvider({ children }: UserProviderProps) {
     // 其他路由:尝试使用后端登录
     const storedSession = safeGetItem('sessionId')
     const storedUsername = safeGetItem('username')
+    const storedIsAdmin = safeGetItem('isAdmin') === 'true'
 
     if (storedSession && storedUsername) {
       setSessionId(storedSession)
       setUsername(storedUsername)
+      setIsAdmin(storedIsAdmin)
       setInitializing(false)
       return
     }
@@ -138,15 +144,43 @@ export function UserProvider({ children }: UserProviderProps) {
     }
   }, [])
 
+  const adminLogin = useCallback(async (adminUsername: string, adminPassword: string) => {
+    setLoading(true)
+    try {
+      const response = await api.post('/auth/app/login', {
+        username: adminUsername,
+        password: adminPassword,
+      })
+      if (response.data.success) {
+        const { session_id: newSessionId, username: newUsername, is_admin } = response.data
+        setSessionId(newSessionId)
+        setUsername(newUsername)
+        setIsAdmin(is_admin)
+        safeSetItem('sessionId', newSessionId)
+        safeSetItem('username', newUsername)
+        safeSetItem('isAdmin', 'true')
+        return { success: true, username: newUsername }
+      }
+      return { success: false, message: response.data.message }
+    } catch (error) {
+      console.error('Admin login failed:', error)
+      return { success: false, message: '管理员登录失败，请检查账号密码' }
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   const value = useMemo<UserContextValue>(() => ({
     username,
     sessionId,
+    isAdmin,
     initializing,
     loading,
     login,
+    adminLogin,
     updateUsername,
     suggestUsername,
-  }), [username, sessionId, initializing, loading, login, updateUsername, suggestUsername])
+  }), [username, sessionId, isAdmin, initializing, loading, login, adminLogin, updateUsername, suggestUsername])
 
   return (
     <UserContext.Provider value={value}>

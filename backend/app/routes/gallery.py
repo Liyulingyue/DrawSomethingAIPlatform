@@ -2,9 +2,9 @@ import os
 import json
 import base64
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
-from ..shared import GALLERY_DIR
+from ..shared import GALLERY_DIR, user_sessions
 
 router = APIRouter(prefix="/gallery", tags=["gallery"])
 
@@ -101,3 +101,32 @@ async def get_gallery_list():
             item["likes"] = 0
 
     return gallery
+
+
+@router.delete("/{filename}")
+async def delete_gallery_item(filename: str, session_id: str = Header(None)):
+    if not session_id or not user_sessions.get(session_id, {}).get("is_admin", False):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    if not os.path.exists(GALLERY_JSON):
+        raise HTTPException(status_code=404, detail="Gallery not found")
+
+    with open(GALLERY_JSON, "r", encoding="utf-8") as f:
+        gallery = json.load(f)
+
+    # Find and remove the item
+    for i, item in enumerate(gallery):
+        if item["filename"] == filename:
+            gallery.pop(i)
+            filepath = os.path.join(GALLERY_DIR, filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            break
+    else:
+        raise HTTPException(status_code=404, detail="Gallery item not found")
+
+    # Save updated gallery data
+    with open(GALLERY_JSON, "w", encoding="utf-8") as f:
+        json.dump(gallery, f, ensure_ascii=False, indent=2)
+
+    return {"message": "Deleted successfully"}

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Dropdown, Button } from 'antd';
-import { HeartFilled, FilterOutlined } from '@ant-design/icons';
+import { Modal, Dropdown, Button, message } from 'antd';
+import { HeartFilled, FilterOutlined, DeleteOutlined } from '@ant-design/icons';
 import { API_BASE_URL } from '../utils/api';
+import { useUser } from '../context/UserContext';
 import AppSidebar from '../components/AppSidebar';
 import SidebarTrigger from '../components/SidebarTrigger';
 import AppFooter from '../components/AppFooter';
@@ -21,6 +22,7 @@ const Gallery: React.FC = () => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc'>('time-desc');
+  const { isAdmin } = useUser();
 
   useEffect(() => {
     fetchGalleryItems();
@@ -120,6 +122,27 @@ const Gallery: React.FC = () => {
     }
   };
 
+  const handleDelete = async (filename: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/gallery/${filename}`, {
+        method: 'DELETE',
+        headers: {
+          'session-id': localStorage.getItem('sessionId') || '',
+        },
+      });
+
+      if (response.ok) {
+        message.success('删除成功');
+        setGalleryItems(prevItems => prevItems.filter(item => item.filename !== filename));
+      } else {
+        message.error('删除失败');
+      }
+    } catch (error) {
+      console.error('Error deleting gallery item:', error);
+      message.error('删除失败');
+    }
+  };
+
   return (
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -183,6 +206,28 @@ const Gallery: React.FC = () => {
                           {item.likes || 0}
                         </span>
                       </button>
+                      {isAdmin && (
+                        <button
+                          className="gallery-delete-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.filename);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            color: '#ff4d4f',
+                            fontSize: '16px',
+                            marginLeft: '8px'
+                          }}
+                        >
+                          <DeleteOutlined />
+                        </button>
+                      )}
                       <p className="gallery-timestamp">{item.timestamp}</p>
                     </div>
                   </div>

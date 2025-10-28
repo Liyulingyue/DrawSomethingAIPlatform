@@ -9,15 +9,9 @@ DrawSomething AI Platform 是一个基于 AI 的多人协作你画我猜游戏�
 - **🤖 AI 驱动的猜词识别**：集成多模态大模型，自动识别绘画内容
 - **👥 多人实时协作**：支持多人在线绘画与实时协作猜词
 - **🎨 专业画板工具**：支持压力感画笔、颜色选择、画笔粗细调节
-- **📱 移动端优化体验**：全新 `/app` 路由提供专为移动设备优化```
-> 💡 **配置说明**：
-> - `repo_path`: Git 仓库的相对路径
-> - `interval`: 检查间隔（如 "10m" 表示10分钟，"1h" 表示1小时）
-> - `post_update`: 更新后执行的命令列表，按顺序执行以确保依赖关系
-> - **网络超时处理**：脚本内置网络超时机制（git fetch: 30秒，git pull: 60秒），网络不稳定时会跳过更新并记录警告日志，避免脚本挂起**配置说明**：
-> - `repo_path`: Git 仓库的相对路径
-> - `interval`: 检查间隔（如 "10m" 表示10分钟，"1h" 表示1小时）
-> - `post_update`: 更新后执行的命令列表，按顺序执行以确保依赖关系*🎯 闯关模式**：挑战不同难度的关卡，支持自定义关卡创建
+- **📱 移动端优化体验**：全新 `/app` 路由提供专为移动设备优化
+- **🛡️ 管理员管理**：提供管理员登录和画廊内容管理功能
+- **🎯 闯关模式**：挑战不同难度的关卡，支持自定义关卡创建
 - **🔧 灵活配置**：支持多种 AI 模型服务（百度文心、OpenAI 等）
 - **📊 游戏统计**：完整的回合历史记录和成功率统计
 
@@ -36,6 +30,8 @@ DrawSomething AI Platform 是一个基于 AI 的多人协作你画我猜游戏�
 - **✏️ 自由绘画** (`/app/draw`)：无压力的自由创作模式
 - **📖 使用说明** (`/app/introduction`)：详细的游戏玩法指南
 - **⚙️ AI 配置** (`/app/configAI`)：自定义 AI 模型设置
+- **🔐 管理员登录** (`/app/login`)：管理员账号登录，获取管理权限
+- **🖼️ 画廊管理** (`/app/gallery`)：查看和删除画廊中的画作（需要管理员权限）
 
 > **注意**：移动端路由暂不支持多人对战模式，专注于单人闯关和自由创作体验。
 
@@ -79,6 +75,11 @@ pip install -r requirements.txt
 
 # 设置环境变量（可选，用于 AI 功能）
 export AI_STUDIO_API_KEY="your_baidu_api_key_here"  # 可选：如果前端未配置 AI 服务
+
+# 配置管理员账号（必需）
+# 编辑 backend/.env 文件设置管理员账号：
+# ADMIN_USER=admin
+# ADMIN_PASSWORD=your_password
 
 # 启动后端服务
 python run.py
@@ -146,6 +147,12 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export AI_STUDIO_API_KEY="your_key"  # 可选：用于后备 AI 服务
+
+# 配置管理员账号（必需）
+# 编辑 .env 文件设置管理员账号：
+# ADMIN_USER=admin
+# ADMIN_PASSWORD=your_password
+
 python run.py
 ```
 
@@ -181,6 +188,12 @@ pip install -r requirements.txt
 
 # 设置生产环境变量
 export AI_STUDIO_API_KEY="your_production_key"  # 可选：用于后备 AI 服务
+
+# 配置管理员账号（必需）
+# 编辑 backend/.env 文件设置管理员账号：
+# ADMIN_USER=admin
+# ADMIN_PASSWORD=your_secure_password
+
 export ENVIRONMENT="production"
 
 # 使用生产服务器运行
@@ -216,6 +229,10 @@ cd DrawSomethingAIPlatform
 
 # 可选：设置 AI 环境变量（如果不使用前端配置）
 echo "AI_STUDIO_API_KEY=your_api_key_here" > .env
+
+# 必需：设置管理员账号
+echo "ADMIN_USER=admin" >> .env
+echo "ADMIN_PASSWORD=your_secure_password" >> .env
 
 # 生产环境：创建 frontend/.env.production 文件配置 API 地址
 echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
@@ -319,6 +336,14 @@ docker-compose down
           "cwd": "../backend"
         },
         {
+          "cmd": ["echo", "ADMIN_USER=admin", ">", ".env"],
+          "cwd": "../backend"
+        },
+        {
+          "cmd": ["echo", "ADMIN_PASSWORD=your_secure_password", ">>", ".env"],
+          "cwd": "../backend"
+        },
+        {
           "cmd": ["backend/.venv/Scripts/python.exe", "restart_backend.py"],
           "cwd": "."
         },
@@ -342,6 +367,7 @@ docker-compose down
 > - `post_update`: 更新后执行的命令列表
 > - Docker 部署使用 `docker-compose` 命令管理容器
 > - 本地部署使用虚拟环境中的 Python 和直接的 npm 命令
+> - 管理员配置会自动写入 `backend/.env` 文件
 
 #### 🚀 启动热更新调度
 
@@ -416,6 +442,21 @@ python auto_update.py --start --verbose
   - 如果前端未配置自定义 AI 服务，将使用此密钥调用百度文心一言 API
   - 获取方式：https://aistudio.baidu.com/account/accessToken
 
+##### 管理员配置
+
+- `ADMIN_USER`: 管理员用户名（必需，用于管理员登录）
+- `ADMIN_PASSWORD`: 管理员密码（必需，用于管理员登录）
+
+> **管理员配置说明**：
+> - 编辑 `backend/.env` 文件设置管理员账号密码
+> - 示例配置：
+>   ```
+>   ADMIN_USER=admin
+>   ADMIN_PASSWORD=your_secure_password
+>   ```
+> - 管理员可以登录 `/app/login` 页面
+> - 管理员权限包括删除画廊中的画作
+
 ## ⚙️ 配置说明
 
 ### AI 模型配置
@@ -449,6 +490,10 @@ python auto_update.py --start --verbose
 ```bash
 # 可选：设置 AI API 密钥（如果不使用前端配置）
 AI_STUDIO_API_KEY=your_api_key_here
+
+# 必需：管理员配置
+ADMIN_USER=admin
+ADMIN_PASSWORD=your_secure_password
 ```
 
 **生产环境** (`frontend/.env.production`)：
@@ -457,10 +502,21 @@ AI_STUDIO_API_KEY=your_api_key_here
 VITE_API_BASE_URL=https://your-production-domain.com/api
 ```
 
+**后端环境** (`backend/.env`)：
+```bash
+# 可选：AI API 密钥（如果不使用前端配置）
+AI_STUDIO_API_KEY=your_production_api_key
+
+# 必需：管理员配置
+ADMIN_USER=admin
+ADMIN_PASSWORD=your_secure_password
+```
+
 > **注意**：
 > - `frontend/.env.production` 文件会被 Vite 自动加载用于生产构建
-> - Docker 部署时，确保将 `frontend/.env.production` 文件放在 frontend 目录下
-> - 如果使用自动更新脚本，请确保生产环境的 `frontend/.env.production` 文件已正确配置
+> - `backend/.env` 文件会被 python-dotenv 自动加载用于后端配置
+> - Docker 部署时，确保将 `frontend/.env.production` 和 `backend/.env` 文件放在对应目录下
+> - 如果使用自动更新脚本，请确保生产环境的配置文件已正确配置
 
 ## 📚 API 文档
 
@@ -484,14 +540,23 @@ VITE_API_BASE_URL=https://your-production-domain.com/api
 5. **提交作品**：AI 自动识别并判断是否成功
 6. **继续挑战**：成功后自动进入下一关
 
-### 桌面端多人对战模式
+### 管理员功能
 
-1. **创建/加入房间**：玩家创建或加入游戏房间
-2. **系统生成目标词**：系统自动生成绘画目标词
-3. **玩家准备**：所有玩家点击"整备完毕"
-4. **轮流绘画**：玩家按顺序进行绘画创作
-5. **AI 识别**：提交作品后 AI 进行智能猜词
-6. **协作优化**：团队共同改进绘画，提高 AI 识别成功率
+#### 管理员登录
+1. **访问管理员登录页面**：打开 `/app/login`
+2. **输入管理员账号**：使用配置的管理员用户名和密码登录
+3. **获取管理权限**：登录成功后获得管理员权限，状态会自动保存
+
+#### 画廊管理
+1. **访问画廊页面**：登录管理员账号后访问 `/app/gallery`
+2. **查看画廊作品**：浏览所有用户上传的画作
+3. **删除不当内容**：点击画作上的删除按钮（红色垃圾桶图标）移除不合适的画作
+4. **实时更新**：删除操作立即生效，画廊列表实时更新
+
+> **管理员权限说明**：
+> - 只有管理员账号登录后才能看到删除按钮
+> - 删除操作不可恢复，请谨慎使用
+> - 管理员状态会持久化保存，下次访问时自动恢复
 
 ## 🎯 功能路由说明
 
@@ -505,6 +570,8 @@ VITE_API_BASE_URL=https://your-production-domain.com/api
 | `/app/challenge-draw` | 挑战绘画 | 闯关模式绘画页面 |
 | `/app/introduction` | 使用说明 | 详细的功能介绍和帮助 |
 | `/app/configAI` | AI 配置 | 自定义 AI 模型设置 |
+| `/app/login` | 管理员登录 | 管理员账号登录页面 |
+| `/app/gallery` | 画廊管理 | 查看和管理画廊作品（管理员权限）|
 
 ### 桌面端路由 (`/*`)
 | 路由 | 功能 | 说明 |

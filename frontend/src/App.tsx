@@ -11,6 +11,7 @@ import ChallengeDraw from './pages/ChallengeDraw'
 import ConfigAI from './pages/ConfigAI'
 import Introduction from './pages/Introduction'
 import Login from './pages/Login'
+import AppLogin from './pages/AppLogin'
 import Room from './pages/Room'
 import MultiplayerGame from './pages/MultiplayerGame'
 import SingleGame from './pages/SingleGame'
@@ -34,6 +35,7 @@ function App() {
               <Route path="/app/introduction" element={<Introduction />} />
               <Route path="/app/configAI" element={<ConfigAI />} />
               <Route path="/app/gallery" element={<Gallery />} />
+              <Route path="/app/login" element={<AppLogin />} />
               <Route path="/login" element={<Login />} />
               <Route path="/rooms" element={<Room />} />
               <Route path="/game" element={<MultiplayerGame />} />

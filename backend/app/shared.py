@@ -22,17 +22,19 @@ def _upgrade_session_structure(session_id: str, value):
         "username": value,
         "created_at": now,
         "last_activity": now,
+        "is_admin": False,
     }
     user_sessions[session_id] = upgraded
     return upgraded
 
 
-def register_session(session_id: str, username: str) -> None:
+def register_session(session_id: str, username: str, is_admin: bool = False) -> None:
     now = time.time()
     user_sessions[session_id] = {
         "username": username,
         "created_at": now,
         "last_activity": now,
+        "is_admin": is_admin,
     }
 
 

@@ -2,3 +2,4 @@ fastapi
 uvicorn[standard]
 pydantic
 openai>=1.40.0
+python-dotenv

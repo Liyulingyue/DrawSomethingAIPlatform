@@ -11,6 +11,7 @@ import uuid
 import re
 import random
 import string
+import os
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -85,3 +86,22 @@ async def update_username(request: UpdateUsernameRequest):
 async def cleanup_users():
     result = cleanup_inactive_users()
     return {"success": True, **result}
+
+
+@router.post("/app/login")
+async def admin_login(request: dict):
+    username = request.get("username")
+    password = request.get("password")
+    
+    admin_user = os.getenv("ADMIN_USER")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    
+    if not admin_user or not admin_password:
+        return {"success": False, "message": "Admin credentials not configured"}
+    
+    if username == admin_user and password == admin_password:
+        session_id = str(uuid.uuid4())
+        register_session(session_id, username, is_admin=True)
+        return {"success": True, "session_id": session_id, "username": username, "is_admin": True}
+    else:
+        return {"success": False, "message": "Invalid credentials"}
