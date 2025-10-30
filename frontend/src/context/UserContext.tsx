@@ -3,10 +3,13 @@ import type { ReactNode } from 'react'
 import { message } from 'antd'
 import { api } from '../utils/api'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002'
+
 interface UserContextValue {
   username: string
   sessionId: string
   isAdmin: boolean
+  callsRemaining: number
   initializing: boolean
   loading: boolean
   login: () => Promise<{ success: boolean; username?: string; message?: string }>
@@ -42,6 +45,7 @@ export function UserProvider({ children }: UserProviderProps) {
   const [username, setUsername] = useState('')
   const [sessionId, setSessionId] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+  const [callsRemaining, setCallsRemaining] = useState(0)
   const [initializing, setInitializing] = useState(true)
   const [loading, setLoading] = useState(false)
 
@@ -65,12 +69,62 @@ export function UserProvider({ children }: UserProviderProps) {
     const isAppRoute = window.location.pathname.startsWith('/app')
     
     if (isAppRoute) {
-      // 纯前端模式:使用本地存储的用户名或生成临时用户名
-      const localUsername = safeGetItem('username') || `访客${Date.now().toString().slice(-6)}`
-      setUsername(localUsername)
-      setSessionId('local-session')
-      setIsAdmin(safeGetItem('isAdmin') === 'true')
-      safeSetItem('username', localUsername)
+      // 检查是否刚刚退出登录
+      const justLoggedOut = safeGetItem('justLoggedOut') === 'true'
+      if (justLoggedOut) {
+        // 清除退出登录标志
+        localStorage.removeItem('justLoggedOut')
+        // 不设置用户名，保持未登录状态
+        setInitializing(false)
+        return
+      }
+
+      // 尝试验证现有的session
+      const storedSession = safeGetItem('sessionId')
+      const storedUsername = safeGetItem('username')
+
+      if (storedSession && storedUsername) {
+        // 验证session是否仍然有效
+        const verifySession = async () => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/auth/user/verify_session`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                session_id: storedSession
+              }),
+            })
+            
+            if (response.ok) {
+              const data = await response.json()
+              if (data.valid) {
+                // session有效，使用存储的信息
+                setSessionId(storedSession)
+                setUsername(data.username)
+                setIsAdmin(data.is_admin)
+                setCallsRemaining(data.calls_remaining || 0)
+                setInitializing(false)
+                return
+              }
+            }
+          } catch (error) {
+            console.warn('Session verification failed:', error)
+          }
+          
+          // session无效，清除本地存储
+          localStorage.removeItem('sessionId')
+          localStorage.removeItem('username')
+          localStorage.removeItem('isAdmin')
+          setInitializing(false)
+        }
+        
+        verifySession()
+        return
+      }
+
+      // 没有有效的session，保持未登录状态
       setInitializing(false)
       return
     }
@@ -156,6 +210,7 @@ export function UserProvider({ children }: UserProviderProps) {
         setSessionId(newSessionId)
         setUsername(newUsername)
         setIsAdmin(is_admin)
+        setCallsRemaining(-1) // 管理员无限调用次数
         safeSetItem('sessionId', newSessionId)
         safeSetItem('username', newUsername)
         safeSetItem('isAdmin', 'true')
@@ -174,13 +229,14 @@ export function UserProvider({ children }: UserProviderProps) {
     username,
     sessionId,
     isAdmin,
+    callsRemaining,
     initializing,
     loading,
     login,
     adminLogin,
     updateUsername,
     suggestUsername,
-  }), [username, sessionId, isAdmin, initializing, loading, login, adminLogin, updateUsername, suggestUsername])
+  }), [username, sessionId, isAdmin, callsRemaining, initializing, loading, login, adminLogin, updateUsername, suggestUsername])
 
   return (
     <UserContext.Provider value={value}>

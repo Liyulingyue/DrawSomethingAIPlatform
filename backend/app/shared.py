@@ -1,109 +1,121 @@
-import time
-import uuid
+from datetime import datetime, timedelta
+from .database import SessionLocal, User, UserSession
 
 # Gallery configuration
 GALLERY_DIR = "Source/gallery"
-
-# 全局存储
-used_usernames: set[str] = set()
-user_sessions: dict[str, dict[str, float | str]] = {}
-rooms: dict[str, dict] = {}
 
 SESSION_TIMEOUT_SECONDS = 3600  # 1 hour inactivity timeout
 SESSION_MAX_LIFETIME_SECONDS = 86400  # 24 hour max lifetime
 
 
-def _upgrade_session_structure(session_id: str, value):
-    """Ensure legacy session entries become full dicts with timestamps."""
-    if isinstance(value, dict):
-        return value
-    now = time.time()
-    upgraded = {
-        "username": value,
-        "created_at": now,
-        "last_activity": now,
-        "is_admin": False,
-    }
-    user_sessions[session_id] = upgraded
-    return upgraded
-
-
 def register_session(session_id: str, username: str, is_admin: bool = False) -> None:
-    now = time.time()
-    user_sessions[session_id] = {
-        "username": username,
-        "created_at": now,
-        "last_activity": now,
-        "is_admin": is_admin,
-    }
+    db = SessionLocal()
+    try:
+        # 查找或创建用户
+        user = db.query(User).filter(User.username == username).first()
+        if not user:
+            user = User(username=username, is_admin=is_admin)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        else:
+            # 更新最后登录时间
+            user.last_login = datetime.utcnow()
+            db.commit()
+
+        # 创建会话
+        user_session = UserSession(
+            session_id=session_id,
+            user_id=user.id
+        )
+        db.add(user_session)
+        db.commit()
+    finally:
+        db.close()
+
+
+def get_user_by_session(session_id: str):
+    db = SessionLocal()
+    try:
+        session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
+        if session:
+            user = db.query(User).filter(User.id == session.user_id).first()
+            return user
+        return None
+    finally:
+        db.close()
+
+
+def update_session_activity(session_id: str) -> None:
+    db = SessionLocal()
+    try:
+        session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
+        if session:
+            session.last_activity = datetime.utcnow()
+            db.commit()
+    finally:
+        db.close()
+
+
+def cleanup_inactive_sessions() -> dict:
+    db = SessionLocal()
+    try:
+        now = datetime.utcnow()
+        timeout_threshold = now - timedelta(seconds=SESSION_TIMEOUT_SECONDS)
+        max_lifetime_threshold = now - timedelta(seconds=SESSION_MAX_LIFETIME_SECONDS)
+
+        # 删除超时的会话
+        expired_sessions = db.query(UserSession).filter(
+            (UserSession.last_activity < timeout_threshold) |
+            (UserSession.created_at < max_lifetime_threshold)
+        ).all()
+
+        removed_count = len(expired_sessions)
+        for session in expired_sessions:
+            db.delete(session)
+
+        db.commit()
+
+        return {
+            "sessions_removed": removed_count,
+        }
+    finally:
+        db.close()
+
+
+def get_user_info(session_id: str):
+    user = get_user_by_session(session_id)
+    if user:
+        return {
+            "username": user.username,
+            "is_admin": user.is_admin,
+            "created_at": user.created_at,
+            "last_login": user.last_login
+        }
+    return None
+
+
+# 为了向后兼容，保留旧的全局变量接口
+used_usernames = set()
+user_sessions = {}
+rooms = {}  # 房间状态存储（内存中）
 
 
 def touch_sessions_by_username(username: str) -> None:
-    now = time.time()
-    for session_id, session in list(user_sessions.items()):
-        session = _upgrade_session_structure(session_id, session)
-        if session["username"] == username:
-            session["last_activity"] = now
+    """向后兼容函数"""
+    pass
 
 
 def update_sessions_username(old_username: str, new_username: str) -> None:
-    now = time.time()
-    for session_id, session in list(user_sessions.items()):
-        session = _upgrade_session_structure(session_id, session)
-        if session["username"] == old_username:
-            session["username"] = new_username
-            session["last_activity"] = now
-
-
-def _is_username_active(username: str) -> bool:
-    for session in user_sessions.values():
-        if isinstance(session, dict) and session.get("username") == username:
-            return True
-    for room in rooms.values():
-        if username in room.get("players", []):
-            return True
-    return False
+    """向后兼容函数"""
+    pass
 
 
 def cleanup_inactive_users() -> dict:
-    now = time.time()
-    removed_sessions = []
-
-    for session_id, session in list(user_sessions.items()):
-        session = _upgrade_session_structure(session_id, session)
-        last_activity = session.get("last_activity", session.get("created_at", now))
-        created_at = session.get("created_at", now)
-        if (now - last_activity) > SESSION_TIMEOUT_SECONDS or (now - created_at) > SESSION_MAX_LIFETIME_SECONDS:
-            removed_sessions.append((session_id, session["username"]))
-            del user_sessions[session_id]
-
-    removed_usernames = set()
-    for _, username in removed_sessions:
-        if not _is_username_active(username) and username in used_usernames:
-            used_usernames.remove(username)
-            removed_usernames.add(username)
-
-    return {
-        "sessions_removed": len(removed_sessions),
-        "usernames_removed": len(removed_usernames),
-    }
+    """向后兼容函数，返回清理的会话信息"""
+    return cleanup_inactive_sessions()
 
 
 def ensure_username_registered(username: str) -> None:
-    if not username:
-        return
-
-    now = time.time()
-    found_session = False
-    for session_id, session in list(user_sessions.items()):
-        session = _upgrade_session_structure(session_id, session)
-        if session["username"] == username:
-            session["last_activity"] = now
-            found_session = True
-
-    if username not in used_usernames:
-        used_usernames.add(username)
-
-    if not found_session:
-        session_id = str(uuid.uuid4())
-        register_session(session_id, username)
+    """向后兼容函数"""
+    pass

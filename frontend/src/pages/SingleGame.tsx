@@ -15,6 +15,7 @@ const DEFAULT_MODEL_CONFIG: ModelConfig = {
   key: '',
   model: 'ernie-4.5-vl-28b-a3b',
   prompt: DEFAULT_MODEL_PROMPT,
+  callPreference: 'server',
 }
 
 const MODEL_CONFIG_STORAGE_KEY = 'drawing-single-model-config'
@@ -24,6 +25,7 @@ const sanitizeModelConfig = (config: ModelConfig) => ({
   key: config.key.trim(),
   model: config.model.trim(),
   prompt: config.prompt.trim(),
+  callPreference: config.callPreference,
 })
 
 function normalizeGuessPayload(raw: unknown): GuessPayload | null {
@@ -121,6 +123,7 @@ function SingleGame() {
           model?: string
           prompt?: string
         }
+        call_preference?: 'custom' | 'server'
       } = {
         image,
         target: singleTarget.trim() || undefined,
@@ -145,6 +148,9 @@ function SingleGame() {
       configPayload.prompt = sanitizedCurrentModelConfig.prompt
 
       requestBody.config = configPayload
+
+      // 添加调用偏好参数
+      requestBody.call_preference = sanitizedCurrentModelConfig.callPreference || 'server'
 
       const response = await api.post('/ai/guess', requestBody)
       const normalized = normalizeGuessPayload(response.data)
@@ -191,6 +197,7 @@ function SingleGame() {
           model?: string
           prompt?: string
         }
+        call_preference?: 'custom' | 'server'
       } = {
         image,
         target: singleTarget.trim() || undefined,
@@ -201,6 +208,9 @@ function SingleGame() {
           prompt: sanitizedCurrentModelConfig.prompt,
         },
       }
+
+      // 添加调用偏好参数
+      requestBody.call_preference = sanitizedCurrentModelConfig.callPreference || 'server'
 
       const response = await api.post('/ai/guess', requestBody)
       const normalized = normalizeGuessPayload(response.data)

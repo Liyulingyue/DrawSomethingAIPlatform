@@ -3,6 +3,7 @@ export interface AIConfig {
   url: string
   key: string
   modelName: string
+  callPreference: 'custom' | 'server'  // 调用偏好：自定义服务或服务器调用点
 }
 
 // 默认配置
@@ -10,6 +11,7 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
   url: 'https://aistudio.baidu.com/llm/lmapi/v3',
   key: '',
   modelName: 'ernie-4.5-vl-28b-a3b',
+  callPreference: 'server',  // 默认使用服务器调用点
 }
 
 // 本地存储键名
@@ -17,6 +19,7 @@ const AI_CONFIG_KEYS = {
   URL: 'ai_url',
   KEY: 'ai_key',
   MODEL_NAME: 'ai_model_name',
+  CALL_PREFERENCE: 'ai_call_preference',
 } as const
 
 /**
@@ -24,10 +27,16 @@ const AI_CONFIG_KEYS = {
  */
 export const getAIConfig = (): AIConfig => {
   try {
+    const storedCallPreference = localStorage.getItem(AI_CONFIG_KEYS.CALL_PREFERENCE)
+    const callPreference = (storedCallPreference === 'custom' || storedCallPreference === 'server')
+      ? storedCallPreference as 'custom' | 'server'
+      : DEFAULT_AI_CONFIG.callPreference
+
     return {
       url: localStorage.getItem(AI_CONFIG_KEYS.URL) || DEFAULT_AI_CONFIG.url,
       key: localStorage.getItem(AI_CONFIG_KEYS.KEY) || DEFAULT_AI_CONFIG.key,
       modelName: localStorage.getItem(AI_CONFIG_KEYS.MODEL_NAME) || DEFAULT_AI_CONFIG.modelName,
+      callPreference,
     }
   } catch (error) {
     console.warn('获取 AI 配置失败，使用默认配置:', error)
@@ -40,9 +49,14 @@ export const getAIConfig = (): AIConfig => {
  */
 export const saveAIConfig = (config: AIConfig): boolean => {
   try {
+    if (!config.callPreference) {
+      console.warn('callPreference 未定义，跳过保存')
+      return false
+    }
     localStorage.setItem(AI_CONFIG_KEYS.URL, config.url || '')
     localStorage.setItem(AI_CONFIG_KEYS.KEY, config.key || '')
     localStorage.setItem(AI_CONFIG_KEYS.MODEL_NAME, config.modelName || '')
+    localStorage.setItem(AI_CONFIG_KEYS.CALL_PREFERENCE, config.callPreference || 'server')
     return true
   } catch (error) {
     console.error('保存 AI 配置失败:', error)
@@ -55,6 +69,13 @@ export const saveAIConfig = (config: AIConfig): boolean => {
  */
 export const isAIConfigValid = (config?: AIConfig): boolean => {
   const currentConfig = config || getAIConfig()
+  
+  // 如果选择服务器调用点，则配置始终有效
+  if (currentConfig.callPreference === 'server') {
+    return true
+  }
+  
+  // 如果选择自定义服务，则需要检查 API 配置是否完整
   return !!(
     currentConfig.url &&
     currentConfig.key &&

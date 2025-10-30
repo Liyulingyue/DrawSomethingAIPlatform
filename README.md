@@ -76,6 +76,9 @@ pip install -r requirements.txt
 # 设置环境变量（可选，用于 AI 功能）
 export AI_STUDIO_API_KEY="your_baidu_api_key_here"  # 可选：如果前端未配置 AI 服务
 
+# 配置数据库连接（必需）
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/drawsomething"
+
 # 配置管理员账号（必需）
 # 编辑 backend/.env 文件设置管理员账号：
 # ADMIN_USER=admin
@@ -237,8 +240,34 @@ echo "ADMIN_PASSWORD=your_secure_password" >> .env
 # 生产环境：创建 frontend/.env.production 文件配置 API 地址
 echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
 
+**快速启动**：
+```bash
+# 克隆项目
+git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
+cd DrawSomethingAIPlatform
+
+# 可选：设置 AI 环境变量（如果不使用前端配置）
+echo "AI_STUDIO_API_KEY=your_api_key_here" > .env
+
+# 必需：设置管理员账号
+echo "ADMIN_USER=admin" >> .env
+echo "ADMIN_PASSWORD=your_secure_password" >> .env
+
+# 生产环境：创建 frontend/.env.production 文件配置 API 地址
+echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
+
 # 启动服务
 docker-compose up -d
+
+# 服务将在以下端口启动：
+# - 后端：http://localhost:8002
+# - 前端：http://localhost:5173
+# - Adminer（数据库管理）：http://localhost:8080
+```
+
+> **开发环境说明**：
+> - 如果只需要数据库服务，可以单独启动：`docker-compose up -d db adminer`
+> - 数据库将在 `localhost:5432` 端口可用，Adminer将在 `http://localhost:8080` 访问
 ```
 
 > **生产部署说明**：
@@ -251,8 +280,7 @@ docker-compose up -d
 服务将在以下端口启动：
 - 后端：`http://localhost:8002`
 - 前端：`http://localhost:5173`
-
-**热更新**：
+- Adminer（数据库管理）：`http://localhost:8080`
 使用自动热更新脚本实现无人值守的代码同步：
 ```powershell
 cd scripts
@@ -336,6 +364,14 @@ docker-compose down
           "cwd": "../backend"
         },
         {
+          "cmd": ["backend/.venv/Scripts/python.exe", "-m", "alembic", "upgrade", "head"],
+          "cwd": "../backend"
+        },
+        {
+          "cmd": ["echo", "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/drawsomething", ">", ".env"],
+          "cwd": "../backend"
+        },
+        {
           "cmd": ["echo", "ADMIN_USER=admin", ">", ".env"],
           "cwd": "../backend"
         },
@@ -367,7 +403,7 @@ docker-compose down
 > - `post_update`: 更新后执行的命令列表
 > - Docker 部署使用 `docker-compose` 命令管理容器
 > - 本地部署使用虚拟环境中的 Python 和直接的 npm 命令
-> - 管理员配置会自动写入 `backend/.env` 文件
+> - 数据库和管理员配置会自动写入 `backend/.env` 文件
 
 #### 🚀 启动热更新调度
 
@@ -436,6 +472,13 @@ python auto_update.py --start --verbose
 
 #### 后端环境变量
 
+##### 必需环境变量
+
+- `DATABASE_URL`: PostgreSQL数据库连接URL
+  - 格式: `postgresql://username:password@host:port/database`
+  - Docker环境: `postgresql://postgres:postgres@db:5432/drawsomething`
+  - 本地开发: `postgresql://postgres:postgres@localhost:5432/drawsomething`
+
 ##### 可选环境变量
 
 - `AI_STUDIO_API_KEY`: 百度 AI Studio 访问令牌（可选，用于后备 AI 服务）
@@ -488,6 +531,9 @@ python auto_update.py --start --verbose
 
 **开发环境** (`.env`)：
 ```bash
+# 必需：数据库连接配置（Docker环境）
+DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
+
 # 可选：设置 AI API 密钥（如果不使用前端配置）
 AI_STUDIO_API_KEY=your_api_key_here
 
@@ -504,6 +550,9 @@ VITE_API_BASE_URL=https://your-production-domain.com/api
 
 **后端环境** (`backend/.env`)：
 ```bash
+# 必需：数据库连接配置
+DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
+
 # 可选：AI API 密钥（如果不使用前端配置）
 AI_STUDIO_API_KEY=your_production_api_key
 
@@ -517,6 +566,123 @@ ADMIN_PASSWORD=your_secure_password
 > - `backend/.env` 文件会被 python-dotenv 自动加载用于后端配置
 > - Docker 部署时，确保将 `frontend/.env.production` 和 `backend/.env` 文件放在对应目录下
 > - 如果使用自动更新脚本，请确保生产环境的配置文件已正确配置
+
+### 🗄️ 数据库配置
+
+项目使用 PostgreSQL 作为数据库，支持用户认证和会话管理。
+
+#### 开发环境单独启动数据库
+
+在开发过程中，如果只需要启动数据库服务而不想启动整个应用栈，可以单独启动数据库：
+
+```bash
+# 仅启动数据库和Adminer
+docker-compose up -d db adminer
+
+# 或者仅启动数据库
+docker-compose up -d db
+```
+
+数据库服务启动后：
+- **PostgreSQL**: `localhost:5432`
+- **Adminer**: `http://localhost:8080` (如果启动了Adminer)
+
+#### Docker 环境数据库配置
+
+使用 Docker Compose 启动 PostgreSQL 和 Adminer（数据库管理界面）：
+
+```bash
+# 启动数据库服务
+docker-compose up -d db adminer
+```
+
+服务启动后：
+- **PostgreSQL**: `localhost:5432`
+- **Adminer**: `http://localhost:8080`
+
+#### Adminer 数据库管理
+
+1. 打开浏览器访问 `http://localhost:8080`
+2. 登录信息：
+   - **系统**: PostgreSQL
+   - **服务器**: `db` (Docker) 或 `localhost` (本地)
+   - **用户名**: `postgres`
+   - **密码**: `postgres`
+   - **数据库**: `drawsomething`
+
+#### 本地开发数据库配置
+
+如果不使用 Docker，可以安装本地 PostgreSQL：
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install postgresql postgresql-contrib
+
+# macOS (使用 Homebrew)
+brew install postgresql
+
+# Windows
+# 下载并安装 PostgreSQL: https://www.postgresql.org/download/windows/
+```
+
+创建数据库：
+```sql
+CREATE DATABASE drawsomething;
+```
+
+更新 `backend/.env` 中的 `DATABASE_URL`：
+```bash
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/drawsomething
+```
+
+#### 数据库迁移
+
+项目使用 Alembic 进行数据库版本控制和迁移管理，支持自动生成和应用数据库模式变更。
+
+##### 初始化数据库迁移
+
+首次设置项目时，需要创建初始迁移：
+
+```bash
+# 进入后端目录
+cd backend
+
+# 生成初始迁移（自动检测当前模型）
+alembic revision --autogenerate -m "initial migration"
+
+# 应用迁移到数据库
+alembic upgrade head
+```
+
+##### 开发过程中的数据库变更
+
+当修改数据库模型时：
+
+```bash
+# 生成新的迁移文件
+alembic revision --autogenerate -m "描述变更内容"
+
+# 应用迁移
+alembic upgrade head
+```
+
+##### 常用 Alembic 命令
+
+```bash
+# 查看当前迁移状态
+alembic current
+
+# 查看迁移历史
+alembic history
+
+# 回滚到指定版本
+alembic downgrade <revision_id>
+
+# 查看待应用的迁移
+alembic show <revision_id>
+```
+
+> **注意**：生产环境部署时，请确保在部署前应用所有迁移。建议在 CI/CD 流程中包含 `alembic upgrade head` 步骤。
 
 ## 📚 API 文档
 

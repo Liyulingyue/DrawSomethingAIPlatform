@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Input, Button, Form, Card, App } from 'antd'
-import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
+import { useState, useEffect } from 'react'
+import { Input, Button, Form, Card, App, Radio } from 'antd'
+import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -23,19 +23,70 @@ function ConfigAI() {
   // 从配置管理器加载初始配置
   const [config, setConfig] = useState<AIConfig>(() => getAIConfig())
 
+  // 跟踪当前选择的调用偏好，用于动态验证
+  const [currentCallPreference, setCurrentCallPreference] = useState<'custom' | 'server'>(() => {
+    const currentConfig = getAIConfig()
+    return currentConfig.callPreference
+  })
+
+  // 动态验证规则：服务器调用点时，API相关字段非必填
+  const getValidationRules = (fieldName: string) => {
+    const isServerMode = currentCallPreference === 'server'
+    
+    switch (fieldName) {
+      case 'url':
+        return isServerMode ? [
+          { type: 'url' as const, message: '请输入有效的 URL' },
+        ] : [
+          { required: true, message: '请输入 API URL' },
+          { type: 'url' as const, message: '请输入有效的 URL' },
+        ]
+      case 'key':
+        return isServerMode ? [] : [
+          { required: true, message: '请输入 API Key' }
+        ]
+      case 'modelName':
+        return isServerMode ? [] : [
+          { required: true, message: '请输入模型名称' }
+        ]
+      default:
+        return []
+    }
+  }
+
+  // 处理调用偏好变化
+  const handleCallPreferenceChange = (value: 'custom' | 'server') => {
+    setCurrentCallPreference(value)
+    // 当切换到服务器模式时，清除相关字段的验证错误
+    if (value === 'server') {
+      form.validateFields(['url', 'key', 'modelName']).catch(() => {})
+    }
+  }
+
+  // 确保表单正确初始化
+  useEffect(() => {
+    const currentConfig = getAIConfig()
+    form.setFieldsValue(currentConfig)
+    setCurrentCallPreference(currentConfig.callPreference)
+  }, [form])
+
   const handleSave = (values: AIConfig) => {
     try {
+      // 确保保存时的 callPreference 是最新的表单状态
+      values.callPreference = currentCallPreference;
+
       const success = saveAIConfigWithNotification(values)
       
       if (success) {
         setConfig(values)
+        setCurrentCallPreference(values.callPreference)
         message.success('AI 配置已保存并生效')
         
         // 显示配置有效性状态
         if (isAIConfigValid(values)) {
           message.info('✅ AI 配置完整，可以正常使用 AI 功能')
         } else {
-          message.warning('⚠️ 配置信息不完整，请检查所有必填项')
+          message.warning('⚠️ 配置信息不完整，自定义服务可能无法使用')
         }
       } else {
         message.error('保存失败，请重试')
@@ -71,10 +122,12 @@ function ConfigAI() {
     const currentValues = form.getFieldsValue()
     console.log('📋 当前表单值:', currentValues)
     
-    // 检查表单值是否完整
-    if (!currentValues.url || !currentValues.key || !currentValues.modelName) {
-      message.error('请先填写完整的 URL、API Key 和模型名称')
-      return
+    // 检查表单值是否完整（仅在自定义模式下检查）
+    if (currentValues.callPreference === 'custom') {
+      if (!currentValues.url || !currentValues.key || !currentValues.modelName) {
+        message.error('请先填写完整的 URL、API Key 和模型名称')
+        return
+      }
     }
     
     // 立即显示测试开始消息
@@ -86,15 +139,16 @@ function ConfigAI() {
       
       // 构造测试请求
       const testRequest = {
-        url: currentValues.url.trim(),
-        key: currentValues.key.trim(),
-        model: currentValues.modelName.trim()
+        url: currentValues.url?.trim() || '',
+        key: currentValues.key?.trim() || '',
+        model: currentValues.modelName?.trim() || ''
       }
       
       console.log('🔧 测试配置:', {
         url: testRequest.url,
         model: testRequest.model,
-        hasKey: !!testRequest.key
+        hasKey: !!testRequest.key,
+        callPreference: currentValues.callPreference
       })
       
       // 调用后端测试连接 API
@@ -242,7 +296,7 @@ function ConfigAI() {
           errorMsg += error.message
         }
       } else {
-        errorMsg += '未知错误'
+          errorMsg += '未知错误'
       }
       
       // 显示网络错误弹窗
@@ -312,10 +366,7 @@ function ConfigAI() {
               <Form.Item
                 label="API URL"
                 name="url"
-                rules={[
-                  { required: true, message: '请输入 API URL' },
-                  { type: 'url', message: '请输入有效的 URL' },
-                ]}
+                rules={getValidationRules('url')}
               >
                 <Input
                   prefix={<ApiOutlined />}
@@ -328,7 +379,17 @@ function ConfigAI() {
               <Form.Item
                 label="API Key"
                 name="key"
-                rules={[{ required: true, message: '请输入 API Key' }]}
+                rules={getValidationRules('key')}
+                extra={
+                  <a 
+                    href="https://aistudio.baidu.com/account/accessToken" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ color: '#1890ff', fontSize: '14px' }}
+                  >
+                    🔗 获取百度 AI Studio Access Token
+                  </a>
+                }
               >
                 <Input.Password
                   prefix={<KeyOutlined />}
@@ -341,7 +402,7 @@ function ConfigAI() {
               <Form.Item
                 label="Model Name"
                 name="modelName"
-                rules={[{ required: true, message: '请输入模型名称' }]}
+                rules={getValidationRules('modelName')}
               >
                 <Input
                   prefix={<RobotOutlined />}
@@ -349,6 +410,31 @@ function ConfigAI() {
                   size="large"
                   className="config-input"
                 />
+              </Form.Item>
+
+              <Form.Item
+                label="调用偏好"
+                name="callPreference"
+                rules={[{ required: true, message: '请选择调用偏好' }]}
+              >
+                <Radio.Group 
+                  size="large" 
+                  className="config-radio-group"
+                  value={currentCallPreference}
+                  onChange={(e) => handleCallPreferenceChange(e.target.value)}
+                >
+                  <Radio.Button value="custom" className="config-radio-button">
+                    <SettingOutlined style={{ marginRight: '8px' }} />
+                    自定义服务
+                  </Radio.Button>
+                  <Radio.Button value="server" className="config-radio-button">
+                    <ApiOutlined style={{ marginRight: '8px' }} />
+                    服务器调用点
+                  </Radio.Button>
+                </Radio.Group>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                  💡 服务器调用点优先使用平台服务，点数不足时自动切换到自定义服务
+                </div>
               </Form.Item>
 
               <Form.Item className="config-ai-actions">
@@ -390,19 +476,18 @@ function ConfigAI() {
 
           <div className="config-ai-footer">
             <p className="config-ai-note">
-              💡 提示：配置信息将保存在浏览器本地存储中
+              💡 提示：配置信息将保存在浏览器本地存储中，获取 API Key：访问{' '}
+              <a
+                href="https://aistudio.baidu.com/account/accessToken"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1890ff' }}
+              >
+                🔗 百度 AI Studio Access Token
+              </a>
             </p>
             <p className="config-ai-note config-ai-help">
-              获取 API Key：访问{' '}
-              <a 
-                href="https://aistudio.baidu.com/account/accessToken" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="config-ai-link"
-              >
-                百度 AI Studio
-              </a>
-              {' '}获取 Access Token
+              💡 选择服务器调用点时优先使用平台服务，点数不足时自动回退到自定义服务。请配置自定义服务参数作为备用方案。
             </p>
           </div>
         </div>

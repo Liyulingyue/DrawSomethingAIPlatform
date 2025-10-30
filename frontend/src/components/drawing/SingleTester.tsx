@@ -1,4 +1,4 @@
-import { Card, Space, Input, Button, List, Avatar, Empty, Typography, Form, message } from 'antd'
+import { Card, Space, Input, Button, List, Avatar, Empty, Typography, Form, message, Radio } from 'antd'
 import type { ChangeEvent } from 'react'
 import { useRef } from 'react'
 import DrawBoard, { type DrawBoardRef } from '../DrawBoard'
@@ -13,6 +13,7 @@ export interface ModelConfig {
   key: string
   model: string
   prompt: string
+  callPreference: 'custom' | 'server'
 }
 
 export interface SingleHistoryEntry {
@@ -116,6 +117,18 @@ const SingleTester = ({
                   onChange={handleModelConfigFieldChange('prompt')}
                   autoSize={{ minRows: 3, maxRows: 6 }}
                 />
+              </Form.Item>
+              <Form.Item label="AI 调用偏好">
+                <Radio.Group
+                  value={modelConfig.callPreference}
+                  onChange={(e) => onModelConfigChange({ callPreference: e.target.value })}
+                >
+                  <Radio value="custom">自定义服务</Radio>
+                  <Radio value="server">服务器调用点</Radio>
+                </Radio.Group>
+                <div style={{ marginTop: '4px', fontSize: '12px', color: '#666' }}>
+                  选择使用自定义AI配置还是服务器提供的调用点
+                </div>
               </Form.Item>
               <Form.Item>
                 <Button type="primary" onClick={handleTestConfig} disabled={submitting || !onTestConfig}>

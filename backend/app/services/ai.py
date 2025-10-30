@@ -402,13 +402,120 @@ def guess_drawing(
     clue: Optional[str] = None,
     config: Optional[Dict[str, Optional[str]]] = None,
     target: Optional[str] = None,
+    call_preference: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Call ERNIE model (or a custom endpoint) to guess the drawing content."""
 
     sanitized_config = _sanitize_config(config)
     prompt = _build_instruction(clue, sanitized_config.get("prompt"))
 
-    if sanitized_config.get("url"):
+    # 根据调用偏好选择不同的调用方式
+    if call_preference == "server":
+        # 优先使用服务器端AI调用，失败时回退到自定义服务
+        api_key = os.getenv("AI_STUDIO_API_KEY")
+        if api_key:
+            try:
+                data = _call_ernie_inference(image, prompt, sanitized_config.get("model"))
+                parsed = _extract_guesses(data)
+                best_guess = parsed.get("best_guess")
+                return {
+                    "success": True,
+                    "configured": True,
+                    "best_guess": best_guess,
+                    "alternatives": parsed.get("alternatives", []),
+                    "reason": parsed.get("reason"),
+                    "matched": _is_guess_correct(best_guess, target),
+                    "target": target,
+                    "raw": data,
+                    "provider": "server",
+                }
+            except Exception as exc:
+                # 服务器端AI调用失败，回退到自定义服务
+                if sanitized_config.get("url"):
+                    try:
+                        data = _call_custom_model(image, prompt, sanitized_config)
+                        parsed = _extract_guesses(data)
+                        best_guess = parsed.get("best_guess")
+                        return {
+                            "success": True,
+                            "configured": True,
+                            "best_guess": best_guess,
+                            "alternatives": parsed.get("alternatives", []),
+                            "reason": f"服务器AI调用失败，已回退到自定义服务。{parsed.get('reason', '')}",
+                            "matched": _is_guess_correct(best_guess, target),
+                            "target": target,
+                            "raw": data,
+                            "provider": "custom_fallback",
+                        }
+                    except Exception as fallback_exc:
+                        return {
+                            "success": False,
+                            "configured": True,
+                            "best_guess": None,
+                            "alternatives": [],
+                            "error": f"服务器AI和自定义服务都调用失败。服务器错误: {str(exc)}, 自定义服务错误: {str(fallback_exc)}",
+                            "reason": None,
+                            "matched": False,
+                            "target": target,
+                            "provider": "server_fallback_failed",
+                        }
+                else:
+                    return {
+                        "success": False,
+                        "configured": True,
+                        "best_guess": None,
+                        "alternatives": [],
+                        "error": f"服务器AI调用失败，且未配置自定义服务作为备用。错误: {str(exc)}",
+                        "reason": None,
+                        "matched": False,
+                        "target": target,
+                        "provider": "server",
+                    }
+        else:
+            # 服务器端AI未配置，直接使用自定义服务
+            if sanitized_config.get("url"):
+                try:
+                    data = _call_custom_model(image, prompt, sanitized_config)
+                    parsed = _extract_guesses(data)
+                    best_guess = parsed.get("best_guess")
+                    return {
+                        "success": True,
+                        "configured": True,
+                        "best_guess": best_guess,
+                        "alternatives": parsed.get("alternatives", []),
+                        "reason": "服务器AI未配置，使用自定义服务",
+                        "matched": _is_guess_correct(best_guess, target),
+                        "target": target,
+                        "raw": data,
+                        "provider": "custom",
+                    }
+                except Exception as exc:
+                    return {
+                        "success": False,
+                        "configured": True,
+                        "best_guess": None,
+                        "alternatives": [],
+                        "error": str(exc),
+                        "reason": None,
+                        "matched": False,
+                        "target": target,
+                        "provider": "custom",
+                    }
+            else:
+                return {
+                    "success": False,
+                    "configured": False,
+                    "best_guess": None,
+                    "alternatives": [],
+                    "reason": "服务器AI和自定义服务都未配置",
+                    "matched": False,
+                    "target": target,
+                    "raw": {"reason": "No AI service configured"},
+                    "provider": "none",
+                }
+    
+    elif call_preference == "custom" or sanitized_config.get("url"):
+        # 使用自定义服务
         try:
             data = _call_custom_model(image, prompt, sanitized_config)
             parsed = _extract_guesses(data)
@@ -432,12 +539,12 @@ def guess_drawing(
                 "alternatives": [],
                 "error": str(exc),
                 "reason": None,
-                "matched": False,  # AI调用失败，无法判断是否匹配
+                "matched": False,
                 "target": target,
                 "provider": "custom",
             }
 
-    # 检查是否有AI Studio API Key
+    # 默认逻辑：优先使用服务器端AI，如果没有则使用自定义配置
     api_key = os.getenv("AI_STUDIO_API_KEY")
     if api_key:
         try:
@@ -463,7 +570,7 @@ def guess_drawing(
                 "alternatives": [],
                 "error": str(exc),
                 "reason": None,
-                "matched": False,  # AI调用失败，无法判断是否匹配
+                "matched": False,
                 "target": target,
                 "provider": "ernie",
             }

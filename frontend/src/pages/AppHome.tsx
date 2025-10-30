@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'antd'
-import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined, PictureOutlined } from '@ant-design/icons'
+import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined, PictureOutlined, UserOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -29,6 +29,10 @@ function AppHome() {
 
   const handleGallery = () => {
     navigate('/app/gallery')
+  }
+
+  const handleLogin = () => {
+    navigate('/app/login')
   }
 
   return (
@@ -60,6 +64,15 @@ function AppHome() {
           className="app-home-button"
         >
           闯关模式
+        </Button>
+        <Button
+          type="primary"
+          size="large"
+          icon={<UserOutlined />}
+          onClick={handleLogin}
+          className="app-home-button app-home-button-login"
+        >
+          用户登录
         </Button>
         <Button
           type="default"

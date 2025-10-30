@@ -19,6 +19,7 @@ class GuessRequest(BaseModel):
     hint: str | None = None  # legacy payload key
     target: str | None = None  # 绘制目标，用于判断是否猜中
     config: ModelConfig | None = None
+    call_preference: str | None = None  # 调用偏好: 'custom' 或 'server'
 
 
 @router.post("/guess")
@@ -27,7 +28,7 @@ async def guess(req: GuessRequest):
     """Call ERNIE vision-language model (or fallback heuristic) to guess drawing content."""
     clue = req.clue or req.hint
     config = req.config.dict(exclude_none=True) if req.config else None
-    result = guess_drawing(req.image, clue, config, req.target)
+    result = guess_drawing(req.image, clue, config, req.target, req.call_preference)
     return result
 
 

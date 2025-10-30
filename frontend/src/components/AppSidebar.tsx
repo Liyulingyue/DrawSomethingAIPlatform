@@ -9,6 +9,7 @@ import {
   InfoCircleOutlined,
   PlusOutlined,
   PictureOutlined,
+  UserOutlined,
 } from '@ant-design/icons'
 import './AppSidebar.css'
 
@@ -26,6 +27,11 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       key: '/app/home',
       icon: <HomeOutlined />,
       label: '主页',
+    },
+    {
+      key: '/app/login',
+      icon: <UserOutlined />,
+      label: '登录',
     },
     {
       key: '/app/level-set',

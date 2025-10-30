@@ -1,0 +1,220 @@
+/* GitHub 链接样式 */
+.github-link {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  border-radius: 50%;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.github-link:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #000;
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.github-link:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.app-login-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-login-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 1rem;
+}
+
+.app-login-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.app-login-title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 1rem;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.02em;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.app-login-subtitle {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  margin: 0.5rem 0 0 0;
+  padding: 0 1rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  animation: fadeInDown 1s ease-out;
+}
+
+.app-login-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 1s ease-out;
+  padding: 2rem;
+}
+
+.app-login-card .ant-card-body {
+  padding: 0;
+}
+
+/* 登录表单样式 */
+.app-login-card .ant-radio-group {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.app-login-card .ant-radio-button-wrapper {
+  flex: 1;
+  text-align: center;
+  border-radius: 8px;
+  margin: 0 2px;
+}
+
+.app-login-card .ant-radio-button-wrapper-checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.app-login-card .ant-input,
+.app-login-card .ant-input-password {
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.app-login-card .ant-input:focus,
+.app-login-card .ant-input-password:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.app-login-card .ant-btn-primary {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.app-login-card .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 动画效果 */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .app-login-container {
+    gap: 2rem;
+  }
+
+  .app-login-title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .app-login-subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+  }
+
+  .app-login-card {
+    max-width: 350px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .github-link {
+    top: 15px;
+    right: 15px;
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .app-login-container {
+    gap: 1.5rem;
+  }
+
+  .app-login-title {
+    font-size: clamp(1.2rem, 5vw, 2rem);
+  }
+
+  .app-login-card {
+    max-width: 320px;
+    padding: 1.2rem;
+  }
+
+  .app-login-card .ant-btn-primary {
+    height: 44px;
+    font-size: 15px;
+  }
+}

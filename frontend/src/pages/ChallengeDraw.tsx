@@ -139,6 +139,7 @@ function ChallengeDraw() {
           model?: string
           prompt?: string
         }
+        call_preference?: 'custom' | 'server'
       } = {
         image,
         target: keyword,
@@ -161,6 +162,10 @@ function ChallengeDraw() {
       } else {
         console.log('ℹ️ 使用默认 AI 配置')
       }
+
+      // 添加调用偏好参数
+      requestBody.call_preference = aiConfig.callPreference || 'server'
+      console.log('📞 使用调用偏好:', requestBody.call_preference)
 
       // 调用后端 API
       const response = await api.post('/ai/guess', requestBody)

@@ -88,6 +88,7 @@ function AppDraw() {
           model?: string
           prompt?: string
         }
+        call_preference?: 'custom' | 'server'
       } = {
         image,
         target: targetWord.trim(),
@@ -110,6 +111,10 @@ function AppDraw() {
       } else {
         console.log('ℹ️ 使用默认 AI 配置')
       }
+
+      // 添加调用偏好参数
+      requestBody.call_preference = aiConfig.callPreference || 'server'
+      console.log('📞 使用调用偏好:', requestBody.call_preference)
 
       // 调用后端 API
       const response = await api.post('/ai/guess', requestBody)
@@ -258,22 +263,14 @@ function AppDraw() {
     }
 
     try {
-      const response = await fetch('/api/gallery/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image,
-          name: galleryName.trim() || '佚名'
-        })
+      await api.post('/gallery/save', {
+        image,
+        name: galleryName.trim() || '佚名'
       })
 
-      if (response.ok) {
-        message.success('成功发布到画廊！')
-        setShowSuccessGalleryModal(false)
-        setGalleryName('佚名')
-      } else {
-        throw new Error('发布失败')
-      }
+      message.success('成功发布到画廊！')
+      setShowSuccessGalleryModal(false)
+      setGalleryName('佚名')
     } catch (error) {
       console.error('发布到画廊失败:', error)
       message.error('发布失败，请稍后重试')

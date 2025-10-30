@@ -105,7 +105,12 @@ async def get_gallery_list():
 
 @router.delete("/{filename}")
 async def delete_gallery_item(filename: str, session_id: str = Header(None)):
-    if not session_id or not user_sessions.get(session_id, {}).get("is_admin", False):
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Session required")
+    
+    from ..shared import get_user_by_session
+    user = get_user_by_session(session_id)
+    if not user or not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
 
     if not os.path.exists(GALLERY_JSON):
