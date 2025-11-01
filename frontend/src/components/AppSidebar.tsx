@@ -10,6 +10,7 @@ import {
   PlusOutlined,
   PictureOutlined,
   UserOutlined,
+  HeartOutlined,
 } from '@ant-design/icons'
 import './AppSidebar.css'
 
@@ -62,6 +63,11 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       key: '/app/configAI',
       icon: <SettingOutlined />,
       label: 'AI 配置',
+    },
+    {
+      key: '/app/donate',
+      icon: <HeartOutlined />,
+      label: '支持我们',
     },
   ]
 

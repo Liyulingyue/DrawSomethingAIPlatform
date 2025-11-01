@@ -282,6 +282,21 @@
   box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
+/* 打赏按钮特殊样式 */
+.action-button-donate.ant-btn-default {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  border: 2px solid transparent;
+  color: white;
+}
+
+.action-button-donate.ant-btn-default:hover {
+  background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
+  border-color: transparent;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+}
+
 /* 版权信息 */
 .introduction-footer {
   text-align: center;

@@ -224,3 +224,9 @@ pids
 /backend/Source/*
 !/backend/Source/.gitkeep
 !/backend/Source/gallery/.gitkeep
+
+# Donation QR codes
+frontend/public/*-qr.*
+frontend/public/wechat-qr.*
+frontend/public/alipay-qr.*
+frontend/public/donate-qr.*

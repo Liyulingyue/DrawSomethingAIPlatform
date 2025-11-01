@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button, Card, Collapse } from 'antd'
-import { HomeOutlined, QuestionCircleOutlined, RocketOutlined, BulbOutlined, SettingOutlined, GithubOutlined, BugOutlined } from '@ant-design/icons'
+import { QuestionCircleOutlined, RocketOutlined, BulbOutlined, SettingOutlined, GithubOutlined, BugOutlined, HeartOutlined, HomeOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -12,6 +12,10 @@ const { Panel } = Collapse
 function Introduction() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
+
+  const handleDonate = () => {
+    navigate('/app/donate')
+  }
 
   return (
     <>
@@ -218,6 +222,14 @@ function Introduction() {
               className="action-button"
             >
               配置 AI
+            </Button>
+            <Button
+              size="large"
+              icon={<HeartOutlined />}
+              onClick={handleDonate}
+              className="action-button action-button-donate"
+            >
+              支持我们
             </Button>
             <Button
               size="large"

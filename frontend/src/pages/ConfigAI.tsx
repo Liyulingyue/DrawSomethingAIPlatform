@@ -362,7 +362,7 @@ function ConfigAI() {
             <p className="config-ai-subtitle">配置 AI 服务的连接参数</p>
           </div>
 
-          <Card className="config-ai-card" bordered={false}>
+          <Card className="config-ai-card" variant="borderless">
             <Form
               form={form}
               layout="vertical"
@@ -425,23 +425,25 @@ function ConfigAI() {
                 name="callPreference"
                 rules={[{ required: true, message: '请选择调用偏好' }]}
               >
-                <Radio.Group 
-                  size="large" 
-                  className="config-radio-group"
-                  value={currentCallPreference}
-                  onChange={(e) => handleCallPreferenceChange(e.target.value)}
-                >
-                  <Radio.Button value="custom" className="config-radio-button">
-                    <SettingOutlined style={{ marginRight: '8px' }} />
-                    自定义服务
-                  </Radio.Button>
-                  <Radio.Button value="server" className="config-radio-button">
-                    <ApiOutlined style={{ marginRight: '8px' }} />
-                    服务器调用点
-                  </Radio.Button>
-                </Radio.Group>
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                  💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务
+                <div>
+                  <Radio.Group 
+                    size="large" 
+                    className="config-radio-group"
+                    value={currentCallPreference}
+                    onChange={(e) => handleCallPreferenceChange(e.target.value)}
+                  >
+                    <Radio.Button value="custom" className="config-radio-button">
+                      <SettingOutlined style={{ marginRight: '8px' }} />
+                      自定义服务
+                    </Radio.Button>
+                    <Radio.Button value="server" className="config-radio-button">
+                      <ApiOutlined style={{ marginRight: '8px' }} />
+                      服务器调用点
+                    </Radio.Button>
+                  </Radio.Group>
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                    💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务
+                  </div>
                 </div>
               </Form.Item>
 

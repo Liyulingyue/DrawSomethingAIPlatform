@@ -1,0 +1,463 @@
+.app-donate-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-donate-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-donate-header {
+  text-align: center;
+  width: 100%;
+}
+
+.app-donate-back-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-donate-back-button:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.app-donate-title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 1rem;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.02em;
+  animation: fadeInDown 0.8s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-donate-subtitle {
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  margin: 0.5rem 0 0 0;
+  padding: 0 1rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  animation: fadeInDown 1s ease-out;
+}
+
+.app-donate-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1000px;
+  animation: fadeInUp 1s ease-out;
+}
+
+.donate-method {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.donate-method:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.donate-method-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.donate-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+.donate-icon.wechat {
+  background: linear-gradient(135deg, #07C160 0%, #00A857 100%);
+}
+
+.donate-icon.alipay {
+  background: linear-gradient(135deg, #1677FF 0%, #0050B3 100%);
+}
+
+.donate-icon.crypto {
+  background: linear-gradient(135deg, #F7931A 0%, #FF9518 100%);
+}
+
+.donate-method-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.donate-qr-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.donate-qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  color: #666;
+  text-align: center;
+  min-height: 180px;
+  width: 180px;
+}
+
+.donate-qr-image {
+  max-width: 180px;
+  max-height: 180px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
+.donate-qr-placeholder p {
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.donate-qr-placeholder small {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.4;
+}
+
+.crypto-addresses {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.crypto-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.crypto-label {
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.crypto-address {
+  flex: 1;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  word-break: break-all;
+  color: #666;
+}
+
+.app-donate-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* 服务点调用说明框 */
+.donate-info-box {
+  margin: 2rem 0;
+  animation: fadeInUp 1s ease-out;
+}
+
+.donate-info-content {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border: 2px solid #91d5ff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.donate-info-title {
+  color: #1890ff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.donate-info-text {
+  color: #333;
+  line-height: 1.6;
+}
+
+.donate-info-text p {
+  margin: 0 0 0.8rem 0;
+  font-size: 1rem;
+}
+
+.donate-info-text p:last-child {
+  margin-bottom: 0;
+}
+
+.donate-info-text strong {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.donate-info-note {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(24, 144, 255, 0.2);
+  color: #666;
+  font-style: italic;
+}
+
+.donate-info-note small {
+  line-height: 1.5;
+  display: block;
+}
+
+.donate-recommendation {
+  background: linear-gradient(135deg, #fff7e6 0%, #fff1b8 100%);
+  border: 2px solid #ffd666;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  color: #d46b08;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(255, 214, 102, 0.3);
+}
+
+.donate-recommendation strong {
+  color: #d46b08;
+  font-size: 1.1em;
+}
+
+.donate-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50px;
+  color: #333;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: fadeInUp 1.2s ease-out;
+}
+
+/* 动画效果 */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .app-donate-content {
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .app-donate-title {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+  }
+
+  .app-donate-subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  }
+
+  .app-donate-methods {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .donate-method {
+    padding: 1.5rem;
+  }
+
+  .donate-method-header {
+    gap: 0.75rem;
+  }
+
+  .donate-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .donate-method-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .crypto-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .crypto-label {
+    min-width: unset;
+  }
+
+  .donate-method-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .crypto-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .crypto-label {
+    min-width: unset;
+  }
+
+  .crypto-address {
+    width: 100%;
+    word-break: break-all;
+  }
+
+  .donate-info-content {
+    padding: 1.2rem;
+  }
+
+  .donate-info-title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-donate-container {
+    gap: 1rem;
+  }
+
+  .app-donate-content {
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+  }
+
+  .app-donate-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .app-donate-methods {
+    gap: 1rem;
+  }
+
+  .donate-method {
+    padding: 1rem;
+  }
+
+  .donate-method-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .donate-qr-placeholder {
+    min-height: 150px;
+    width: 150px;
+    padding: 1.5rem;
+  }
+
+  .donate-message {
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+  }
+
+  .donate-info-box {
+    margin: 1.5rem 0;
+  }
+
+  .donate-info-content {
+    padding: 1rem;
+  }
+
+  .donate-info-title {
+    font-size: 1rem;
+  }
+
+  .donate-info-text p {
+    font-size: 0.95rem;
+  }
+
+  .donate-info-note small {
+    font-size: 0.9rem;
+  }
+
+  .donate-recommendation {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+  }
+}

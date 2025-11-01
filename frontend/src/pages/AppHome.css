@@ -199,6 +199,19 @@
   color: white;
 }
 
+/* 打赏按钮特殊样式 */
+.app-home-button-donate.ant-btn-default {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  border: 2px solid transparent;
+  color: white;
+}
+
+.app-home-button-donate.ant-btn-default:hover {
+  background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
+  border-color: transparent;
+  color: white;
+}
+
 /* 动画效果 */
 @keyframes fadeInDown {
   from {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'antd'
-import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined, PictureOutlined, UserOutlined } from '@ant-design/icons'
+import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined, PictureOutlined, UserOutlined, HeartOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -33,6 +33,10 @@ function AppHome() {
 
   const handleLogin = () => {
     navigate('/app/login')
+  }
+
+  const handleDonate = () => {
+    navigate('/app/donate')
   }
 
   return (
@@ -109,6 +113,15 @@ function AppHome() {
           className="app-home-button app-home-button-info"
         >
           使用说明
+        </Button>
+        <Button
+          type="default"
+          size="large"
+          icon={<HeartOutlined />}
+          onClick={handleDonate}
+          className="app-home-button app-home-button-donate"
+        >
+          支持我们
         </Button>
       </div>
         </div>

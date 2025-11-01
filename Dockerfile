@@ -10,7 +10,11 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements and install
 COPY backend/requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir \
+    --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+    --extra-index-url https://pypi.org/simple \
+    --timeout 300 \
+    -r requirements.txt
 
 # Copy backend code
 COPY backend/ .
