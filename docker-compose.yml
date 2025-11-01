@@ -7,14 +7,14 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    # 移除对外端口暴露 - 只允许内部访问
+    # 移除对外端口暴露 - 只允许内部访问，开发环境需要放开限制
     # ports:
     #   - "5432:5432"
     networks:
       - internal
     restart: unless-stopped
 
-  # 生产环境建议移除或限制访问
+  # 生产环境移除或限制访问，开发环境可启用，用于数据库管理
   # adminer:
   #   image: adminer
   #   ports:

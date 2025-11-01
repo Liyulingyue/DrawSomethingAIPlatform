@@ -161,12 +161,13 @@ async def user_login(request: dict, db: Session = Depends(get_db)):
         
         return {"success": True, "session_id": session_id, "username": username, "is_admin": False}
     else:
-        # 创建新用户
+        # 创建新用户，默认赠送调用点
         password_hash = hash_password(password)
         new_user = User(
             username=username,
             password_hash=password_hash,
-            is_admin=False
+            is_admin=False,
+            calls_remaining=config.DEFAULT_NEW_USER_CALLS  # 从配置读取新用户默认调用点
         )
         db.add(new_user)
         db.commit()

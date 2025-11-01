@@ -25,6 +25,9 @@ class Config:
     SESSION_TIMEOUT_SECONDS: int = int(os.getenv("SESSION_TIMEOUT_SECONDS", "3600"))  # 1 hour inactivity timeout
     SESSION_MAX_LIFETIME_SECONDS: int = int(os.getenv("SESSION_MAX_LIFETIME_SECONDS", "86400"))  # 24 hour max lifetime
 
+    # === 用户配置 ===
+    DEFAULT_NEW_USER_CALLS: int = int(os.getenv("DEFAULT_NEW_USER_CALLS", "20"))  # 新用户默认赠送的调用点数量
+
     # === 画廊配置 ===
     GALLERY_DIR: str = os.getenv("GALLERY_DIR", "Source/gallery")
 
