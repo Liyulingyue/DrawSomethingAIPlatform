@@ -9,11 +9,11 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements and install
 COPY backend/requirements.txt .
-RUN pip install --upgrade pip && \
-    pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
-    pip config set global.extra-index-url https://pypi.org/simple && \
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ && \
+    pip config set global.trusted-host pypi.tuna.tsinghua.edu.cn && \
     pip config set global.timeout 600 && \
     pip config set global.retries 10 && \
+    pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
