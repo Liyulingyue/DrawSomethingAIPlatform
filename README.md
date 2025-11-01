@@ -268,50 +268,68 @@ npm run preview
 **环境要求**：
 - Docker 和 Docker Compose
 
-**快速启动**：
+##### 快速开始（试用环境）
+
+使用开发环境配置文件进行快速试用，适合开发调试和功能体验：
+
 ```bash
 # 克隆项目
 git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
 cd DrawSomethingAIPlatform
 
-# 可选：设置 AI 环境变量（如果不使用前端配置）
-echo "MODEL_KEY=your_api_key_here" > .env
-
-# 必需：设置管理员账号
-echo "ADMIN_USER=admin" >> .env
-echo "ADMIN_PASSWORD=your_secure_password" >> .env
-
-# 生产环境：创建 frontend/.env.production 文件配置 API 地址
-echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
-
-**快速启动**：
-```bash
-# 克隆项目
-git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
-cd DrawSomethingAIPlatform
-
-# 可选：设置 AI 环境变量（如果不使用前端配置）
-echo "MODEL_KEY=your_api_key_here" > .env
-
-# 必需：设置管理员账号
-echo "ADMIN_USER=admin" >> .env
-echo "ADMIN_PASSWORD=your_secure_password" >> .env
-
-# 生产环境：创建 frontend/.env.production 文件配置 API 地址
-echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
-
-# 启动服务
-docker-compose up -d
+# 启动开发环境（包含数据库和Adminer）
+docker-compose -f docker-compose.dev.yml up -d
 
 # 服务将在以下端口启动：
 # - 后端：http://localhost:8002
 # - 前端：http://localhost:5173
 # - Adminer（数据库管理）：http://localhost:8080
+# - 数据库：localhost:5432 (外部可访问，便于开发调试)
 ```
 
-> **开发环境说明**：
-> - 如果只需要数据库服务，可以单独启动：`docker-compose up -d db adminer`
-> - 数据库将在 `localhost:5432` 端口可用，Adminer将在 `http://localhost:8080` 访问
+**开发环境特点**：
+- 支持源代码热重载
+- 数据库端口对外暴露
+- 包含 Adminer 数据库管理工具
+- 适合开发和测试
+
+##### 生产部署
+
+使用生产环境配置文件进行正式部署，优化安全性和性能：
+
+```bash
+# 克隆项目
+git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
+cd DrawSomethingAIPlatform
+
+# 可选：设置 AI 环境变量（如果不使用前端配置）
+echo "MODEL_KEY=your_api_key_here" > .env
+
+# 必需：设置管理员账号
+echo "ADMIN_USER=admin" >> .env
+echo "ADMIN_PASSWORD=your_secure_password" >> .env
+
+# 生产环境：创建 frontend/.env.production 文件配置 API 地址
+echo "VITE_API_BASE_URL=https://your-production-domain.com/api" > frontend/.env.production
+
+# 启动生产环境
+docker-compose up -d
+
+# 服务将在以下端口启动：
+# - 后端：http://localhost:8002
+# - 前端：http://localhost:5173
+```
+
+**生产环境特点**：
+- 数据库端口不对外暴露，提高安全性
+- 不包含开发工具（如 Adminer）
+- 后端使用构建镜像，不挂载源代码
+- 适合生产环境部署
+
+> **环境选择建议**：
+> - **首次试用**：使用 `docker-compose.dev.yml` 快速体验所有功能
+> - **生产部署**：使用 `docker-compose.yml` 获得更好的安全性和性能
+> - **开发调试**：使用 `docker-compose.dev.yml` 
 ```
 
 > **生产部署说明**：
