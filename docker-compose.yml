@@ -7,17 +7,23 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # 移除对外端口暴露 - 只允许内部访问
+    # ports:
+    #   - "5432:5432"
+    networks:
+      - internal
     restart: unless-stopped
 
-  adminer:
-    image: adminer
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
-    depends_on:
-      - db
+  # 生产环境建议移除或限制访问
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - internal
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
 
   backend:
     build: .
@@ -29,6 +35,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
     depends_on:
       - db
+    networks:
+      - internal
     restart: unless-stopped
 
   frontend:
@@ -40,6 +48,10 @@ services:
       - ./frontend:/app
     command: sh -c "npm install && npm run dev"
     restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
 
 volumes:
   postgres_data:
