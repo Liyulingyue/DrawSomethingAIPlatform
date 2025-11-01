@@ -1,136 +1,116 @@
 import os
-import json
 import base64
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Depends
 from pydantic import BaseModel
-from ..shared import GALLERY_DIR, user_sessions, get_user_by_session
+from sqlalchemy.orm import Session
+from ..database import Gallery, User, get_db
+from ..shared import get_user_by_session
 
 router = APIRouter(prefix="/gallery", tags=["gallery"])
-
-GALLERY_JSON = os.path.join(GALLERY_DIR, "gallery.json")
 
 class SaveGalleryRequest(BaseModel):
     image: str  # base64 encoded image
     name: str = "佚名"
+    user_id: int = None  # 可选的用户ID
 
 @router.post("/save")
-async def save_to_gallery(request: SaveGalleryRequest):
-    # Ensure gallery directory exists
-    os.makedirs(GALLERY_DIR, exist_ok=True)
-
-    # Load existing gallery data
-    if os.path.exists(GALLERY_JSON):
-        with open(GALLERY_JSON, "r", encoding="utf-8") as f:
-            gallery = json.load(f)
-    else:
-        gallery = []
-
-    # Decode and save image
+async def save_to_gallery(request: SaveGalleryRequest, db: Session = Depends(get_db)):
+    # Decode image data
     try:
         image_data = base64.b64decode(request.image.split(',')[1])  # Remove data:image/png;base64,
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}.png"
-        filepath = os.path.join(GALLERY_DIR, filename)
-        with open(filepath, "wb") as f:
-            f.write(image_data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image data: {str(e)}")
 
-    # Add to gallery list
-    gallery.append({
-        "filename": filename,
-        "name": request.name,
-        "timestamp": timestamp,
-        "likes": 0
-    })
+    # Generate filename and timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{timestamp}.png"
+
+    # Get username from user_id if provided
+    username = request.name
+    if request.user_id:
+        user = db.query(User).filter(User.id == request.user_id).first()
+        if user:
+            username = user.username
+
+    # Create gallery entry in database with image data
+    gallery_item = Gallery(
+        filename=filename,
+        username=username,
+        user_id=request.user_id,
+        timestamp=timestamp,
+        likes=0,
+        image_data=image_data,
+        image_mime_type='image/png'
+    )
+    db.add(gallery_item)
 
     # Maintain max 100 images - clean up on every insert, max 2 deletions per insert
-    if len(gallery) > 100:
-        # Sort by timestamp and remove oldest (up to 2 images)
-        gallery.sort(key=lambda x: x["timestamp"])
-        deletions = min(2, len(gallery) - 100)  # Don't delete more than needed, max 2 per insert
-        for _ in range(deletions):
-            if gallery:
-                oldest = gallery.pop(0)
-                oldest_filepath = os.path.join(GALLERY_DIR, oldest["filename"])
-                if os.path.exists(oldest_filepath):
-                    os.remove(oldest_filepath)
-                    print(f"Removed old gallery image: {oldest_filepath}")
+    total_count = db.query(Gallery).count()
+    if total_count >= 100:
+        # Get oldest entries (up to 2)
+        oldest_entries = db.query(Gallery).order_by(Gallery.created_at).limit(2).all()
+        deletions = min(2, total_count - 99)  # Keep 100, so delete if we have 101+
 
-    # Save updated gallery data
-    with open(GALLERY_JSON, "w", encoding="utf-8") as f:
-        json.dump(gallery, f, ensure_ascii=False, indent=2)
+        for entry in oldest_entries[:deletions]:
+            db.delete(entry)
+
+    db.commit()
 
     return {"message": "Saved to gallery"}
 
 @router.post("/like/{filename}")
-async def like_gallery_item(filename: str):
-    if not os.path.exists(GALLERY_JSON):
-        raise HTTPException(status_code=404, detail="Gallery not found")
-
-    with open(GALLERY_JSON, "r", encoding="utf-8") as f:
-        gallery = json.load(f)
-
-    # Find and update the item
-    for item in gallery:
-        if item["filename"] == filename:
-            item["likes"] = (item.get("likes", 0) + 1)
-            break
-    else:
+async def like_gallery_item(filename: str, db: Session = Depends(get_db)):
+    # Find the gallery item
+    gallery_item = db.query(Gallery).filter(Gallery.filename == filename).first()
+    if not gallery_item:
         raise HTTPException(status_code=404, detail="Gallery item not found")
 
-    # Save updated gallery data
-    with open(GALLERY_JSON, "w", encoding="utf-8") as f:
-        json.dump(gallery, f, ensure_ascii=False, indent=2)
+    # Increment likes
+    gallery_item.likes += 1
+    db.commit()
 
-    return {"message": "Liked successfully", "likes": item["likes"]}
+    return {"message": "Liked successfully", "likes": gallery_item.likes}
 
 @router.get("/list")
-async def get_gallery_list():
-    if not os.path.exists(GALLERY_JSON):
-        return []
+async def get_gallery_list(db: Session = Depends(get_db)):
+    # Get all gallery items, ordered by creation time (newest first)
+    gallery_items = db.query(Gallery).order_by(Gallery.created_at.desc()).all()
 
-    with open(GALLERY_JSON, "r", encoding="utf-8") as f:
-        gallery = json.load(f)
+    # Convert to the expected format with base64 encoded image data
+    gallery_list = []
+    for item in gallery_items:
+        # Encode image data to base64
+        image_base64 = base64.b64encode(item.image_data).decode('utf-8')
+        image_data_url = f"data:{item.image_mime_type};base64,{image_base64}"
 
-    # Sort by timestamp (newest first) and ensure likes field exists
-    gallery.sort(key=lambda x: x["timestamp"], reverse=True)
-    for item in gallery:
-        if "likes" not in item:
-            item["likes"] = 0
+        gallery_list.append({
+            "filename": item.filename,
+            "name": item.username,
+            "timestamp": item.timestamp,
+            "likes": item.likes,
+            "image_data": image_data_url  # Add base64 encoded image data
+        })
 
-    return gallery
+    return gallery_list
 
 
 @router.delete("/{filename}")
-async def delete_gallery_item(filename: str, session_id: str = Header(None)):
+async def delete_gallery_item(filename: str, session_id: str = Header(None), db: Session = Depends(get_db)):
     if not session_id:
         raise HTTPException(status_code=401, detail="Session required")
-    
+
     user = get_user_by_session(session_id)
     if not user or not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
 
-    if not os.path.exists(GALLERY_JSON):
-        raise HTTPException(status_code=404, detail="Gallery not found")
-
-    with open(GALLERY_JSON, "r", encoding="utf-8") as f:
-        gallery = json.load(f)
-
-    # Find and remove the item
-    for i, item in enumerate(gallery):
-        if item["filename"] == filename:
-            gallery.pop(i)
-            filepath = os.path.join(GALLERY_DIR, filename)
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            break
-    else:
+    # Find the gallery item
+    gallery_item = db.query(Gallery).filter(Gallery.filename == filename).first()
+    if not gallery_item:
         raise HTTPException(status_code=404, detail="Gallery item not found")
 
-    # Save updated gallery data
-    with open(GALLERY_JSON, "w", encoding="utf-8") as f:
-        json.dump(gallery, f, ensure_ascii=False, indent=2)
+    # Remove from database (image data is stored in DB, no file to delete)
+    db.delete(gallery_item)
+    db.commit()
 
     return {"message": "Deleted successfully"}

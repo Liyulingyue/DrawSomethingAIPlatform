@@ -13,6 +13,7 @@ interface GalleryItem {
   name: string;
   timestamp: string;
   likes: number;
+  image_data: string; // base64 encoded image data (required)
 }
 
 const Gallery: React.FC = () => {
@@ -172,12 +173,12 @@ const Gallery: React.FC = () => {
               {galleryItems.map((item) => (
                 <div key={item.filename} className="gallery-item">
                   <img
-                    src={`${API_BASE_URL}/gallery/static/${item.filename}`}
+                    src={item.image_data!}
                     alt={`由 ${item.name} 绘制`}
                     className="gallery-image"
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                      setPreviewImg(`${API_BASE_URL}/gallery/static/${item.filename}`);
+                      setPreviewImg(item.image_data!);
                       setPreviewVisible(true);
                     }}
                   />

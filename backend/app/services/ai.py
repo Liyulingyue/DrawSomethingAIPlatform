@@ -359,6 +359,7 @@ def guess_drawing(
     base_url = sanitized_config.get("url")
     api_key = sanitized_config.get("key")
     model_name = sanitized_config.get("model")
+    print(f"🔧 准备调用AI模型，提供者: {provider}, base_url: {base_url}, api_key: {api_key}, model_name: {model_name}")
 
     if not base_url or not api_key:
         return {

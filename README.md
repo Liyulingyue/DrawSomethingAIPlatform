@@ -721,16 +721,44 @@ alembic revision --autogenerate -m "initial migration"
 alembic upgrade head
 ```
 
-##### 开发过程中的数据库变更
+##### 自动迁移应用
 
-当修改数据库模型时：
+**本项目已集成自动迁移应用**，后端启动时会自动执行数据库迁移，无需手动操作。
 
 ```bash
+# 正常启动后端即可，迁移会自动应用
+cd backend
+python run.py
+```
+
+启动日志会显示：
+```
+正在应用数据库迁移...
+数据库迁移应用完成
+INFO:     Started server process [...]
+```
+
+如果迁移失败，应用会继续启动但可能出现数据库错误。
+
+##### 手动迁移管理
+
+如果需要手动管理迁移：
+
+```bash
+# 进入后端目录
+cd backend
+
 # 生成新的迁移文件
 alembic revision --autogenerate -m "描述变更内容"
 
-# 应用迁移
+# 手动应用迁移
 alembic upgrade head
+
+# 检查状态
+alembic status
+
+# 查看历史
+alembic history
 ```
 
 ##### 常用 Alembic 命令
@@ -747,9 +775,78 @@ alembic downgrade <revision_id>
 
 # 查看待应用的迁移
 alembic show <revision_id>
+
+# 应用所有待处理的迁移到最新版本
+alembic upgrade head
+
+# 应用到指定版本
+alembic upgrade <revision_id>
+
+# 回滚一步（回到上一个版本）
+alembic downgrade -1
+
+# 查看迁移状态（哪些已应用，哪些待应用）
+alembic status
+
+# 生成空的迁移文件（手动编写迁移逻辑）
+alembic revision -m "migration message"
+
+# 强制标记迁移为已应用（危险操作，仅在确定时使用）
+alembic stamp head
+
+# 查看数据库中的当前版本
+alembic current
+
+# 检查迁移文件是否有语法错误
+alembic check
 ```
 
-> **注意**：生产环境部署时，请确保在部署前应用所有迁移。建议在 CI/CD 流程中包含 `alembic upgrade head` 步骤。
+##### 迁移文件管理
+
+```bash
+# 查看迁移文件内容
+alembic show <revision_id>
+
+# 编辑迁移文件（如果需要手动调整）
+# 编辑 backend/alembic/versions/<revision_id>_<message>.py
+
+# 删除错误的迁移文件（如果还没应用）
+# 直接删除 backend/alembic/versions/ 下的文件
+```
+
+##### 生产环境部署
+
+```bash
+# 在生产环境中应用迁移（建议在应用启动前执行）
+alembic upgrade head
+
+# 检查迁移状态
+alembic status
+
+# 如果需要回滚（谨慎操作）
+alembic downgrade <safe_revision_id>
+```
+
+> **注意**：
+> - 生产环境部署时，请确保在部署前应用所有迁移
+> - 建议在 CI/CD 流程中包含 `alembic upgrade head` 步骤
+> - 回滚操作可能导致数据丢失，请谨慎使用
+> - 本项目已集成自动迁移应用，后端启动时会自动执行 `alembic upgrade head`
+
+#### 画廊数据库迁移
+
+项目已将画廊功能完全迁移到数据库，图片数据直接存储在数据库中，无需文件系统支持。
+
+**迁移步骤：**
+```bash
+# 进入后端目录
+cd backend
+
+# 运行迁移脚本（将gallery.json和图片文件数据完全迁移到数据库）
+python migrate_gallery.py
+```
+
+迁移完成后，原`gallery.json`文件会被备份为`gallery.json.backup`，图片文件数据会完全导入到数据库中，旧的图片文件可以安全删除。
 
 ## 📚 API 文档
 

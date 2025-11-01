@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
@@ -33,8 +33,21 @@ class UserSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     last_activity = Column(DateTime, default=datetime.utcnow)
 
-# 创建表
-Base.metadata.create_all(bind=engine)
+class Gallery(Base):
+    __tablename__ = "gallery"
+
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, nullable=False)  # 上传者用户名
+    user_id = Column(Integer, nullable=True)  # 关联用户ID，可为空（兼容旧数据）
+    timestamp = Column(String, nullable=False)  # 格式：YYYYMMDD_HHMMSS
+    likes = Column(Integer, default=0)
+    image_data = Column(LargeBinary, nullable=False)  # 图片二进制数据
+    image_mime_type = Column(String, default='image/png')  # 图片MIME类型
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# 注意：不再自动创建表，由 Alembic 迁移管理数据库结构
+# Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
