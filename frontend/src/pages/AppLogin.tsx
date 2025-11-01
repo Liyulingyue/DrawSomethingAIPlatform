@@ -275,7 +275,7 @@ function AppLogin() {
               <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <div>
                   <Title level={3}>用户登录</Title>
-                  <Text type="secondary">输入用户名和密码登录</Text>
+                  <Text type="secondary">输入用户名和密码登录，登录使您能够使用服务器资源进行模型推理</Text>
                 </div>
 
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>
