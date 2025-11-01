@@ -65,7 +65,7 @@ function AppHome() {
           size="large"
           icon={<TrophyOutlined />}
           onClick={handleLevelSelect}
-          className="app-home-button"
+          className="app-home-button app-home-button-primary"
         >
           闯关模式
         </Button>

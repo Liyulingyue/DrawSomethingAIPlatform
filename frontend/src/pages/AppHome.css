@@ -160,6 +160,16 @@
   color: #764ba2;
 }
 
+/* 闯关模式按钮特殊样式 */
+.app-home-button-primary.ant-btn-primary {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  border: none;
+}
+
+.app-home-button-primary.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #fee140 0%, #fa709a 100%);
+}
+
 /* AI 配置按钮特殊样式 */
 .app-home-button-config.ant-btn-default {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
