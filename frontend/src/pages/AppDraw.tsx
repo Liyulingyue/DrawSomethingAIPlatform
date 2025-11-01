@@ -17,11 +17,11 @@ function AppDraw() {
   const [targetWord, setTargetWord] = useState('')
   const [clue, setClue] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [galleryName, setGalleryName] = useState('佚名')
+  const { sessionId, refreshUserInfo, username } = useUser()
+  const [galleryName, setGalleryName] = useState(username || '佚名')
   const [showSuccessGalleryModal, setShowSuccessGalleryModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successModalData, setSuccessModalData] = useState<any>(null)
-  const { sessionId, refreshUserInfo } = useUser()
 
   // 防止移动设备页面滚动
   useEffect(() => {
@@ -53,6 +53,13 @@ function AppDraw() {
       document.removeEventListener('touchmove', preventScroll)
     }
   }, [])
+
+  // 当用户名改变时，更新默认的画廊名称
+  useEffect(() => {
+    if (username && galleryName === '佚名') {
+      setGalleryName(username)
+    }
+  }, [username, galleryName])
 
   const handleDraw = (image: string) => {
     // 绘画时的回调，可以用于实时保存等
@@ -361,7 +368,7 @@ function AppDraw() {
             <Input
               value={galleryName}
               onChange={(e) => setGalleryName(e.target.value)}
-              placeholder="输入您的名称（默认佚名）"
+              placeholder={`输入您的名称（默认${username || '佚名'}）`}
             />
           </Form.Item>
           <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>

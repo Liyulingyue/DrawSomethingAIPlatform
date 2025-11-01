@@ -6,6 +6,7 @@ import { api } from '../utils/api'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002'
 
 interface UserContextValue {
+  userId: number | null
   username: string
   sessionId: string
   isAdmin: boolean
@@ -43,6 +44,7 @@ const safeSetItem = (key: string, value: string) => {
 }
 
 export function UserProvider({ children }: UserProviderProps) {
+  const [userId, setUserId] = useState<number | null>(null)
   const [username, setUsername] = useState('')
   const [sessionId, setSessionId] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
@@ -115,6 +117,7 @@ export function UserProvider({ children }: UserProviderProps) {
                 if (infoResponse.ok) {
                   const infoData = await infoResponse.json()
                   if (infoData.success) {
+                    setUserId(infoData.user_id || null)
                     setSessionId(storedSession)
                     setUsername(infoData.username)
                     setIsAdmin(infoData.is_admin)
@@ -223,6 +226,7 @@ export function UserProvider({ children }: UserProviderProps) {
       })
       if (response.data.success) {
         const { session_id: newSessionId, username: newUsername, is_admin } = response.data
+        setUserId(null) // 管理员没有对应的user记录
         setSessionId(newSessionId)
         setUsername(newUsername)
         setIsAdmin(is_admin)
@@ -274,6 +278,7 @@ export function UserProvider({ children }: UserProviderProps) {
           if (infoResponse.ok) {
             const infoData = await infoResponse.json()
             if (infoData.success) {
+              setUserId(infoData.user_id || null)
               setSessionId(storedSession)
               setUsername(infoData.username)
               setIsAdmin(infoData.is_admin)
@@ -303,6 +308,7 @@ export function UserProvider({ children }: UserProviderProps) {
   }, [])
 
   const value = useMemo<UserContextValue>(() => ({
+    userId,
     username,
     sessionId,
     isAdmin,
@@ -314,7 +320,7 @@ export function UserProvider({ children }: UserProviderProps) {
     updateUsername,
     suggestUsername,
     refreshUserInfo,
-  }), [username, sessionId, isAdmin, callsRemaining, initializing, loading, login, adminLogin, updateUsername, suggestUsername, refreshUserInfo])
+  }), [userId, username, sessionId, isAdmin, callsRemaining, initializing, loading, login, adminLogin, updateUsername, suggestUsername, refreshUserInfo])
 
   return (
     <UserContext.Provider value={value}>

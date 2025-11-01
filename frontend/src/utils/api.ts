@@ -7,6 +7,15 @@ export const api = axios.create({
   timeout: 15000,
 })
 
+// Add request interceptor to include session-id header
+api.interceptors.request.use((config) => {
+  const sessionId = localStorage.getItem('sessionId')
+  if (sessionId) {
+    config.headers['session-id'] = sessionId
+  }
+  return config
+})
+
 export function formatRelativeTime(timestamp?: number | null): string {
   if (!timestamp) return '未知'
   const diff = Math.max(0, Date.now() / 1000 - timestamp)

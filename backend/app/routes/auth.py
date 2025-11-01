@@ -233,6 +233,7 @@ async def get_user_info(request: dict, db: Session = Depends(get_db)):
         if user:
             return {
                 "success": True,
+                "user_id": user.id,
                 "username": user.username,
                 "is_admin": user.is_admin,
                 "calls_remaining": user.calls_remaining if user.calls_remaining is not None else 0

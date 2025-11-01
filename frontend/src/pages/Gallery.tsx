@@ -11,6 +11,7 @@ import './Gallery.css';
 interface GalleryItem {
   filename: string;
   name: string;
+  user_id: number | null;
   timestamp: string;
   likes: number;
   image_data: string; // base64 encoded image data (required)
@@ -23,10 +24,12 @@ const Gallery: React.FC = () => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc'>('time-desc');
-  const { isAdmin } = useUser();
+  const { isAdmin, userId, refreshUserInfo } = useUser();
 
   useEffect(() => {
     fetchGalleryItems();
+    // 刷新用户信息以确保userId正确
+    refreshUserInfo();
   }, []);
 
   const fetchGalleryItems = async () => {
@@ -207,7 +210,7 @@ const Gallery: React.FC = () => {
                           {item.likes || 0}
                         </span>
                       </button>
-                      {isAdmin && (
+                      {(isAdmin || (userId && item.user_id === userId)) && (
                         <button
                           className="gallery-delete-button"
                           onClick={(e) => {
@@ -250,7 +253,7 @@ const Gallery: React.FC = () => {
         onCancel={() => setPreviewVisible(false)}
         width={800}
         centered
-        bodyStyle={{ textAlign: 'center', padding: 0 }}
+        styles={{ body: { textAlign: 'center', padding: 0 } }}
       >
         {previewImg && (
           <img

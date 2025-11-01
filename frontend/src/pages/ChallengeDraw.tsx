@@ -7,7 +7,7 @@ import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getLevelById } from '../config/levels'
-import { api, API_BASE_URL } from '../utils/api'
+import { api } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
 import { generatePoster, downloadPoster } from '../utils/posterGenerator'
 import { useUser } from '../context/UserContext'
@@ -31,12 +31,12 @@ const markKeywordCompleted = (levelId: string, keyword: string) => {
 
 function ChallengeDraw() {
   const { message, modal } = App.useApp()
-  const { sessionId } = useUser()
+  const { sessionId, username } = useUser()
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [showGalleryModal, setShowGalleryModal] = useState(false)
-  const [galleryName, setGalleryName] = useState('佚名')
+  const [galleryName, setGalleryName] = useState(username || '佚名')
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -109,6 +109,13 @@ function ChallengeDraw() {
       navigate('/app/level-set')
     }
   }, [levelId, keyword, navigate])
+
+  // 当用户名改变时，更新默认的画廊名称
+  useEffect(() => {
+    if (username && galleryName === '佚名') {
+      setGalleryName(username)
+    }
+  }, [username, galleryName])
 
   const handleDraw = (image: string) => {
     // 绘画时的回调，可以用于实时保存等
@@ -482,24 +489,15 @@ function ChallengeDraw() {
         aiModel: 'DrawSomethingAI'
       })
 
-      // 将 dataUrl 转换为 base64 格式发送到后端
-      const response = await fetch(`${API_BASE_URL}/gallery/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image: posterDataUrl,
-          name: galleryName.trim() || '佚名'
-        })
+      await api.post('/gallery/save', {
+        image: posterDataUrl,
+        name: galleryName.trim() || '佚名'
       })
 
-      if (response.ok) {
-        message.success('成功发布到画廊！')
-        setShowGalleryModal(false)
-        setGalleryName('佚名')
-        // 发布成功后，成功弹窗保持打开状态，让用户可以继续选择下一关
-      } else {
-        throw new Error('发布失败')
-      }
+      message.success('成功发布到画廊！')
+      setShowGalleryModal(false)
+      setGalleryName('佚名')
+      // 发布成功后，成功弹窗保持打开状态，让用户可以继续选择下一关
     } catch (error) {
       console.error('发布到画廊失败:', error)
       message.error('发布失败，请稍后重试')
@@ -627,7 +625,7 @@ function ChallengeDraw() {
             <Input
               value={galleryName}
               onChange={(e) => setGalleryName(e.target.value)}
-              placeholder="输入您的名称（默认佚名）"
+              placeholder={`输入您的名称（默认${username || '佚名'}）`}
             />
           </Form.Item>
           <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>

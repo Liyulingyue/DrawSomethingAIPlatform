@@ -16,10 +16,6 @@
           "cwd": ".."
         },
         {
-          "cmd": ["docker-compose", "run", "--rm", "backend", "alembic", "upgrade", "head"],
-          "cwd": ".."
-        },
-        {
           "cmd": ["docker-compose", "up", "-d", "--build"],
           "cwd": ".."
         }
