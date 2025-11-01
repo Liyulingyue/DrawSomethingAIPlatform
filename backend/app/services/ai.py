@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
-MODEL_NAME = "ernie-4.5-vl-28b-a3b"
+MODEL_NAME = os.getenv("MODEL_NAME", "ernie-4.5-vl-28b-a3b")
 
 FORMAT_INSTRUCTIONS = (
     "请仅输出一个 JSON 代码块，严格按照如下格式返回：\n"
@@ -135,11 +135,11 @@ def _sanitize_config(config: Optional[Dict[str, Optional[str]]]) -> Dict[str, st
 
 
 def _call_custom_model(image: str, prompt: str, config: Dict[str, str]) -> Dict[str, Any]:
-    url = config.get("url")
+    url = config.get("url") or os.getenv("MODEL_URL")
     if not url:
         raise AIServiceNotConfigured("自定义模型 URL 未提供")
 
-    api_key = config.get("key")
+    api_key = config.get("key") or os.getenv("MODEL_KEY")
     if not api_key:
         raise AIServiceNotConfigured("自定义模型 API Key 未提供")
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { message } from 'antd'
 import { api } from '../utils/api'
+import { getAIConfig } from '../utils/aiConfig'
 import { useUser } from '../context/UserContext'
 
 export interface GuessPayload {
@@ -576,11 +577,16 @@ export function useDrawingRoom(options: { allowNoRoom?: boolean } = {}) {
       return
     }
     try {
-      const response = await api.post('/drawing/guess', {
-        room_id: roomId,
-        username,
-        guess: guessText,
-      })
+          const { callPreference } = getAIConfig();
+          // 自动获取 sessionId
+          const { sessionId } = useUser();
+          const response = await api.post('/drawing/guess', {
+            room_id: roomId,
+            username,
+            guess: guessText,
+            call_preference: callPreference,
+            session_id: sessionId,
+          })
       if (!response.data?.success) {
         message.error(response.data?.message ?? '猜词失败')
       } else {

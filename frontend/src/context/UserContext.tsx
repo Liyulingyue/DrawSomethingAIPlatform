@@ -16,6 +16,7 @@ interface UserContextValue {
   adminLogin: (username: string, password: string) => Promise<{ success: boolean; username?: string; message?: string }>
   updateUsername: (newUsername: string) => Promise<{ success: boolean; username?: string; message?: string }>
   suggestUsername: () => Promise<{ success: boolean; username?: string; message?: string }>
+  refreshUserInfo: () => Promise<void>
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined)
@@ -236,7 +237,8 @@ export function UserProvider({ children }: UserProviderProps) {
     adminLogin,
     updateUsername,
     suggestUsername,
-  }), [username, sessionId, isAdmin, callsRemaining, initializing, loading, login, adminLogin, updateUsername, suggestUsername])
+    refreshUserInfo,
+  }), [username, sessionId, isAdmin, callsRemaining, initializing, loading, login, adminLogin, updateUsername, suggestUsername, refreshUserInfo])
 
   return (
     <UserContext.Provider value={value}>

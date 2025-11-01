@@ -1,7 +1,10 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from ..services.ai import guess_drawing
+from ..shared import get_user_by_session
+from ..database import SessionLocal
 import random
+import openai
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -20,16 +23,55 @@ class GuessRequest(BaseModel):
     target: str | None = None  # 绘制目标，用于判断是否猜中
     config: ModelConfig | None = None
     call_preference: str | None = None  # 调用偏好: 'custom' 或 'server'
+    session_id: str | None = None  # 用户会话ID
 
 
 @router.post("/guess")
 @router.post("/recognize")
 async def guess(req: GuessRequest):
     """Call ERNIE vision-language model (or fallback heuristic) to guess drawing content."""
+    
+    # 新增：判断会话有效性和服务点
+    user = None
+    session_id = getattr(req, 'session_id', None)  # 如果前端传递了session_id
+    if session_id:
+        user = get_user_by_session(session_id)
+    calls_remaining = getattr(user, "calls_remaining", 0) if user else 0
+    session_valid = user is not None
+    # 判断调用偏好
+    call_preference = (req.call_preference or "server").lower()
+
+    # 业务逻辑：优先服务器调用
+    use_server = session_valid and call_preference == "server" and calls_remaining > 0
+    use_custom = not use_server
+
+    # 提取线索信息
     clue = req.clue or req.hint
-    config = req.config.dict(exclude_none=True) if req.config else None
-    result = guess_drawing(req.image, clue, config, req.target, req.call_preference)
-    return result
+
+    # TODO: 实际调用大模型/自定义服务的代码应在此分支实现
+    if use_server:
+        # 调用服务器配置的大模型
+        result = guess_drawing(req.image, clue, None, req.target, "server")
+        
+        # 如果调用成功，扣除一点
+        if result.get("success"):
+            # 扣除用户点数
+            user.calls_remaining -= 1
+            db = SessionLocal()
+            try:
+                db.commit()
+                print(f"🔹 用户 {user.username} 服务器调用成功，剩余点数: {user.calls_remaining}")
+            except Exception as e:
+                db.rollback()
+                print(f"❌ 扣除点数失败: {e}")
+            finally:
+                db.close()
+        
+        return result
+    else:
+        # 调用自定义服务
+        result = guess_drawing(req.image, clue, req.config.dict(exclude_none=True) if req.config else None, req.target, "custom")
+        return result
 
 
 # 随机绘制目标列表
@@ -61,10 +103,9 @@ class TestConnectionRequest(BaseModel):
 async def test_ai_connection(req: TestConnectionRequest):
     """Test AI service connection with provided configuration."""
     try:
-        from openai import OpenAI
         
         # 创建 OpenAI 客户端
-        client = OpenAI(
+        client = openai.OpenAI(
             api_key=req.key,
             base_url=req.url
         )

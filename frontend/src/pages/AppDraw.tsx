@@ -7,6 +7,7 @@ import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { api } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
+import { useUser } from '../context/UserContext'
 import './AppDraw.css'
 
 function AppDraw() {
@@ -20,6 +21,7 @@ function AppDraw() {
   const [showSuccessGalleryModal, setShowSuccessGalleryModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successModalData, setSuccessModalData] = useState<any>(null)
+  const { sessionId, refreshUserInfo } = useUser()
 
   // 防止移动设备页面滚动
   useEffect(() => {
@@ -89,6 +91,7 @@ function AppDraw() {
           prompt?: string
         }
         call_preference?: 'custom' | 'server'
+        session_id?: string
       } = {
         image,
         target: targetWord.trim(),
@@ -116,11 +119,20 @@ function AppDraw() {
       requestBody.call_preference = aiConfig.callPreference || 'server'
       console.log('📞 使用调用偏好:', requestBody.call_preference)
 
+      // 添加用户会话ID
+      if (sessionId) {
+        requestBody.session_id = sessionId
+        console.log('🔑 使用会话ID:', sessionId)
+      }
+
       // 调用后端 API
       const response = await api.post('/ai/guess', requestBody)
       const result = response.data
 
       console.log('📥 AI 猜词结果:', result)
+
+      // 刷新用户信息（更新剩余调用次数）
+      await refreshUserInfo()
 
       // 判断是否猜中 - 使用宽松的判断标准
       const targetNormalized = targetWord.trim().toLowerCase()

@@ -484,6 +484,13 @@ python auto_update.py --start --verbose
 - `AI_STUDIO_API_KEY`: 百度 AI Studio 访问令牌（可选，用于后备 AI 服务）
   - 如果前端未配置自定义 AI 服务，将使用此密钥调用百度文心一言 API
   - 获取方式：https://aistudio.baidu.com/account/accessToken
+- `MODEL_URL`: 自定义 AI 模型 API 端点 URL（可选）
+  - 用于配置自定义 AI 服务的 API 地址
+- `MODEL_KEY`: 自定义 AI 模型 API 密钥（可选）
+  - 用于配置自定义 AI 服务的访问密钥
+- `MODEL_NAME`: AI 模型名称（可选）
+  - 默认值：`ernie-4.5-vl-28b-a3b`
+  - 用于指定使用的 AI 模型名称
 
 ##### 管理员配置
 
@@ -515,8 +522,14 @@ python auto_update.py --start --verbose
 #### 后备配置方式
 设置环境变量 `AI_STUDIO_API_KEY`：
 - **API 端点**: `https://aistudio.baidu.com/llm/lmapi/v3`
-- **推荐模型**: `ernie-4.5-vl-28b-a3b`
+- **推荐模型**: `ernie-4.5-vl-28b-a3b`（可通过 `MODEL_NAME` 环境变量自定义）
 - **获取密钥**: https://aistudio.baidu.com/account/accessToken
+
+#### 自定义 AI 模型配置
+通过环境变量配置自定义 AI 模型：
+- `MODEL_URL`: 自定义模型 API 端点
+- `MODEL_KEY`: 自定义模型 API 密钥  
+- `MODEL_NAME`: 自定义模型名称
 
 > **注意**：系统优先使用前端配置的 AI 服务。如果前端未配置任何 AI 服务，则自动回退到环境变量配置的百度文心一言 API。
 
@@ -537,6 +550,11 @@ DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
 # 可选：设置 AI API 密钥（如果不使用前端配置）
 AI_STUDIO_API_KEY=your_api_key_here
 
+# 可选：自定义 AI 模型配置
+MODEL_URL=http://your-custom-model-api.com/v1
+MODEL_KEY=your_custom_model_key
+MODEL_NAME=your-custom-model-name
+
 # 必需：管理员配置
 ADMIN_USER=admin
 ADMIN_PASSWORD=your_secure_password
@@ -555,6 +573,11 @@ DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
 
 # 可选：AI API 密钥（如果不使用前端配置）
 AI_STUDIO_API_KEY=your_production_api_key
+
+# 可选：自定义 AI 模型配置
+MODEL_URL=http://your-production-model-api.com/v1
+MODEL_KEY=your_production_model_key
+MODEL_NAME=your-production-model-name
 
 # 必需：管理员配置
 ADMIN_USER=admin

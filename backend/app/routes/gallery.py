@@ -4,7 +4,7 @@ import base64
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
-from ..shared import GALLERY_DIR, user_sessions
+from ..shared import GALLERY_DIR, user_sessions, get_user_by_session
 
 router = APIRouter(prefix="/gallery", tags=["gallery"])
 
@@ -108,7 +108,6 @@ async def delete_gallery_item(filename: str, session_id: str = Header(None)):
     if not session_id:
         raise HTTPException(status_code=401, detail="Session required")
     
-    from ..shared import get_user_by_session
     user = get_user_by_session(session_id)
     if not user or not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
