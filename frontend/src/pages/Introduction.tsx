@@ -94,6 +94,7 @@ function Introduction() {
                   <p><strong>登录后的额外功能：</strong></p>
                   <ul>
                     <li>💰 <strong>使用服务器AI资源：</strong>无需配置即可使用平台提供的AI服务</li>
+                    <li>🖼️ <strong>作品管理：</strong>登录用户可以删除自己发布的画廊作品，未登录只能发布画廊作品，而无法主动删除</li>
                     <li>🏆 <strong>解锁高级功能：</strong>未来可能推出的更多功能</li>
                   </ul>
                   <p className="tip">💡 提示：如果您想使用平台AI服务进行识别，请先进行登录。登录后系统会自动为您分配点数用于AI调用。</p>
