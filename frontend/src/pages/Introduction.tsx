@@ -78,8 +78,24 @@ function Introduction() {
             <h2 className="section-title">
               <BulbOutlined /> 快速开始
             </h2>
-            <Collapse defaultActiveKey={['1']} ghost>
-              <Panel header="1️⃣ 配置 AI 服务（首次使用）" key="1">
+            <Collapse defaultActiveKey={['login']} ghost>
+              <Panel header="📋 登录说明（可选）" key="login">
+                <div className="guide-content">
+                  <p><strong>不登录不影响正常游戏：</strong></p>
+                  <ul>
+                    <li>✅ <strong>可以正常绘画：</strong>所有绘画功能都可正常使用</li>
+                    <li>✅ <strong>可以体验AI识别：</strong>如果您配置了自定义AI服务</li>
+                    <li>✅ <strong>可以自由创作：</strong>闯关模式和自由绘画模式都可用</li>
+                  </ul>
+                  <p><strong>登录后的额外功能：</strong></p>
+                  <ul>
+                    <li>💰 <strong>使用服务器AI资源：</strong>无需配置即可使用平台提供的AI服务</li>
+                    <li>🏆 <strong>解锁高级功能：</strong>未来可能推出的更多功能</li>
+                  </ul>
+                  <p className="tip">💡 提示：如果您想使用平台AI服务进行识别，请先进行登录。登录后系统会自动为您分配点数用于AI调用。</p>
+                </div>
+              </Panel>
+              <Panel header="2️⃣ 配置 AI 服务（首次使用）" key="1">
                 <div className="guide-content">
                   <p>首次使用需要配置 AI 服务：</p>
                   <ul>
@@ -93,7 +109,7 @@ function Introduction() {
                   <p className="tip">💡 提示：如果没有配置 AI 服务，系统无法使用。</p>
                 </div>
               </Panel>
-              <Panel header="2️⃣ 选择游戏模式" key="2">
+              <Panel header="3️⃣ 选择游戏模式" key="2">
                 <div className="guide-content">
                   <p><strong>闯关模式：</strong></p>
                   <ul>
@@ -110,7 +126,7 @@ function Introduction() {
                   </ul>
                 </div>
               </Panel>
-              <Panel header="3️⃣ 开始绘画" key="3">
+              <Panel header="4️⃣ 开始绘画" key="3">
                 <div className="guide-content">
                   <ul>
                     <li>使用画笔工具在画板上绘制</li>
@@ -120,7 +136,7 @@ function Introduction() {
                   </ul>
                 </div>
               </Panel>
-              <Panel header="4️⃣ 查看结果" key="4">
+              <Panel header="5️⃣ 查看结果" key="4">
                 <div className="guide-content">
                   <p>提交后，AI 会分析你的绘画并给出：</p>
                   <ul>

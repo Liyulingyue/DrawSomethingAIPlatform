@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Input, Button, Form, Card, App, Radio } from 'antd'
+import { Input, Button, Form, Card, App, Radio, Alert } from 'antd'
 import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -60,6 +60,14 @@ function ConfigAI() {
     // 当切换到服务器模式时，清除相关字段的验证错误
     if (value === 'server') {
       form.validateFields(['url', 'key', 'modelName']).catch(() => {})
+      // 显示登录提示
+      message.info({
+        content: '💰 服务器调用点需要登录后才能使用。',
+        duration: 5,
+        style: {
+          marginTop: '20px',
+        },
+      })
     }
   }
 
