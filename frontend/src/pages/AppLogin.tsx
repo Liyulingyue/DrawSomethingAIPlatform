@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, Typography, Space, Input, Button, message, Avatar, Tag, Modal } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '../context/UserContext'
@@ -14,12 +14,30 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002
 
 function AppLogin() {
   const navigate = useNavigate()
-  const { username, isAdmin, callsRemaining, adminLogin, loading, initializing } = useUser()
+  const { username, isAdmin, callsRemaining, adminLogin, loading, initializing, refreshUserInfo } = useUser()
   const [loginUsername, setLoginUsername] = useState('')
   const [password, setPassword] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [rechargeModalVisible, setRechargeModalVisible] = useState(false)
   const [rechargeLoading, setRechargeLoading] = useState(false)
+  const [refreshingStatus, setRefreshingStatus] = useState(false)
+
+  // 进入页面时自动刷新登录状态
+  useEffect(() => {
+    const refreshLoginStatus = async () => {
+      const sessionId = localStorage.getItem('sessionId')
+      if (sessionId && !initializing) {
+        console.log('🔄 进入登录页面，自动刷新登录状态')
+        setRefreshingStatus(true)
+        try {
+          await refreshUserInfo()
+        } finally {
+          setRefreshingStatus(false)
+        }
+      }
+    }
+    refreshLoginStatus()
+  }, [initializing, refreshUserInfo])
 
   const handleLogin = async () => {
     if (!loginUsername.trim()) {
@@ -131,8 +149,8 @@ function AppLogin() {
       if (response.ok) {
         message.success(`充值成功！获得 20 次调用`)
         setRechargeModalVisible(false)
-        // 刷新页面以更新调用次数显示
-        window.location.reload()
+        // 刷新用户信息以更新调用次数显示
+        await refreshUserInfo()
       } else {
         const errorData = await response.json()
         message.error(errorData.message || '充值失败')
@@ -206,7 +224,7 @@ function AppLogin() {
                     {!isAdmin && (
                       <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Tag color={callsRemaining > 0 ? 'blue' : 'orange'}>
-                          剩余调用次数: {callsRemaining}
+                          剩余调用次数: {refreshingStatus ? '刷新中...' : callsRemaining}
                         </Tag>
                         <Button
                           size="small"
@@ -221,7 +239,7 @@ function AppLogin() {
                     {isAdmin && (
                       <div style={{ marginTop: '8px' }}>
                         <Tag color="gold">
-                          剩余调用次数: 无限
+                          剩余调用次数: {refreshingStatus ? '刷新中...' : '无限'}
                         </Tag>
                       </div>
                     )}

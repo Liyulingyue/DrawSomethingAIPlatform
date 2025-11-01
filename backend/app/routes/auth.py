@@ -8,6 +8,7 @@ from ..shared import (
     cleanup_inactive_users,
 )
 from ..database import SessionLocal, User, UserSession, hash_password, verify_password
+from ..config import config
 import uuid
 import re
 import random
@@ -104,8 +105,8 @@ async def admin_login(request: dict):
     username = request.get("username")
     password = request.get("password")
     
-    admin_user = os.getenv("ADMIN_USER")
-    admin_password = os.getenv("ADMIN_PASSWORD")
+    admin_user = config.ADMIN_USER
+    admin_password = config.ADMIN_PASSWORD
     
     if not admin_user or not admin_password:
         return {"success": False, "message": "Admin credentials not configured"}
@@ -136,7 +137,7 @@ async def user_login(request: dict, db: Session = Depends(get_db)):
     password = password.strip()
     
     # 检查用户名是否已被管理员使用
-    admin_user = os.getenv("ADMIN_USER")
+    admin_user = config.ADMIN_USER
     if username == admin_user:
         return {"success": False, "message": "用户名已被管理员使用"}
     
@@ -210,19 +211,34 @@ async def verify_session(request: dict, db: Session = Depends(get_db)):
     # 查找会话
     session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
     if session:
+        # 更新会话活动时间
+        session.last_activity = datetime.utcnow()
+        db.commit()
+        return {"valid": True}
+    
+    return {"valid": False, "message": "会话无效或已过期"}
+
+
+@router.post("/user/get_info")
+async def get_user_info(request: dict, db: Session = Depends(get_db)):
+    session_id = request.get("session_id")
+    
+    if not session_id:
+        return {"success": False, "message": "缺少会话ID"}
+    
+    # 查找会话
+    session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
+    if session:
         user = db.query(User).filter(User.id == session.user_id).first()
         if user:
-            # 更新会话活动时间
-            session.last_activity = datetime.utcnow()
-            db.commit()
             return {
-                "valid": True,
+                "success": True,
                 "username": user.username,
                 "is_admin": user.is_admin,
                 "calls_remaining": user.calls_remaining if user.calls_remaining is not None else 0
             }
     
-    return {"valid": False, "message": "会话无效或已过期"}
+    return {"success": False, "message": "会话无效或用户信息不存在"}
 
 
 @router.post("/user/recharge")

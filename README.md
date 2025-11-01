@@ -74,7 +74,7 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # 设置环境变量（可选，用于 AI 功能）
-export AI_STUDIO_API_KEY="your_baidu_api_key_here"  # 可选：如果前端未配置 AI 服务
+export MODEL_KEY="your_baidu_api_key_here"  # 可选：如果前端未配置 AI 服务
 
 # 配置数据库连接（必需）
 export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/drawsomething"
@@ -149,7 +149,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export AI_STUDIO_API_KEY="your_key"  # 可选：用于后备 AI 服务
+export MODEL_KEY="your_key"  # 可选：用于后备 AI 服务
 
 # 配置管理员账号（必需）
 # 编辑 .env 文件设置管理员账号：
@@ -190,7 +190,7 @@ cd backend
 pip install -r requirements.txt
 
 # 设置生产环境变量
-export AI_STUDIO_API_KEY="your_production_key"  # 可选：用于后备 AI 服务
+export MODEL_KEY="your_production_key"  # 可选：用于后备 AI 服务
 
 # 配置管理员账号（必需）
 # 编辑 backend/.env 文件设置管理员账号：
@@ -231,7 +231,7 @@ git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
 cd DrawSomethingAIPlatform
 
 # 可选：设置 AI 环境变量（如果不使用前端配置）
-echo "AI_STUDIO_API_KEY=your_api_key_here" > .env
+echo "MODEL_KEY=your_api_key_here" > .env
 
 # 必需：设置管理员账号
 echo "ADMIN_USER=admin" >> .env
@@ -247,7 +247,7 @@ git clone https://github.com/Liyulingyue/DrawSomethingAIPlatform.git
 cd DrawSomethingAIPlatform
 
 # 可选：设置 AI 环境变量（如果不使用前端配置）
-echo "AI_STUDIO_API_KEY=your_api_key_here" > .env
+echo "MODEL_KEY=your_api_key_here" > .env
 
 # 必需：设置管理员账号
 echo "ADMIN_USER=admin" >> .env
@@ -481,7 +481,7 @@ python auto_update.py --start --verbose
 
 ##### 可选环境变量
 
-- `AI_STUDIO_API_KEY`: 百度 AI Studio 访问令牌（可选，用于后备 AI 服务）
+- `MODEL_KEY`: 百度 AI Studio 访问令牌（可选，用于后备 AI 服务）
   - 如果前端未配置自定义 AI 服务，将使用此密钥调用百度文心一言 API
   - 获取方式：https://aistudio.baidu.com/account/accessToken
 - `MODEL_URL`: 自定义 AI 模型 API 端点 URL（可选）
@@ -520,7 +520,7 @@ python auto_update.py --start --verbose
 - 配置包括：API 端点、访问密钥、模型名称、自定义提示词
 
 #### 后备配置方式
-设置环境变量 `AI_STUDIO_API_KEY`：
+设置环境变量 `MODEL_KEY`：
 - **API 端点**: `https://aistudio.baidu.com/llm/lmapi/v3`
 - **推荐模型**: `ernie-4.5-vl-28b-a3b`（可通过 `MODEL_NAME` 环境变量自定义）
 - **获取密钥**: https://aistudio.baidu.com/account/accessToken
@@ -548,7 +548,7 @@ python auto_update.py --start --verbose
 DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
 
 # 可选：设置 AI API 密钥（如果不使用前端配置）
-AI_STUDIO_API_KEY=your_api_key_here
+MODEL_KEY=your_api_key_here
 
 # 可选：自定义 AI 模型配置
 MODEL_URL=http://your-custom-model-api.com/v1
@@ -572,7 +572,7 @@ VITE_API_BASE_URL=https://your-production-domain.com/api
 DATABASE_URL=postgresql://postgres:postgres@db:5432/drawsomething
 
 # 可选：AI API 密钥（如果不使用前端配置）
-AI_STUDIO_API_KEY=your_production_api_key
+MODEL_KEY=your_production_api_key
 
 # 可选：自定义 AI 模型配置
 MODEL_URL=http://your-production-model-api.com/v1

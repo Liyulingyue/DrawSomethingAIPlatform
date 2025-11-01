@@ -2,9 +2,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from ..services.ai import guess_drawing
 from ..shared import get_user_by_session
-from ..database import SessionLocal
+from ..database import SessionLocal, User, UserSession
+from ..config import config
 import random
 import openai
+import os
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -29,7 +31,7 @@ class GuessRequest(BaseModel):
 @router.post("/guess")
 @router.post("/recognize")
 async def guess(req: GuessRequest):
-    """Call ERNIE vision-language model (or fallback heuristic) to guess drawing content."""
+    """Call AI vision-language model to guess drawing content."""
     
     # 新增：判断会话有效性和服务点
     user = None
@@ -38,40 +40,72 @@ async def guess(req: GuessRequest):
         user = get_user_by_session(session_id)
     calls_remaining = getattr(user, "calls_remaining", 0) if user else 0
     session_valid = user is not None
-    # 判断调用偏好
-    call_preference = (req.call_preference or "server").lower()
-
-    # 业务逻辑：优先服务器调用
-    use_server = session_valid and call_preference == "server" and calls_remaining > 0
-    use_custom = not use_server
-
     # 提取线索信息
     clue = req.clue or req.hint
 
-    # TODO: 实际调用大模型/自定义服务的代码应在此分支实现
-    if use_server:
-        # 调用服务器配置的大模型
-        result = guess_drawing(req.image, clue, None, req.target, "server")
-        
-        # 如果调用成功，扣除一点
-        if result.get("success"):
-            # 扣除用户点数
-            user.calls_remaining -= 1
-            db = SessionLocal()
-            try:
-                db.commit()
-                print(f"🔹 用户 {user.username} 服务器调用成功，剩余点数: {user.calls_remaining}")
-            except Exception as e:
-                db.rollback()
-                print(f"❌ 扣除点数失败: {e}")
-            finally:
-                db.close()
-        
-        return result
+    # 准备配置
+    config_custom = req.config.dict(exclude_none=True) if req.config else {}
+    config_server = {
+        'key': config.MODEL_KEY,
+        'model': config.MODEL_NAME,
+        'url': config.MODEL_URL
+    }
+
+    # 根据调用偏好和条件选择配置
+    call_preference = (req.call_preference or "server").lower()
+    is_server_call = False
+    
+    if call_preference == "server" and session_valid and calls_remaining > 0:
+        # 倾向服务器且条件满足，使用服务器配置
+        config_to_use = config_server
+        provider = "server"
+        is_server_call = True
+        print(f"🔍 使用服务器端AI配置")
     else:
-        # 调用自定义服务
-        result = guess_drawing(req.image, clue, req.config.dict(exclude_none=True) if req.config else None, req.target, "custom")
-        return result
+        # 其他情况使用自定义配置
+        config_to_use = config_custom
+        provider = "custom"
+        reason = []
+        if call_preference != "server":
+            reason.append(f"调用偏好为 '{call_preference}'")
+        if not session_valid:
+            reason.append("会话无效")
+        if calls_remaining <= 0:
+            reason.append(f"剩余调用次数为 {calls_remaining}")
+        reason_str = ", ".join(reason)
+        print(f"🔍 使用自定义AI配置 (原因: {reason_str})")
+
+    # 统一调用AI服务
+    result = guess_drawing(req.image, clue, config_to_use, req.target, provider)
+    
+    # 如果是服务器端调用且成功，扣除点数
+    if is_server_call and result.get("success") and result.get("provider") == "server":
+        # 扣除用户点数
+        db = SessionLocal()
+        try:
+            # 在当前数据库会话中重新获取用户对象
+            session_record = db.query(UserSession).filter(UserSession.session_id == session_id).first()
+            if session_record:
+                user_in_db = db.query(User).filter(User.id == session_record.user_id).first()
+                if user_in_db:
+                    user_in_db.calls_remaining -= 1
+                    db.commit()
+                    print(f"🔹 用户 {user_in_db.username} 服务器调用成功，剩余点数: {user_in_db.calls_remaining}")
+                else:
+                    print(f"❌ 无法找到用户记录")
+            else:
+                print(f"❌ 无法找到会话记录")
+        except Exception as e:
+            db.rollback()
+            print(f"❌ 扣除点数失败: {e}")
+        finally:
+            db.close()
+    elif is_server_call:
+        print(f"ℹ️ 未扣费: success={result.get('success')}, provider={result.get('provider')}")
+    else:
+        print(f"ℹ️ 自定义AI调用完成，无需扣费")
+    
+    return result
 
 
 # 随机绘制目标列表

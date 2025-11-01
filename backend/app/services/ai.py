@@ -5,8 +5,9 @@ from collections.abc import Sequence
 from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
+from ..config import config
 
-MODEL_NAME = os.getenv("MODEL_NAME", "ernie-4.5-vl-28b-a3b")
+MODEL_NAME = config.MODEL_NAME
 
 FORMAT_INSTRUCTIONS = (
     "请仅输出一个 JSON 代码块，严格按照如下格式返回：\n"
@@ -60,19 +61,16 @@ def _is_guess_correct(guess: Optional[str], target: Optional[str]) -> bool:
     return False
 
 
-def _call_ernie_inference(
+def _call_openai_model(
     image: str,
     prompt: str,
+    base_url: str,
+    api_key: str,
     model_name: Optional[str] = None,
 ) -> Dict[str, Any]:
-    # 使用AI Studio API Key直接调用
-    api_key = os.getenv("AI_STUDIO_API_KEY")
-    if not api_key:
-        raise AIServiceNotConfigured("AI_STUDIO_API_KEY 未配置")
-
     client = OpenAI(
         api_key=api_key,
-        base_url="https://aistudio.baidu.com/llm/lmapi/v3",
+        base_url=base_url,
     )
 
     try:
@@ -110,7 +108,7 @@ def _call_ernie_inference(
             raise Exception("API返回空响应")
 
     except Exception as e:
-        raise Exception(f"调用ERNIE推理失败: {str(e)}")
+        raise Exception(f"调用OpenAI兼容模型失败: {str(e)}")
 
 
 def _build_instruction(clue: Optional[str], custom_prompt: Optional[str]) -> str:
@@ -132,61 +130,6 @@ def _sanitize_config(config: Optional[Dict[str, Optional[str]]]) -> Dict[str, st
         if isinstance(value, str):
             sanitized[key] = value.strip()
     return sanitized
-
-
-def _call_custom_model(image: str, prompt: str, config: Dict[str, str]) -> Dict[str, Any]:
-    url = config.get("url") or os.getenv("MODEL_URL")
-    if not url:
-        raise AIServiceNotConfigured("自定义模型 URL 未提供")
-
-    api_key = config.get("key") or os.getenv("MODEL_KEY")
-    if not api_key:
-        raise AIServiceNotConfigured("自定义模型 API Key 未提供")
-
-    client = OpenAI(
-        api_key=api_key,
-        base_url=url,
-    )
-
-    try:
-        # 构造消息，包含文本提示和图片
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": image,
-                            "detail": "high"
-                        }
-                    }
-                ]
-            }
-        ]
-
-        completion = client.chat.completions.create(
-            model=config.get("model") or MODEL_NAME,
-            messages=messages,
-            stream=False,  # 不使用流式响应
-        )
-
-        # 提取响应内容
-        if completion.choices and len(completion.choices) > 0:
-            content = completion.choices[0].message.content
-            return {"result": content}
-        else:
-            raise Exception("API返回空响应")
-
-    except Exception as e:
-        raise Exception(f"调用自定义模型失败: {str(e)}")
-
-
-def _normalize_candidate_text(text: str) -> List[str]:
     cleaned = text.replace("\r", "\n").replace("，", ",").replace("。", "\n")
     segments: List[str] = []
     for part in cleaned.split("\n"):
@@ -402,188 +345,58 @@ def guess_drawing(
     clue: Optional[str] = None,
     config: Optional[Dict[str, Optional[str]]] = None,
     target: Optional[str] = None,
-    call_preference: Optional[str] = None,
+    provider: str = "server",
 ) -> Dict[str, Any]:
-    """Call ERNIE model (or a custom endpoint) to guess the drawing content."""
+    """AI model calling interface based on provided config and provider.
+
+    This function calls the AI service specified by the provider parameter using the config.
+    - provider: "custom" for custom model, "server" for server-side AI
+    """
 
     sanitized_config = _sanitize_config(config)
     prompt = _build_instruction(clue, sanitized_config.get("prompt"))
 
-    # 根据调用偏好选择不同的调用方式
-    if call_preference == "server":
-        # 优先使用服务器端AI调用，失败时回退到自定义服务
-        api_key = os.getenv("AI_STUDIO_API_KEY")
-        if api_key:
-            try:
-                data = _call_ernie_inference(image, prompt, sanitized_config.get("model"))
-                parsed = _extract_guesses(data)
-                best_guess = parsed.get("best_guess")
-                return {
-                    "success": True,
-                    "configured": True,
-                    "best_guess": best_guess,
-                    "alternatives": parsed.get("alternatives", []),
-                    "reason": parsed.get("reason"),
-                    "matched": _is_guess_correct(best_guess, target),
-                    "target": target,
-                    "raw": data,
-                    "provider": "server",
-                }
-            except Exception as exc:
-                # 服务器端AI调用失败，回退到自定义服务
-                if sanitized_config.get("url"):
-                    try:
-                        data = _call_custom_model(image, prompt, sanitized_config)
-                        parsed = _extract_guesses(data)
-                        best_guess = parsed.get("best_guess")
-                        return {
-                            "success": True,
-                            "configured": True,
-                            "best_guess": best_guess,
-                            "alternatives": parsed.get("alternatives", []),
-                            "reason": f"服务器AI调用失败，已回退到自定义服务。{parsed.get('reason', '')}",
-                            "matched": _is_guess_correct(best_guess, target),
-                            "target": target,
-                            "raw": data,
-                            "provider": "custom_fallback",
-                        }
-                    except Exception as fallback_exc:
-                        return {
-                            "success": False,
-                            "configured": True,
-                            "best_guess": None,
-                            "alternatives": [],
-                            "error": f"服务器AI和自定义服务都调用失败。服务器错误: {str(exc)}, 自定义服务错误: {str(fallback_exc)}",
-                            "reason": None,
-                            "matched": False,
-                            "target": target,
-                            "provider": "server_fallback_failed",
-                        }
-                else:
-                    return {
-                        "success": False,
-                        "configured": True,
-                        "best_guess": None,
-                        "alternatives": [],
-                        "error": f"服务器AI调用失败，且未配置自定义服务作为备用。错误: {str(exc)}",
-                        "reason": None,
-                        "matched": False,
-                        "target": target,
-                        "provider": "server",
-                    }
-        else:
-            # 服务器端AI未配置，直接使用自定义服务
-            if sanitized_config.get("url"):
-                try:
-                    data = _call_custom_model(image, prompt, sanitized_config)
-                    parsed = _extract_guesses(data)
-                    best_guess = parsed.get("best_guess")
-                    return {
-                        "success": True,
-                        "configured": True,
-                        "best_guess": best_guess,
-                        "alternatives": parsed.get("alternatives", []),
-                        "reason": "服务器AI未配置，使用自定义服务",
-                        "matched": _is_guess_correct(best_guess, target),
-                        "target": target,
-                        "raw": data,
-                        "provider": "custom",
-                    }
-                except Exception as exc:
-                    return {
-                        "success": False,
-                        "configured": True,
-                        "best_guess": None,
-                        "alternatives": [],
-                        "error": str(exc),
-                        "reason": None,
-                        "matched": False,
-                        "target": target,
-                        "provider": "custom",
-                    }
-            else:
-                return {
-                    "success": False,
-                    "configured": False,
-                    "best_guess": None,
-                    "alternatives": [],
-                    "reason": "服务器AI和自定义服务都未配置",
-                    "matched": False,
-                    "target": target,
-                    "raw": {"reason": "No AI service configured"},
-                    "provider": "none",
-                }
-    
-    elif call_preference == "custom" or sanitized_config.get("url"):
-        # 使用自定义服务
-        try:
-            data = _call_custom_model(image, prompt, sanitized_config)
-            parsed = _extract_guesses(data)
-            best_guess = parsed.get("best_guess")
-            return {
-                "success": True,
-                "configured": True,
-                "best_guess": best_guess,
-                "alternatives": parsed.get("alternatives", []),
-                "reason": parsed.get("reason"),
-                "matched": _is_guess_correct(best_guess, target),
-                "target": target,
-                "raw": data,
-                "provider": "custom",
-            }
-        except Exception as exc:
-            return {
-                "success": False,
-                "configured": True,
-                "best_guess": None,
-                "alternatives": [],
-                "error": str(exc),
-                "reason": None,
-                "matched": False,
-                "target": target,
-                "provider": "custom",
-            }
+    base_url = sanitized_config.get("url")
+    api_key = sanitized_config.get("key")
+    model_name = sanitized_config.get("model")
 
-    # 默认逻辑：优先使用服务器端AI，如果没有则使用自定义配置
-    api_key = os.getenv("AI_STUDIO_API_KEY")
-    if api_key:
-        try:
-            data = _call_ernie_inference(image, prompt, sanitized_config.get("model"))
-            parsed = _extract_guesses(data)
-            best_guess = parsed.get("best_guess")
-            return {
-                "success": True,
-                "configured": True,
-                "best_guess": best_guess,
-                "alternatives": parsed.get("alternatives", []),
-                "reason": parsed.get("reason"),
-                "matched": _is_guess_correct(best_guess, target),
-                "target": target,
-                "raw": data,
-                "provider": "ernie",
-            }
-        except Exception as exc:
-            return {
-                "success": False,
-                "configured": True,
-                "best_guess": None,
-                "alternatives": [],
-                "error": str(exc),
-                "reason": None,
-                "matched": False,
-                "target": target,
-                "provider": "ernie",
-            }
+    if not base_url or not api_key:
+        return {
+            "success": False,
+            "configured": False,
+            "best_guess": None,
+            "alternatives": [],
+            "reason": "请先在AI配置页面设置API Key和URL",
+            "matched": False,
+            "target": target,
+            "raw": {"reason": "Missing URL or API Key"},
+            "provider": provider,
+        }
 
-    # fallback heuristic when AI not configured
-    return {
-        "success": False,
-        "configured": False,
-        "best_guess": None,
-        "alternatives": [],
-        "reason": "AI服务未配置，无法进行图像识别",
-        "matched": False,
-        "target": target,
-        "raw": {"reason": "AI service not configured"},
-        "provider": "fallback",
-    }
+    try:
+        data = _call_openai_model(image, prompt, base_url, api_key, model_name)
+        parsed = _extract_guesses(data)
+        best_guess = parsed.get("best_guess")
+        return {
+            "success": True,
+            "configured": True,
+            "best_guess": best_guess,
+            "alternatives": parsed.get("alternatives", []),
+            "reason": parsed.get("reason"),
+            "matched": _is_guess_correct(best_guess, target),
+            "target": target,
+            "raw": data,
+            "provider": provider,
+        }
+    except Exception as exc:
+        return {
+            "success": False,
+            "configured": True,
+            "best_guess": None,
+            "alternatives": [],
+            "error": str(exc),
+            "reason": None,
+            "matched": False,
+            "target": target,
+            "provider": provider,
+        }

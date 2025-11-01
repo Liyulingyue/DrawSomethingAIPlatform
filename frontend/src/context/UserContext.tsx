@@ -88,7 +88,7 @@ export function UserProvider({ children }: UserProviderProps) {
         // 验证session是否仍然有效
         const verifySession = async () => {
           try {
-            const response = await fetch(`${API_BASE_URL}/auth/user/verify_session`, {
+            const verifyResponse = await fetch(`${API_BASE_URL}/auth/user/verify_session`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -98,23 +98,38 @@ export function UserProvider({ children }: UserProviderProps) {
               }),
             })
             
-            if (response.ok) {
-              const data = await response.json()
-              if (data.valid) {
-                // session有效，使用存储的信息
-                setSessionId(storedSession)
-                setUsername(data.username)
-                setIsAdmin(data.is_admin)
-                setCallsRemaining(data.calls_remaining || 0)
-                setInitializing(false)
-                return
+            if (verifyResponse.ok) {
+              const verifyData = await verifyResponse.json()
+              if (verifyData.valid) {
+                // 会话有效，获取用户信息
+                const infoResponse = await fetch(`${API_BASE_URL}/auth/user/get_info`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    session_id: storedSession
+                  }),
+                })
+                
+                if (infoResponse.ok) {
+                  const infoData = await infoResponse.json()
+                  if (infoData.success) {
+                    setSessionId(storedSession)
+                    setUsername(infoData.username)
+                    setIsAdmin(infoData.is_admin)
+                    setCallsRemaining(infoData.calls_remaining || 0)
+                    setInitializing(false)
+                    return
+                  }
+                }
               }
             }
           } catch (error) {
             console.warn('Session verification failed:', error)
           }
           
-          // session无效，清除本地存储
+          // session无效或获取信息失败，清除本地存储
           localStorage.removeItem('sessionId')
           localStorage.removeItem('username')
           localStorage.removeItem('isAdmin')
@@ -223,6 +238,67 @@ export function UserProvider({ children }: UserProviderProps) {
       return { success: false, message: '管理员登录失败，请检查账号密码' }
     } finally {
       setLoading(false)
+    }
+  }, [])
+
+  const refreshUserInfo = useCallback(async () => {
+    const storedSession = safeGetItem('sessionId')
+    if (!storedSession) return
+
+    try {
+      // 首先验证会话有效性
+      const verifyResponse = await fetch(`${API_BASE_URL}/auth/user/verify_session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: storedSession
+        }),
+      })
+      
+      if (verifyResponse.ok) {
+        const verifyData = await verifyResponse.json()
+        if (verifyData.valid) {
+          // 会话有效，获取用户信息
+          const infoResponse = await fetch(`${API_BASE_URL}/auth/user/get_info`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              session_id: storedSession
+            }),
+          })
+          
+          if (infoResponse.ok) {
+            const infoData = await infoResponse.json()
+            if (infoData.success) {
+              setSessionId(storedSession)
+              setUsername(infoData.username)
+              setIsAdmin(infoData.is_admin)
+              setCallsRemaining(infoData.calls_remaining || 0)
+              safeSetItem('username', infoData.username)
+              safeSetItem('isAdmin', infoData.is_admin ? 'true' : 'false')
+              console.log('🔄 用户信息已刷新，剩余调用次数:', infoData.calls_remaining)
+              return
+            }
+          }
+        }
+      }
+      
+      // 会话无效或获取信息失败，清除登录状态
+      console.log('🔄 会话无效或获取信息失败，清除登录状态')
+      localStorage.removeItem('sessionId')
+      localStorage.removeItem('username')
+      localStorage.removeItem('isAdmin')
+      setSessionId('')
+      setUsername('')
+      setIsAdmin(false)
+      setCallsRemaining(0)
+    } catch (error) {
+      console.warn('刷新用户信息失败:', error)
+      // 网络错误，暂时不清空状态，避免误操作
     }
   }, [])
 

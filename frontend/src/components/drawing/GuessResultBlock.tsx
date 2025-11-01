@@ -8,6 +8,7 @@ interface GuessResultBlockProps {
 }
 
 const GuessResultBlock = ({ guess }: GuessResultBlockProps) => {
+
   if (!guess) {
     return <Text type="secondary">暂未获得 AI 猜测结果</Text>
   }

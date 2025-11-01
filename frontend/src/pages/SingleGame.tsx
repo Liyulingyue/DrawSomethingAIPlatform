@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import SingleTester, { type ModelConfig, type SingleHistoryEntry } from '../components/drawing/SingleTester'
 import { api } from '../utils/api'
 import { type GuessPayload } from '../hooks/useDrawingRoom'
+import { useUser } from '../context/UserContext'
 import './DrawingRoom.css'
 
 const { Content } = Layout
@@ -68,6 +69,7 @@ function normalizeGuessPayload(raw: unknown): GuessPayload | null {
 }
 
 function SingleGame() {
+  const { sessionId } = useUser()
   const [singleTarget, setSingleTarget] = useState('')
   const [singleResult, setSingleResult] = useState<GuessPayload | null>(null)
   const [singleHistory, setSingleHistory] = useState<SingleHistoryEntry[]>([])
@@ -124,9 +126,11 @@ function SingleGame() {
           prompt?: string
         }
         call_preference?: 'custom' | 'server'
+        session_id?: string
       } = {
         image,
         target: singleTarget.trim() || undefined,
+        session_id: sessionId,
       }
 
       const configPayload: {
@@ -198,6 +202,7 @@ function SingleGame() {
           prompt?: string
         }
         call_preference?: 'custom' | 'server'
+        session_id?: string
       } = {
         image,
         target: singleTarget.trim() || undefined,
@@ -207,6 +212,7 @@ function SingleGame() {
           model: sanitizedCurrentModelConfig.model || undefined,
           prompt: sanitizedCurrentModelConfig.prompt,
         },
+        session_id: sessionId,
       }
 
       // 添加调用偏好参数

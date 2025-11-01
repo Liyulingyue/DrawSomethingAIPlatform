@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 from .database import SessionLocal, User, UserSession
+from .config import config
 
 # Gallery configuration
-GALLERY_DIR = "Source/gallery"
+GALLERY_DIR = config.GALLERY_DIR
 
-SESSION_TIMEOUT_SECONDS = 3600  # 1 hour inactivity timeout
-SESSION_MAX_LIFETIME_SECONDS = 86400  # 24 hour max lifetime
+SESSION_TIMEOUT_SECONDS = config.SESSION_TIMEOUT_SECONDS  # 1 hour inactivity timeout
+SESSION_MAX_LIFETIME_SECONDS = config.SESSION_MAX_LIFETIME_SECONDS  # 24 hour max lifetime
 
 
 def register_session(session_id: str, username: str, is_admin: bool = False) -> None:

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Layout, message } from 'antd'
 import Navbar from '../components/Navbar'
-import { useDrawingRoom, type GuessPayload } from '../hooks/useDrawingRoom'
+import { useUser } from '../context/UserContext'
 import SingleTester, { type ModelConfig, type SingleHistoryEntry } from '../components/drawing/SingleTester'
 import MultiplayerView from '../components/drawing/MultiplayerView'
 import { api } from '../utils/api'
@@ -88,6 +88,7 @@ function DrawingRoom() {
     actions,
     state,
   } = useDrawingRoom({ allowNoRoom: true })
+  const { sessionId } = useUser()
 
   const lastSyncedTarget = useRef('')
   const lastSyncedClue = useRef('')
@@ -255,9 +256,11 @@ function DrawingRoom() {
           model?: string
           prompt?: string
         }
+        session_id?: string
       } = {
         image,
         target: singleTarget.trim() || undefined,
+        session_id: sessionId,
       }
 
       const configPayload: {
@@ -325,6 +328,7 @@ function DrawingRoom() {
           model?: string
           prompt?: string
         }
+        session_id?: string
       } = {
         image: image,
         target: singleTarget.trim() || undefined,
@@ -334,6 +338,7 @@ function DrawingRoom() {
           model: sanitizedCurrentModelConfig.model || undefined,
           prompt: sanitizedCurrentModelConfig.prompt,
         },
+        session_id: sessionId,
       }
 
       const response = await api.post('/ai/guess', requestBody)

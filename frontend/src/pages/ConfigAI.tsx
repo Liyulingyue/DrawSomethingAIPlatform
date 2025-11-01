@@ -433,7 +433,7 @@ function ConfigAI() {
                   </Radio.Button>
                 </Radio.Group>
                 <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                  💡 服务器调用点优先使用平台服务，点数不足时自动切换到自定义服务
+                  💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务
                 </div>
               </Form.Item>
 

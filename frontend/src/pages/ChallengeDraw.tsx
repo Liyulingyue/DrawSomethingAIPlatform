@@ -10,6 +10,7 @@ import { getLevelById } from '../config/levels'
 import { api, API_BASE_URL } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
 import { generatePoster, downloadPoster } from '../utils/posterGenerator'
+import { useUser } from '../context/UserContext'
 import './ChallengeDraw.css'
 
 // 本地存储 key
@@ -30,6 +31,7 @@ const markKeywordCompleted = (levelId: string, keyword: string) => {
 
 function ChallengeDraw() {
   const { message, modal } = App.useApp()
+  const { sessionId } = useUser()
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -140,6 +142,7 @@ function ChallengeDraw() {
           prompt?: string
         }
         call_preference?: 'custom' | 'server'
+        session_id?: string
       } = {
         image,
         target: keyword,
@@ -166,6 +169,12 @@ function ChallengeDraw() {
       // 添加调用偏好参数
       requestBody.call_preference = aiConfig.callPreference || 'server'
       console.log('📞 使用调用偏好:', requestBody.call_preference)
+
+      // 添加用户会话ID
+      if (sessionId) {
+        requestBody.session_id = sessionId
+        console.log('🔑 使用会话ID:', sessionId)
+      }
 
       // 调用后端 API
       const response = await api.post('/ai/guess', requestBody)
