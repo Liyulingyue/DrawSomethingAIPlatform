@@ -8,6 +8,7 @@ from .routes import (
     messages_router,
     ai_router,
     gallery_router,
+    sketch_router,
 )
 
 app = FastAPI()
@@ -27,6 +28,7 @@ app.include_router(rooms_router)
 app.include_router(drawing_router)
 app.include_router(messages_router)
 app.include_router(ai_router)
+app.include_router(sketch_router)
 
 
 @app.get("/")

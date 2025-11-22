@@ -1,0 +1,268 @@
+.challenge-guess-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  /* 防止移动设备页面滚动 */
+  touch-action: pan-y;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 标题区域 */
+.challenge-guess-title-section {
+  flex: 0 0 auto;
+  padding: 1.5rem 1rem 1rem 1rem;
+  background: transparent;
+  text-align: center;
+}
+
+.challenge-guess-level-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.challenge-level-icon {
+  font-size: 2rem;
+}
+
+.challenge-guess-page-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: white;
+  margin: 0;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 倒计时和进度区域 */
+.challenge-guess-timer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: transparent;
+  z-index: 10;
+  touch-action: auto;
+}
+
+.challenge-timer-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timer-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.timer-warning {
+  color: #ff4d4f !important;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.challenge-progress-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #52c41a;
+  margin-left: 1rem;
+}
+
+/* 画板内容区域 - 占据中间大部分空间 */
+.challenge-guess-content {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  overflow: hidden;
+  /* 确保占据剩余高度 */
+  min-height: 0;
+}
+
+/* 确保 MobileDrawBoard 组件适应容器 */
+.challenge-guess-content .mobile-draw-board {
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  max-height: 100%;
+}
+
+/* 输入区域 */
+.challenge-guess-input-section {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem 1rem;
+  background: transparent;
+  z-index: 10;
+  touch-action: auto;
+}
+
+.guess-input-container {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.guess-input {
+  flex: 1;
+  height: 50px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  border: 2px solid #d9d9d9;
+  padding: 0 1.5rem;
+}
+
+.guess-input:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.submit-guess-button {
+  min-width: 120px;
+  height: 50px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  transition: all 0.3s ease;
+}
+
+.submit-guess-button:hover {
+  background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.5);
+}
+
+.submit-guess-button:active {
+  transform: translateY(0);
+}
+
+.skip-challenge-button {
+  min-width: 200px;
+  height: 45px;
+  border-radius: 22.5px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #d9d9d9;
+  color: #595959;
+  background: white;
+  transition: all 0.3s ease;
+  align-self: center;
+}
+
+.skip-challenge-button:hover {
+  border-color: #40a9ff;
+  color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 底部版权信息 */
+.challenge-guess-footer {
+  flex: 0 0 auto;
+  padding: 1rem;
+  background: transparent;
+  text-align: center;
+}
+
+.challenge-guess-copyright {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .challenge-guess-title-section {
+    padding: 1rem 0.75rem 0.75rem 0.75rem;
+  }
+
+  .challenge-level-icon {
+    font-size: 1.5rem;
+  }
+
+  .challenge-guess-page-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .challenge-guess-timer {
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .challenge-timer-display {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .challenge-guess-content {
+    padding: 0.75rem;
+  }
+
+  .challenge-guess-input-section {
+    padding: 1rem 0.75rem;
+  }
+
+  .guess-input-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .guess-input {
+    width: 100%;
+    height: 45px;
+    font-size: 1rem;
+  }
+
+  .submit-guess-button {
+    width: 100%;
+    min-width: unset;
+    height: 45px;
+    font-size: 1rem;
+  }
+
+  .skip-challenge-button {
+    width: 100%;
+    max-width: 280px;
+    min-width: unset;
+    height: 45px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .challenge-guess-timer {
+    padding: 0.5rem;
+  }
+
+  .challenge-guess-input-section {
+    padding: 0.75rem 0.5rem;
+  }
+}

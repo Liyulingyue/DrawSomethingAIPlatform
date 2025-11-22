@@ -37,7 +37,12 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
     {
       key: '/app/level-set',
       icon: <TrophyOutlined />,
-      label: '闯关模式',
+      label: '绘画闯关',
+    },
+    {
+      key: '/app/level-set-guess',
+      icon: <TrophyOutlined />,
+      label: '猜词闯关',
     },
     {
       key: '/app/my-custom-levels',

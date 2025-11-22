@@ -4,6 +4,7 @@ from .drawing import router as drawing_router
 from .messages import router as messages_router
 from .ai import router as ai_router
 from .gallery import router as gallery_router
+from .sketch import router as sketch_router
 
 __all__ = [
 	"auth_router",
@@ -12,4 +13,5 @@ __all__ = [
 	"messages_router",
 	"ai_router",
 	"gallery_router",
+	"sketch_router",
 ]

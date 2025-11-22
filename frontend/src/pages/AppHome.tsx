@@ -15,6 +15,10 @@ function AppHome() {
     navigate('/app/level-set')
   }
 
+  const handleLevelSetGuess = () => {
+    navigate('/app/level-set-guess')
+  }
+
   const handleFreeDraw = () => {
     navigate('/app/draw')
   }
@@ -67,7 +71,16 @@ function AppHome() {
           onClick={handleLevelSelect}
           className="app-home-button app-home-button-primary"
         >
-          闯关模式
+          绘画闯关
+        </Button>
+        <Button
+          type="primary"
+          size="large"
+          icon={<TrophyOutlined />}
+          onClick={handleLevelSetGuess}
+          className="app-home-button app-home-button-secondary"
+        >
+          猜词闯关
         </Button>
         <Button
           type="primary"

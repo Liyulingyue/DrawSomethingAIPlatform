@@ -6,3 +6,6 @@ python-dotenv
 psycopg2-binary
 sqlalchemy
 alembic
+opencv-python-headless
+numpy
+Pillow

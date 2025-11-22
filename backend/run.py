@@ -11,8 +11,15 @@ import uvicorn
 def apply_migrations():
     """应用所有待处理的 Alembic 迁移"""
     try:
+        import sys
+        import io
         from alembic.config import Config
         from alembic import command
+        
+        # 设置 stdout 和 stderr 为 UTF-8 编码，避免 Windows GBK 编码问题
+        if sys.platform == 'win32':
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
         
         # 获取 alembic.ini 的路径（与 run.py 同级）
         alembic_cfg_path = os.path.join(os.path.dirname(__file__), "alembic.ini")

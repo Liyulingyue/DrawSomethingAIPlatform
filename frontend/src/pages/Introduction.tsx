@@ -56,7 +56,7 @@ function Introduction() {
             <div className="features-grid">
               <div className="feature-item">
                 <div className="feature-icon">🏆</div>
-                <h3>闯关模式</h3>
+                <h3>绘画闯关</h3>
                 <p>从新手入门到高级挑战，循序渐进提升绘画能力。每个关卡都有精心设计的关键词列表。</p>
               </div>
               <div className="feature-item">
@@ -89,7 +89,7 @@ function Introduction() {
                   <ul>
                     <li>✅ <strong>可以正常绘画：</strong>所有绘画功能都可正常使用</li>
                     <li>✅ <strong>可以体验AI识别：</strong>如果您配置了自定义AI服务</li>
-                    <li>✅ <strong>可以自由创作：</strong>闯关模式和自由绘画模式都可用</li>
+                    <li>✅ <strong>可以自由创作：</strong>绘画闯关和自由绘画模式都可用</li>
                   </ul>
                   <p><strong>登录后的额外功能：</strong></p>
                   <ul>
@@ -116,7 +116,7 @@ function Introduction() {
               </Panel>
               <Panel header="3️⃣ 选择游戏模式" key="2">
                 <div className="guide-content">
-                  <p><strong>闯关模式：</strong></p>
+                  <p><strong>绘画闯关：</strong></p>
                   <ul>
                     <li>选择一个关卡（如"新手入门"）</li>
                     <li>点击"开始挑战"从第一关开始</li>

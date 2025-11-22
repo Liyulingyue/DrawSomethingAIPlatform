@@ -565,7 +565,7 @@ function ChallengeDraw() {
         <div className="challenge-draw-title-section">
           <div className="challenge-draw-level-info">
             <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-            <h1 className="challenge-draw-page-title">{levelConfig?.title || '闯关模式'}</h1>
+            <h1 className="challenge-draw-page-title">{levelConfig?.title || '绘画闯关'}</h1>
           </div>
         </div>
 

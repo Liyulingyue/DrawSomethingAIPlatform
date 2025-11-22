@@ -165,7 +165,7 @@ function LevelConfig() {
               ghost
               onClick={() => navigate('/app/level-set')}
             >
-              ← 返回闯关模式
+              ← 返回绘画闯关
             </Button>
             <Button
               type="primary"

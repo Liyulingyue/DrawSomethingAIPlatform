@@ -17,6 +17,15 @@ class Config:
     MODEL_NAME: str = os.getenv("MODEL_NAME", "ernie-4.5-vl-28b-a3b")
     MODEL_URL: str = os.getenv("MODEL_URL", "https://aistudio.baidu.com/llm/lmapi/v3")
 
+    # === Text2Image 模型配置 ===
+    TEXT2IMAGE_MODEL_URL: str = os.getenv("TEXT2IMAGE_MODEL_URL", "https://aistudio.baidu.com/llm/lmapi/v3")
+    TEXT2IMAGE_MODEL_KEY: Optional[str] = os.getenv("TEXT2IMAGE_MODEL_KEY")
+    TEXT2IMAGE_MODEL_NAME: str = os.getenv("TEXT2IMAGE_MODEL_NAME", "Stable-Diffusion-XL")
+
+    # === 简笔画配置 ===
+    SKETCH_MAX_STEPS: int = int(os.getenv("SKETCH_MAX_STEPS", "20"))  # 笔画最大步数
+    SKETCH_SORT_METHOD: str = os.getenv("SKETCH_SORT_METHOD", "position")  # 笔画排序方法: area 或 position
+
     # === 管理员配置 ===
     ADMIN_USER: Optional[str] = os.getenv("ADMIN_USER")
     ADMIN_PASSWORD: Optional[str] = os.getenv("ADMIN_PASSWORD")

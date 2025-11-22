@@ -117,7 +117,7 @@ function LevelSet() {
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
       <div className="level-set-container">
         <div className="level-set-content">
-        <h1 className="level-set-title">闯关模式</h1>
+        <h1 className="level-set-title">绘画闯关</h1>
         
         <div className="level-cards-grid">
           {allLevels.map((level) => (

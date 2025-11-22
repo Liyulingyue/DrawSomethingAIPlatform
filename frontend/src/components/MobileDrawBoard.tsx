@@ -5,6 +5,9 @@ import './MobileDrawBoard.css'
 
 interface MobileDrawBoardProps {
   onDraw?: (image: string) => void
+  hideColorPicker?: boolean
+  readOnly?: boolean
+  displayImage?: string | null
 }
 
 export interface MobileDrawBoardRef {
@@ -16,7 +19,7 @@ const DEFAULT_COLOR = '#1f1f1f'
 const DEFAULT_SIZE = 6
 const COLOR_PRESETS = ['#1f1f1f', '#f5222d', '#faad14', '#52c41a', '#13c2c2', '#1677ff', '#722ed1', '#ffffff']
 
-function MobileDrawBoard({ onDraw }: MobileDrawBoardProps, ref: React.Ref<MobileDrawBoardRef>) {
+function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, displayImage = null }: MobileDrawBoardProps, ref: React.Ref<MobileDrawBoardRef>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const contextRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -107,6 +110,40 @@ function MobileDrawBoard({ onDraw }: MobileDrawBoardProps, ref: React.Ref<Mobile
     }
   }, [brushSize])
 
+  // 显示外部图片
+  useEffect(() => {
+    if (!displayImage || !canvasRef.current || !contextRef.current) return
+
+    const img = new Image()
+    img.onload = () => {
+      const ctx = contextRef.current
+      const canvas = canvasRef.current
+      if (!ctx || !canvas) return
+
+      // 清空画布
+      const { width: displayWidth, height: displayHeight } = canvasSize
+      ctx.save()
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+      ctx.restore()
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, displayWidth, displayHeight)
+
+      // 计算居中显示的位置和尺寸
+      const scale = Math.min(displayWidth / img.width, displayHeight / img.height)
+      const x = (displayWidth - img.width * scale) / 2
+      const y = (displayHeight - img.height * scale) / 2
+      
+      // 绘制图片
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale)
+      
+      // 恢复画笔设置
+      ctx.strokeStyle = brushColorRef.current
+      ctx.lineWidth = brushSizeRef.current
+    }
+    img.src = displayImage
+  }, [displayImage, canvasSize])
+
   const getCanvasCoords = useCallback((event: PointerEvent) => {
     const canvas = canvasRef.current
     if (!canvas) return { x: 0, y: 0 }
@@ -188,57 +225,59 @@ function MobileDrawBoard({ onDraw }: MobileDrawBoardProps, ref: React.Ref<Mobile
 
   return (
     <div className="mobile-draw-board">
-      <div className="mobile-draw-board-toolbar">
-        <Space className="mobile-draw-board-controls" wrap>
-          <Space size="small">
-            <span className="mobile-draw-board-label">颜色</span>
-            <Space size={4} className="mobile-draw-board-colors" wrap>
-              {COLOR_PRESETS.map((color) => (
-                <button
-                  key={color}
-                  className={`mobile-draw-board-color${color === brushColor ? ' active' : ''}`}
-                  style={{ background: color, color: color === '#ffffff' ? '#ccc' : undefined }}
-                  type="button"
-                  onClick={() => setBrushColor(color)}
-                  aria-label={`选择颜色 ${color}`}
-                >
-                  {color === '#ffffff' ? '擦' : ''}
-                </button>
-              ))}
+      {!hideColorPicker && (
+        <div className="mobile-draw-board-toolbar">
+          <Space className="mobile-draw-board-controls" wrap>
+            <Space size="small">
+              <span className="mobile-draw-board-label">颜色</span>
+              <Space size={4} className="mobile-draw-board-colors" wrap>
+                {COLOR_PRESETS.map((color) => (
+                  <button
+                    key={color}
+                    className={`mobile-draw-board-color${color === brushColor ? ' active' : ''}`}
+                    style={{ background: color, color: color === '#ffffff' ? '#ccc' : undefined }}
+                    type="button"
+                    onClick={() => setBrushColor(color)}
+                    aria-label={`选择颜色 ${color}`}
+                  >
+                    {color === '#ffffff' ? '擦' : ''}
+                  </button>
+                ))}
+              </Space>
+            </Space>
+            <Space size="small" align="center" className="mobile-draw-board-size-control">
+              <span className="mobile-draw-board-label">粗细</span>
+              <div className="mobile-draw-board-slider">
+                <Slider
+                  min={2}
+                  max={24}
+                  step={1}
+                  value={brushSize}
+                  onChange={(value) => setBrushSize(value as number)}
+                />
+              </div>
             </Space>
           </Space>
-          <Space size="small" align="center" className="mobile-draw-board-size-control">
-            <span className="mobile-draw-board-label">粗细</span>
-            <div className="mobile-draw-board-slider">
-              <Slider
-                min={2}
-                max={24}
-                step={1}
-                value={brushSize}
-                onChange={(value) => setBrushSize(value as number)}
-              />
-            </div>
-          </Space>
-        </Space>
-        <Button
-          type="default"
-          icon={<ClearOutlined />}
-          onClick={clearCanvas}
-          size="small"
-        >
-          清空
-        </Button>
-      </div>
+          <Button
+            type="default"
+            icon={<ClearOutlined />}
+            onClick={clearCanvas}
+            size="small"
+          >
+            清空
+          </Button>
+        </div>
+      )}
       
       <div className="mobile-draw-board-canvas-container" ref={containerRef}>
         <canvas
           ref={canvasRef}
           className="mobile-draw-board-canvas"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onPointerDown={readOnly ? undefined : handlePointerDown}
+          onPointerMove={readOnly ? undefined : handlePointerMove}
+          onPointerUp={readOnly ? undefined : handlePointerUp}
+          onPointerCancel={readOnly ? undefined : handlePointerUp}
+          onPointerLeave={readOnly ? undefined : handlePointerUp}
         />
       </div>
     </div>
