@@ -51,8 +51,11 @@ function LevelSet() {
   const [customLevels] = useState<LevelConfig[]>(getCustomLevels())
   const navigate = useNavigate()
 
+  // 只获取绘画闯关类型的自定义关卡
+  const drawCustomLevels = customLevels.filter(level => !level.type || level.type === 'draw')
+
   // 合并默认关卡和自定义关卡，并排序：可用的在前，待更新的在后
-  const allLevels = [...LEVEL_CONFIGS, ...customLevels].sort((a, b) => {
+  const allLevels = [...LEVEL_CONFIGS, ...drawCustomLevels].sort((a, b) => {
     // 如果状态不同，可用的排在前面
     if (a.status === 'coming-soon' && b.status !== 'coming-soon') return 1
     if (a.status !== 'coming-soon' && b.status === 'coming-soon') return -1

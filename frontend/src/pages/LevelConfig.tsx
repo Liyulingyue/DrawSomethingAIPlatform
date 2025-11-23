@@ -61,6 +61,9 @@ function CustomLevelConfiguration() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
+  // 获取关卡类型
+  const levelType = searchParams.get('type') || 'draw'
+
   useEffect(() => {
     // 检查是否有编辑参数
     const editId = searchParams.get('edit')
@@ -110,7 +113,8 @@ function CustomLevelConfiguration() {
         keywords: keywordsArray,
         clue: values.clue?.trim() || undefined,
         status: 'available',
-        difficulty: values.difficulty || '休闲'
+        difficulty: values.difficulty || '休闲',
+        type: levelType as 'draw' | 'guess'
       }
 
       let updatedCustomLevels: LevelConfig[]
@@ -156,16 +160,20 @@ function CustomLevelConfiguration() {
         <div className="level-config-content">
           {/* 页面标题 */}
           <h1 className="level-config-title">
-            {editingLevelId ? '编辑自定义关卡' : '创建自定义关卡'}
+            {editingLevelId ? '编辑自定义关卡' : (levelType === 'guess' ? '创建猜词自定义关卡' : '创建绘画自定义关卡')}
           </h1>
           
           <div className="level-config-nav-buttons">
             <Button
               type="primary"
               ghost
-              onClick={() => navigate('/app/level-set')}
+              onClick={() => navigate(levelType === 'guess' ? '/app/level-set-guess' : '/app/level-set')}
+              style={levelType === 'guess' ? {
+                borderColor: '#667eea',
+                color: '#667eea'
+              } : undefined}
             >
-              ← 返回绘画闯关
+              ← {levelType === 'guess' ? '返回猜词闯关' : '返回绘画闯关'}
             </Button>
             <Button
               type="primary"

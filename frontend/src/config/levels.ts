@@ -8,6 +8,7 @@ export interface LevelConfig {
   difficulty?: string
   keywords?: string[]  // 该关卡的关键词列表
   clue?: string        // 提示信息
+  type?: 'draw' | 'guess'  // 关卡类型：绘画闯关或猜词闯关
 }
 
 // 关卡配置数据
@@ -84,14 +85,39 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   }
 ]
 
+// 本地存储 key
+const CUSTOM_LEVELS_KEY = 'custom_levels'
+
+// 获取自定义关卡列表
+const getCustomLevels = (): LevelConfig[] => {
+  try {
+    const stored = localStorage.getItem(CUSTOM_LEVELS_KEY)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('读取自定义关卡失败:', error)
+  }
+  return []
+}
+
 // 获取可用的关卡
 export const getAvailableLevels = (): LevelConfig[] => {
   return LEVEL_CONFIGS.filter(level => level.status === 'available')
 }
 
-// 根据 ID 获取关卡配置
+// 根据 ID 获取关卡配置（包含自定义关卡）
 export const getLevelById = (id: string): LevelConfig | undefined => {
-  return LEVEL_CONFIGS.find(level => level.id === id)
+  // 先从预设关卡中查找
+  let level = LEVEL_CONFIGS.find(level => level.id === id)
+  
+  // 如果没找到，再从自定义关卡中查找
+  if (!level) {
+    const customLevels = getCustomLevels()
+    level = customLevels.find(level => level.id === id)
+  }
+  
+  return level
 }
 
 // 从关卡中随机获取一个关键词
