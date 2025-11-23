@@ -24,7 +24,7 @@ class Config:
 
     # === 简笔画配置 ===
     SKETCH_MAX_STEPS: int = int(os.getenv("SKETCH_MAX_STEPS", "20"))  # 笔画最大步数
-    SKETCH_SORT_METHOD: str = os.getenv("SKETCH_SORT_METHOD", "position")  # 笔画排序方法: area 或 position
+    SKETCH_SORT_METHOD: str = os.getenv("SKETCH_SORT_METHOD", "area")  # 笔画排序方法: area 或 position
 
     # === 管理员配置 ===
     ADMIN_USER: Optional[str] = os.getenv("ADMIN_USER")

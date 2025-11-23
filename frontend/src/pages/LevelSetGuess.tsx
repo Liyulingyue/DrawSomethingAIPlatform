@@ -1,41 +1,51 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, message, Button } from 'antd'
+import { Card, message, Button, Modal } from 'antd'
 import { LockOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { GUESS_LEVEL_CONFIGS, type GuessLevelConfig } from '../config/guessLevels'
+import { useUser } from '../context/UserContext'
 import './LevelSet.css'
-
-// 本地存储 key
-const COMPLETED_GUESS_LEVELS_KEY = 'completed_guess_levels'
 
 function LevelSetGuess() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
+  const { sessionId, username, initializing } = useUser()
 
-  // 获取已完成的关卡列表
-  const getCompletedLevels = (): Set<string> => {
-    try {
-      const stored = localStorage.getItem(COMPLETED_GUESS_LEVELS_KEY)
-      if (stored) {
-        return new Set(JSON.parse(stored))
-      }
-    } catch (error) {
-      console.error('读取已完成的猜词关卡失败:', error)
+  // 检查登录状态
+  useEffect(() => {
+    if (initializing) return // 等待初始化完成
+
+    if (!sessionId || !username) {
+      Modal.warning({
+        title: '需要登录',
+        content: '猜词闯关功能需要消耗服务点，必须登录后才能使用。',
+        okText: '去登录',
+        onOk: () => {
+          navigate('/app/login', { replace: true })
+        }
+      })
     }
-    return new Set()
-  }
-
-  // 检查关卡是否已完成
-  const isLevelCompleted = (levelId: string): boolean => {
-    const completed = getCompletedLevels()
-    return completed.has(levelId)
-  }
+  }, [sessionId, username, initializing, navigate])
 
   const handleStartChallenge = (level: GuessLevelConfig, e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    // 再次检查登录状态
+    if (!sessionId || !username) {
+      Modal.warning({
+        title: '需要登录',
+        content: '猜词闯关功能需要消耗服务点，必须登录后才能使用。',
+        okText: '去登录',
+        onOk: () => {
+          navigate('/app/login', { replace: true })
+        }
+      })
+      return
+    }
+    
     if (level.status === 'coming-soon') {
       message.info(`${level.title}关卡即将推出，敬请期待！`)
       return
@@ -56,7 +66,38 @@ function LevelSetGuess() {
         <h1 className="level-set-title">猜词闯关</h1>
         <p className="level-set-subtitle">看到AI生成的图片，猜出对应的词语。每关10个词，按随机顺序挑战</p>
 
-        <div className="level-cards-grid">
+        {/* 未登录时显示遮罩 */}
+        {(!sessionId || !username) && !initializing ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            background: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '12px',
+            margin: '40px auto',
+            maxWidth: '500px'
+          }}>
+            <LockOutlined style={{ fontSize: '64px', color: '#ff6b35', marginBottom: '24px' }} />
+            <h2 style={{ fontSize: '24px', marginBottom: '16px', color: '#333' }}>需要登录</h2>
+            <p style={{ fontSize: '16px', color: '#666', marginBottom: '24px' }}>
+              猜词闯关功能需要消耗服务点，必须登录后才能使用。
+            </p>
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => navigate('/app/login')}
+              style={{
+                background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+                border: 'none',
+                height: '48px',
+                padding: '0 40px',
+                fontSize: '16px'
+              }}
+            >
+              立即登录
+            </Button>
+          </div>
+        ) : (
+          <div className="level-cards-grid">
           {GUESS_LEVEL_CONFIGS.map((level) => (
             <Card
               key={level.id}
@@ -94,6 +135,7 @@ function LevelSetGuess() {
             </Card>
           ))}
         </div>
+        )}
         <AppFooter className="app-footer-light" />
       </div>
       </div>

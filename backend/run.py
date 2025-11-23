@@ -1,3 +1,4 @@
+import traceback
 from dotenv import load_dotenv
 import os
 
@@ -35,6 +36,7 @@ def apply_migrations():
         
     except Exception as e:
         print(f"应用数据库迁移时出错: {e}")
+        traceback.print_exc()
         print("继续启动应用，但数据库结构可能不一致")
 
 if __name__ == "__main__":

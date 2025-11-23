@@ -27,7 +27,7 @@ import {
 } from '../../hooks/useDrawingRoom'
 import { formatRelativeTime } from '../../utils/api'
 
-const { Title, Text, Paragraph } = Typography
+const { Title, Text } = Typography
 const { TextArea } = Input
 
 interface ModelConfig {
@@ -116,12 +116,9 @@ const MultiplayerView = ({
   scores,
   playerStates,
   username,
-  isReady,
   readyStatus,
   statusDescription,
-  targetInput,
   chatInput,
-  guessStatus,
   currentDrawing,
   state,
   modelConfig,
@@ -133,18 +130,12 @@ const MultiplayerView = ({
   onPrepare,
   onUnprepare,
   onGuess,
-  onGuessWord,
   onSkipGuess,
   onSyncDrawing,
-  onTargetInputChange,
   onChatInputChange,
   onChatKeyDown,
-  onToggleReady,
-  onConfigureRound,
   onStartRound,
-  onResetRound,
   onResetScores,
-  onSubmitDrawing,
   onSendMessage,
   onLeaveRoom,
 }: MultiplayerViewProps) => {
@@ -170,10 +161,6 @@ const MultiplayerView = ({
         </Space>
       </Card>
     )
-  }
-
-  const handleTargetChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onTargetInputChange(event.target.value)
   }
 
   const handleChatChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -335,7 +322,7 @@ const MultiplayerView = ({
                             </Button>
                             <Button
                               type="primary"
-                              onClick={() => onGuess(latestGuessImage)}
+                              onClick={() => onGuess(latestGuessImage || undefined)}
                               disabled={!latestGuessImage || status === 'finished' || hasResolvedGuess}
                             >
                               进行猜词

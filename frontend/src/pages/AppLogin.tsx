@@ -175,7 +175,7 @@ function AppLogin() {
               <h1 className="app-login-title">🎨 你画AI猜</h1>
               <p className="app-login-subtitle">DrawSomething AI Platform</p>
             </div>
-            <Card className="app-login-card" bordered={false}>
+            <Card className="app-login-card" variant="borderless">
               <div style={{ textAlign: 'center', padding: '20px' }}>
                 <Text>加载中...</Text>
               </div>
@@ -198,7 +198,7 @@ function AppLogin() {
             <p className="app-login-subtitle">DrawSomething AI Platform</p>
           </div>
 
-          <Card className="app-login-card" bordered={false}>
+          <Card className="app-login-card" variant="borderless">
             {username ? (
               // 已登录状态
               <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>

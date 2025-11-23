@@ -1,19 +1,19 @@
 import { useRef, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Button, App, Input } from 'antd'
+import { Button, App, Input, Spin } from 'antd'
 import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import MobileDrawBoard, { type MobileDrawBoardRef } from '../components/MobileDrawBoard'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getGuessLevelById, getShuffledKeywords } from '../config/guessLevels'
-import { api } from '../utils/api'
-import { getAIConfig } from '../utils/aiConfig'
 import { generateSketch } from '../utils/sketchApi'
+import { useUser } from '../context/UserContext'
 import './ChallengeGuess.css'
 
 // 本地存储 key
 const COMPLETED_GUESS_LEVELS_KEY = 'completed_guess_levels'
+const GUESS_LEVEL_SCORES_KEY = 'guess_level_scores'
 
 // 标记关卡为已完成
 const markLevelCompleted = (levelId: string) => {
@@ -28,6 +28,33 @@ const markLevelCompleted = (levelId: string) => {
   }
 }
 
+// 存储关卡得分
+const saveLevelScore = (levelId: string, score: number) => {
+  try {
+    const stored = localStorage.getItem(GUESS_LEVEL_SCORES_KEY)
+    const scores = stored ? JSON.parse(stored) : {}
+    scores[levelId] = score
+    localStorage.setItem(GUESS_LEVEL_SCORES_KEY, JSON.stringify(scores))
+    console.log(`💰 保存关卡得分: ${levelId} = ${score}分`, scores)
+  } catch (error) {
+    console.error('保存关卡得分失败:', error)
+  }
+}
+
+// 获取所有已完成关卡的总得分
+const getTotalScore = (): number => {
+  try {
+    const stored = localStorage.getItem(GUESS_LEVEL_SCORES_KEY)
+    const scores = stored ? JSON.parse(stored) : {}
+    const total = Object.values(scores).reduce((total: number, score: any) => total + (typeof score === 'number' ? score : 0), 0)
+    console.log(`📊 计算总得分:`, scores, `= ${total}分`)
+    return total
+  } catch (error) {
+    console.error('获取总得分失败:', error)
+    return 0
+  }
+}
+
 function ChallengeGuess() {
   const { message, modal } = App.useApp()
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
@@ -38,8 +65,26 @@ function ChallengeGuess() {
   const [sketchSteps, setSketchSteps] = useState<string[]>([])
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [levelScore, setLevelScore] = useState(0) // 当前关卡累计积分
   const navigate = useNavigate()
   const location = useLocation()
+  const { sessionId, username, initializing } = useUser()
+
+  // 检查登录状态
+  useEffect(() => {
+    if (initializing) return // 等待初始化完成
+
+    if (!sessionId || !username) {
+      modal.warning({
+        title: '需要登录',
+        content: '猜词闯关功能需要消耗服务点，必须登录后才能使用。',
+        okText: '去登录',
+        onOk: () => {
+          navigate('/app/login', { replace: true })
+        }
+      })
+    }
+  }, [sessionId, username, initializing, navigate, modal])
 
   // 解析URL参数
   const searchParams = new URLSearchParams(location.search)
@@ -53,6 +98,11 @@ function ChallengeGuess() {
   // 获取当前关键词
   const shuffledKeywords = getShuffledKeywords(levelId)
   const currentKeyword = shuffledKeywords[keywordIndex] || ''
+
+  // 关卡变化时重置积分
+  useEffect(() => {
+    setLevelScore(0)
+  }, [levelId])
 
   // 打印当前目标词和关卡信息（仅在关键参数变化时）
   useEffect(() => {
@@ -85,7 +135,9 @@ function ChallengeGuess() {
         const result = await generateSketch({
           prompt: currentKeyword,
           max_steps: 20,
-          sort_method: 'position'
+          sort_method: 'area',
+          useCache: false, // 猜词闯关不使用缓存
+          sessionId: sessionId
         })
         
         if (cancelled) {
@@ -97,10 +149,36 @@ function ChallengeGuess() {
         setSketchSteps(result.steps)
         setCurrentStepIndex(0)
         loadedKeywordRef.current = currentKeyword // 标记已加载
-      } catch (error) {
+      } catch (error: any) {
         if (!cancelled) {
           console.error('💥 生成简笔画失败:', error)
-          message.error('生成简笔画失败，请稍后重试')
+          
+          let errorMessage = '生成简笔画失败，请稍后重试'
+          let isInsufficientCredits = false
+          
+          if (error?.response?.status === 402) {
+            errorMessage = '调用次数不足，请充值后继续游戏'
+            isInsufficientCredits = true
+          } else if (error?.response?.status === 401) {
+            errorMessage = '登录已过期，请重新登录'
+          } else if (error instanceof Error) {
+            if (error.message.includes('Failed to fetch')) {
+              errorMessage = '无法连接到服务器，请检查网络连接'
+            }
+          }
+          
+          if (isInsufficientCredits) {
+            modal.warning({
+              title: '调用次数不足',
+              content: '您的服务点数不足，无法生成简笔画。请充值后继续游戏。',
+              okText: '去充值',
+              onOk: () => {
+                navigate('/app/login')
+              }
+            })
+          } else {
+            message.error(errorMessage)
+          }
         }
       } finally {
         if (!cancelled) {
@@ -134,6 +212,8 @@ function ChallengeGuess() {
 
   // 累加计时逻辑
   useEffect(() => {
+    if (loading) return // 加载中不启动计时
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev >= 300) { // 最大5分钟
@@ -144,7 +224,44 @@ function ChallengeGuess() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [])
+  }, [loading])
+
+  // 时间结束自动显示答案
+  useEffect(() => {
+    if (timeLeft >= 300 && currentKeyword && !loading) {
+      modal.confirm({
+        title: '⏰ 时间到！',
+        content: (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
+            <p style={{ fontSize: '16px', marginBottom: '16px' }}>
+              正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
+            </p>
+            <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
+              <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 挑战结束：</p>
+              <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
+                🎨 准备好迎接下一题挑战了吗？
+              </p>
+            </div>
+          </div>
+        ),
+        width: 480,
+        okText: '继续挑战',
+        onOk: handleNextKeyword,
+        cancelText: '重新开始',
+        onCancel: () => {
+          // 重置状态，重新开始这一题
+          setGuessInput('')
+          setTimeLeft(0)
+          setSketchSteps([])
+          setCurrentStepIndex(0)
+          setLoading(true)
+          loadedKeywordRef.current = '' // 重置加载标记
+        }
+      })
+      message.warning('时间到！正确答案已显示')
+    }
+  }, [timeLeft, currentKeyword, loading, modal, message])
 
   // 提交猜测
   const handleSubmitGuess = async () => {
@@ -158,37 +275,19 @@ function ChallengeGuess() {
       return
     }
 
-    const image = drawBoardRef.current?.getImage()
-    if (!image) {
-      message.error('无法获取画作')
-      return
-    }
-
     setSubmitting(true)
 
     try {
-      const aiConfig = getAIConfig()
-      if (!aiConfig) {
-        message.error('请先配置AI服务')
-        return
-      }
-
-      // 调用AI识别API
-      const response = await api.post('/ai/recognize', {
-        image: image,
-        model: aiConfig.modelName || 'ernie-4.5-vl-28b-a3b'
-      })
-
-      const result = response.data
-      console.log('🎯 AI识别结果:', result)
-
-      // 检查用户猜测是否正确
+      // 直接比较用户猜测和正确答案
       const userGuess = guessInput.trim().toLowerCase()
       const correctAnswer = currentKeyword.toLowerCase()
       const isCorrect = userGuess === correctAnswer
 
       if (isCorrect) {
-        // 猜测正确
+        // 猜测正确 - 计算积分
+        const score = calculateScore(timeLeft)
+        setLevelScore(prev => prev + score)
+        
         markLevelCompleted(`${levelId}:${keywordIndex}`)
 
         modal.success({
@@ -200,7 +299,7 @@ function ChallengeGuess() {
                 正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
               </p>
               <p style={{ color: '#666', marginBottom: '16px' }}>
-                AI识别结果：{result.guess || '未识别'}
+                用时：{formatTime(timeLeft)} | 获得积分：<strong style={{ color: '#faad14' }}>{score}分</strong>
               </p>
               <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
                 <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 继续挑战：</p>
@@ -215,46 +314,84 @@ function ChallengeGuess() {
           onOk: handleNextKeyword
         })
 
-        message.success('🎉 恭喜猜对！')
+        message.success(`🎉 恭喜猜对！获得 ${score} 积分！`)
       } else {
-        // 猜测错误
-        modal.confirm({
-          title: '❌ 猜错了',
-          content: (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
-              <p style={{ fontSize: '16px', marginBottom: '8px' }}>
-                您的猜测：<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
-              </p>
-              <p style={{ fontSize: '16px', marginBottom: '8px' }}>
-                AI识别结果：<strong style={{ color: '#1890ff' }}>{result.guess || '未识别'}</strong>
-              </p>
-              <p style={{ color: '#666', marginBottom: '16px' }}>
-                正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
-              </p>
-              <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 改进建议：</p>
-                <ul style={{ margin: '0 0 0 16px', paddingLeft: '8px', textAlign: 'left' }}>
-                  <li>尝试画得更清晰一些</li>
-                  <li>添加更多细节特征</li>
-                  <li>使用更明显的形状</li>
-                </ul>
-                <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
-                  🎨 继续在画板上修改或重新绘制！
+        // 猜测错误 - 检查是否时间结束
+        const timeUp = timeLeft >= 300 // 5分钟 = 300秒
+
+        if (timeUp) {
+          // 时间结束，显示正确答案
+          modal.confirm({
+            title: '⏰ 时间到！',
+            content: (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
+                <p style={{ fontSize: '16px', marginBottom: '8px' }}>
+                  您的猜测：<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
                 </p>
+                <p style={{ fontSize: '16px', marginBottom: '16px' }}>
+                  正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
+                </p>
+                <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 挑战结束：</p>
+                  <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
+                    🎨 准备好迎接下一题挑战了吗？
+                  </p>
+                </div>
               </div>
-            </div>
-          ),
-          width: 520,
-          okText: '继续挑战',
-          onOk: () => {
-            setGuessInput('')
-            // 不需要清空画板，让用户继续看简笔画
-          },
-          cancelText: '跳过此题',
-          onCancel: handleNextKeyword
-        })
-        message.warning('猜错了，再试一次吧！')
+            ),
+            width: 480,
+            okText: '继续挑战',
+            onOk: handleNextKeyword,
+            cancelText: '重新开始',
+            onCancel: () => {
+              // 重置状态，重新开始这一题
+              setGuessInput('')
+              setTimeLeft(0)
+              setSketchSteps([])
+              setCurrentStepIndex(0)
+              setLoading(true)
+              loadedKeywordRef.current = '' // 重置加载标记
+            }
+          })
+          message.warning('时间到！正确答案已显示')
+        } else {
+          // 时间未结束，只显示猜错了
+          modal.confirm({
+            title: '❌ 猜错了',
+            content: (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
+                <p style={{ fontSize: '16px', marginBottom: '8px' }}>
+                  您的猜测：<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
+                </p>
+                <p style={{ color: '#666', marginBottom: '16px' }}>
+                  剩余时间：<strong style={{ color: '#faad14' }}>{formatTime(300 - timeLeft)}</strong>
+                </p>
+                <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 继续挑战：</p>
+                  <ul style={{ margin: '0 0 0 16px', paddingLeft: '8px', textAlign: 'left' }}>
+                    <li>仔细观察画作的细节</li>
+                    <li>尝试不同的角度思考</li>
+                    <li>考虑常见的联想</li>
+                  </ul>
+                  <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
+                    🎨 继续在画板上观察或重新猜测！
+                  </p>
+                </div>
+              </div>
+            ),
+            width: 480,
+            okText: '继续猜测',
+            onOk: () => {
+              setGuessInput('')
+              // 不需要清空画板，让用户继续观察简笔画
+            },
+            cancelText: '跳过此题',
+            onCancel: handleNextKeyword
+          })
+          message.warning('猜错了，再试一次吧！')
+        }
       }
 
     } catch (error) {
@@ -294,7 +431,7 @@ function ChallengeGuess() {
               </p>
             </div>
             <p style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-              请检查网络连接和 AI 配置是否正确
+              请检查网络连接
             </p>
           </div>
         ),
@@ -306,9 +443,7 @@ function ChallengeGuess() {
     } finally {
       setSubmitting(false)
     }
-  }
-
-  // 下一题
+  }  // 下一题
   const handleNextKeyword = () => {
     if (!levelConfig) {
       message.warning('关卡配置未找到')
@@ -321,9 +456,59 @@ function ChallengeGuess() {
 
     if (nextIndex >= totalKeywords) {
       // 已经是最后一个关键词，恭喜完成该关卡
+      console.log(`🎯 完成关卡: ${levelId}, 本关得分: ${levelScore}`)
+      
       markLevelCompleted(levelId)
-      message.success(`🎉 恭喜完成【${levelConfig.title}】关卡所有挑战！`)
-      navigate('/app/level-set-guess')
+      
+      // 先获取旧的总得分
+      const oldTotalScore = getTotalScore()
+      console.log(`📊 保存前的总得分: ${oldTotalScore}`)
+      
+      // 保存本关得分
+      saveLevelScore(levelId, levelScore)
+      
+      // 重新获取总得分（应该包含刚保存的得分）
+      const newTotalScore = getTotalScore()
+      console.log(`📊 保存后的总得分: ${newTotalScore}`)
+      
+      modal.success({
+        title: '🎉 恭喜完成关卡！',
+        content: (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <CheckCircleOutlined style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }} />
+            <p style={{ fontSize: '18px', marginBottom: '12px' }}>
+              成功完成【{levelConfig.title}】关卡！
+            </p>
+            <div style={{ 
+              background: '#f6ffed', 
+              border: '1px solid #b7eb8f', 
+              borderRadius: '8px', 
+              padding: '16px',
+              marginBottom: '16px'
+            }}>
+              <p style={{ fontSize: '16px', margin: '0 0 8px 0', fontWeight: 500 }}>
+                📊 挑战统计：
+              </p>
+              <p style={{ fontSize: '14px', margin: '0 0 4px 0', color: '#666' }}>
+                💰 本关得分：<strong style={{ color: '#faad14' }}>{levelScore} 分</strong>
+              </p>
+              <p style={{ fontSize: '14px', margin: '0', color: '#666' }}>
+                🏆 历史总得分：<strong style={{ color: '#52c41a' }}>{newTotalScore} 分</strong>
+              </p>
+            </div>
+            <p style={{ color: '#666', fontSize: '14px' }}>
+              继续挑战更多关卡，提升您的猜词技巧吧！
+            </p>
+          </div>
+        ),
+        width: 500,
+        okText: '返回关卡选择',
+        onOk: () => {
+          navigate('/app/level-set-guess')
+        }
+      })
+      
+      message.success(`🎉 恭喜完成【${levelConfig.title}】关卡所有挑战！获得 ${levelScore} 积分！`)
       return
     }
 
@@ -335,6 +520,7 @@ function ChallengeGuess() {
     setCurrentStepIndex(0)
     setLoading(true)
     loadedKeywordRef.current = '' // 重置加载标记
+    // 注意：不重置levelScore，保持关卡内积分累计
 
     // 跳转到下一个关键词
     navigate(`/app/challenge-guess?level=${levelId}&keywordIndex=${nextIndex}`)
@@ -376,6 +562,26 @@ function ChallengeGuess() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  // 计算积分（基于用时）
+  const calculateScore = (timeSpent: number): number => {
+    if (timeSpent <= 120) { // 2分钟内
+      return 5
+    } else if (timeSpent <= 1800) { // 30分钟内
+      return 3
+    } else { // 超过30分钟
+      return 1
+    }
+  }
+
+  // 获取当前绘画进度
+  const getDrawingProgress = () => {
+    if (sketchSteps.length === 0) return { current: 0, total: 20 }
+    return {
+      current: Math.min(currentStepIndex + 1, sketchSteps.length),
+      total: sketchSteps.length
+    }
+  }
+
   return (
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -392,13 +598,27 @@ function ChallengeGuess() {
         {/* 倒计时区域 */}
         <div className="challenge-guess-timer">
           <div className="challenge-timer-display">
-            <ClockCircleOutlined style={{ marginRight: '8px' }} />
-            <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
-              {formatTime(timeLeft)}/5:00
-            </span>
-            <span className="challenge-progress-text">
-              第 {keywordIndex + 1} / {shuffledKeywords.length} 题
-            </span>
+            <div className="timer-left">
+              <ClockCircleOutlined style={{ marginRight: '8px' }} />
+              <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
+                {formatTime(timeLeft)}/5:00
+              </span>
+            </div>
+            <div className="timer-center">
+              <span className="challenge-progress-text">
+                第 {keywordIndex + 1} / {shuffledKeywords.length} 题
+              </span>
+            </div>
+            <div className="timer-right">
+              <span className="challenge-score-text">
+                💰 {levelScore} 分
+              </span>
+              {!loading && (
+                <span className="challenge-drawing-progress">
+                  🎨 {getDrawingProgress().current}/{getDrawingProgress().total}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -406,14 +626,22 @@ function ChallengeGuess() {
         <div className="challenge-guess-content">
           {loading ? (
             <div style={{ 
-              display: 'flex', 
+              display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center', 
               justifyContent: 'center',
               height: '100%',
-              fontSize: '16px',
-              color: '#666'
+              gap: '1rem'
             }}>
-              正在生成简笔画...
+              <Spin size="large" className="custom-spin" />
+              <div style={{ 
+                fontSize: '1.2rem', 
+                color: 'white', 
+                fontWeight: 500,
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
+              }}>
+                AI正在构思画作，请稍后
+              </div>
             </div>
           ) : (
             <MobileDrawBoard
@@ -446,7 +674,7 @@ function ChallengeGuess() {
               disabled={submitting || !guessInput.trim()}
               className="submit-guess-button"
             >
-              {submitting ? '识别中...' : '发送'}
+              {submitting ? '提交中...' : '发送'}
             </Button>
           </div>
           <Button

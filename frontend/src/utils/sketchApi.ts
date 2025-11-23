@@ -14,6 +14,8 @@ export interface GenerateSketchRequest {
   prompt: string
   max_steps?: number
   sort_method?: 'area' | 'position'
+  useCache?: boolean // 是否使用缓存，默认为 true
+  sessionId?: string // 用户会话ID
 }
 
 export interface DecomposeImageRequest {
@@ -87,11 +89,14 @@ function setCachedSketch(prompt: string, data: SketchStep): void {
  */
 export async function generateSketch(request: GenerateSketchRequest): Promise<SketchStep> {
   const cacheKey = request.prompt
+  const useCache = request.useCache !== false // 默认使用缓存
   
-  // 先检查缓存
-  const cached = getCachedSketch(cacheKey)
-  if (cached) {
-    return cached
+  // 只在启用缓存时检查缓存
+  if (useCache) {
+    const cached = getCachedSketch(cacheKey)
+    if (cached) {
+      return cached
+    }
   }
 
   // 检查是否有相同的请求正在进行
@@ -108,15 +113,18 @@ export async function generateSketch(request: GenerateSketchRequest): Promise<Sk
       const response = await api.post('/sketch/generate', {
         prompt: request.prompt,
         max_steps: request.max_steps ?? 20,
-        sort_method: request.sort_method ?? 'position'
+        sort_method: request.sort_method ?? 'position',
+        session_id: request.sessionId
       }, {
         timeout: 60000 // 60秒超时
       })
 
       const data = response.data.data
       
-      // 缓存结果
-      setCachedSketch(cacheKey, data)
+      // 只在启用缓存时缓存结果
+      if (useCache) {
+        setCachedSketch(cacheKey, data)
+      }
       
       return data
     } finally {

@@ -53,7 +53,7 @@ const saveCustomLevels = (levels: LevelConfig[]): void => {
   }
 }
 
-function LevelConfig() {
+function CustomLevelConfiguration() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [customLevels, setCustomLevels] = useState<LevelConfig[]>(getCustomLevels())
   const [editingLevelId, setEditingLevelId] = useState<string | null>(null)
@@ -294,4 +294,4 @@ function LevelConfig() {
   )
 }
 
-export default LevelConfig
+export default CustomLevelConfiguration

@@ -134,12 +134,12 @@ export const getShuffledKeywords = (levelId: string): string[] => {
   // 尝试从 localStorage 获取缓存的顺序
   const cacheKey = `shuffled_keywords_${levelId}`
   const cached = localStorage.getItem(cacheKey)
-  
+
   if (cached) {
     try {
       const parsed = JSON.parse(cached)
       // 验证缓存是否有效（关键词数量和内容一致）
-      if (parsed.length === level.keywords.length && 
+      if (parsed.length === level.keywords.length &&
           parsed.every((k: string) => level.keywords.includes(k))) {
         return parsed
       }

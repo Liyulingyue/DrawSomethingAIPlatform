@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Dropdown, Button, message } from 'antd';
+import { Modal, Dropdown, Button, message, Spin } from 'antd';
 import { HeartFilled, FilterOutlined, DeleteOutlined } from '@ant-design/icons';
 import { API_BASE_URL } from '../utils/api';
 import { useUser } from '../context/UserContext';
@@ -171,7 +171,24 @@ const Gallery: React.FC = () => {
 
         {/* 画廊内容区域 */}
         <div className="gallery-content">
-          {galleryItems.length > 0 ? (
+          {loading ? (
+            <div style={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center', 
+              justifyContent: 'center',
+              height: '200px',
+              gap: '1rem'
+            }}>
+              <Spin size="large" />
+              <div style={{ 
+                fontSize: '1.2rem', 
+                color: '#666'
+              }}>
+                正在加载画廊...
+              </div>
+            </div>
+          ) : galleryItems.length > 0 ? (
             <div className="gallery-grid">
               {galleryItems.map((item) => (
                 <div key={item.filename} className="gallery-item">

@@ -5,7 +5,7 @@ import Home from './pages/Home'
 import AppHome from './pages/AppHome'
 import LevelSet from './pages/LevelSet'
 import LevelSetGuess from './pages/LevelSetGuess'
-import LevelConfig from './pages/LevelConfig'
+import CustomLevelConfiguration from './pages/LevelConfig'
 import MyCustomLevels from './pages/MyCustomLevels'
 import AppDraw from './pages/AppDraw'
 import ChallengeDraw from './pages/ChallengeDraw'
@@ -32,7 +32,7 @@ function App() {
               <Route path="/app/home" element={<AppHome />} />
               <Route path="/app/level-set" element={<LevelSet />} />
               <Route path="/app/level-set-guess" element={<LevelSetGuess />} />
-              <Route path="/app/level-config" element={<LevelConfig />} />
+              <Route path="/app/level-config" element={<CustomLevelConfiguration />} />
               <Route path="/app/my-custom-levels" element={<MyCustomLevels />} />
               <Route path="/app/draw" element={<AppDraw />} />
               <Route path="/app/challenge-draw" element={<ChallengeDraw />} />

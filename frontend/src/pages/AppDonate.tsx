@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Button, message } from 'antd'
-import { HeartOutlined, QrcodeOutlined, CopyOutlined } from '@ant-design/icons'
+import { HeartOutlined, QrcodeOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -8,15 +7,6 @@ import './AppDonate.css'
 
 function AppDonate() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const handleCopyAddress = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address)
-      message.success('地址已复制到剪贴板')
-    } catch (error) {
-      message.error('复制失败，请手动复制')
-    }
-  }
 
   return (
     <>
