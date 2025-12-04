@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { App as AntApp } from 'antd'
 import { UserProvider } from './context/UserContext'
-import Home from './pages/Home'
 import AppHome from './pages/AppHome'
 import LevelSet from './pages/LevelSet'
 import LevelSetGuess from './pages/LevelSetGuess'
@@ -12,12 +11,8 @@ import ChallengeDraw from './pages/ChallengeDraw'
 import ChallengeGuess from './pages/ChallengeGuess'
 import ConfigAI from './pages/ConfigAI'
 import Introduction from './pages/Introduction'
-import Login from './pages/Login'
 import AppLogin from './pages/AppLogin'
 import AppDonate from './pages/AppDonate'
-import Room from './pages/Room'
-import MultiplayerGame from './pages/MultiplayerGame'
-import SingleGame from './pages/SingleGame'
 import Gallery from './pages/Gallery'
 import './App.css'
 
@@ -28,7 +23,6 @@ function App() {
         <Router>
           <div className="app-shell">
             <Routes>
-              <Route path="/" element={<Home />} />
               <Route path="/app/home" element={<AppHome />} />
               <Route path="/app/level-set" element={<LevelSet />} />
               <Route path="/app/level-set-guess" element={<LevelSetGuess />} />
@@ -42,11 +36,7 @@ function App() {
               <Route path="/app/gallery" element={<Gallery />} />
               <Route path="/app/donate" element={<AppDonate />} />
               <Route path="/app/login" element={<AppLogin />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/rooms" element={<Room />} />
-              <Route path="/game" element={<MultiplayerGame />} />
-              <Route path="/game/single" element={<SingleGame />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/app/home" replace />} />
             </Routes>
           </div>
         </Router>

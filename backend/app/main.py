@@ -5,9 +5,6 @@ from starlette.requests import Request
 import os
 from .routes import (
     auth_router,
-    rooms_router,
-    drawing_router,
-    messages_router,
     ai_router,
     gallery_router,
     sketch_router,
@@ -39,12 +36,8 @@ async def options_handler(full_path: str):
         }
     )
 
-app.include_router(gallery_router)
-
 app.include_router(auth_router)
-app.include_router(rooms_router)
-app.include_router(drawing_router)
-app.include_router(messages_router)
+app.include_router(gallery_router)
 app.include_router(ai_router)
 app.include_router(sketch_router)
 

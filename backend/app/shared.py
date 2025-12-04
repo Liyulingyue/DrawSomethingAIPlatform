@@ -83,7 +83,6 @@ def cleanup_inactive_sessions() -> dict:
     finally:
         db.close()
 
-
 def get_user_info(session_id: str):
     user = get_user_by_session(session_id)
     if user:
@@ -94,29 +93,3 @@ def get_user_info(session_id: str):
             "last_login": user.last_login
         }
     return None
-
-
-# 为了向后兼容，保留旧的全局变量接口
-used_usernames = set()
-user_sessions = {}
-rooms = {}  # 房间状态存储（内存中）
-
-
-def touch_sessions_by_username(username: str) -> None:
-    """向后兼容函数"""
-    pass
-
-
-def update_sessions_username(old_username: str, new_username: str) -> None:
-    """向后兼容函数"""
-    pass
-
-
-def cleanup_inactive_users() -> dict:
-    """向后兼容函数，返回清理的会话信息"""
-    return cleanup_inactive_sessions()
-
-
-def ensure_username_registered(username: str) -> None:
-    """向后兼容函数"""
-    pass
