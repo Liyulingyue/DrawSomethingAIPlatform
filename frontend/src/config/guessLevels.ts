@@ -114,14 +114,47 @@ export const GUESS_LEVEL_CONFIGS: GuessLevelConfig[] = [
   }
 ]
 
+// 本地存储 key
+const CUSTOM_LEVELS_KEY = 'custom_levels'
+
+// 获取自定义关卡列表
+const getCustomLevels = (): GuessLevelConfig[] => {
+  try {
+    const stored = localStorage.getItem(CUSTOM_LEVELS_KEY)
+    if (stored) {
+      const allCustomLevels = JSON.parse(stored)
+      // 只返回猜词类型的自定义关卡，并确保有 keywords
+      return allCustomLevels
+        .filter((level: any) => level.type === 'guess' && level.keywords && level.keywords.length > 0)
+        .map((level: any) => ({
+          ...level,
+          keywords: level.keywords,
+          status: level.status as 'available' | 'coming-soon'
+        }))
+    }
+  } catch (error) {
+    console.error('读取自定义猜词关卡失败:', error)
+  }
+  return []
+}
+
 // 获取可用的猜词关卡
 export const getAvailableGuessLevels = (): GuessLevelConfig[] => {
   return GUESS_LEVEL_CONFIGS.filter(level => level.status === 'available')
 }
 
-// 根据 ID 获取猜词关卡配置
+// 根据 ID 获取猜词关卡配置（包含自定义关卡）
 export const getGuessLevelById = (id: string): GuessLevelConfig | undefined => {
-  return GUESS_LEVEL_CONFIGS.find(level => level.id === id)
+  // 先从预设关卡中查找
+  let level = GUESS_LEVEL_CONFIGS.find(level => level.id === id)
+  
+  // 如果没找到，再从自定义关卡中查找
+  if (!level) {
+    const customLevels = getCustomLevels()
+    level = customLevels.find(level => level.id === id)
+  }
+  
+  return level
 }
 
 // 获取关卡的随机顺序关键词列表

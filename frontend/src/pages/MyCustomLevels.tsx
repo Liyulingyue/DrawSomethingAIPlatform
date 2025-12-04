@@ -42,8 +42,9 @@ function MyCustomLevels() {
   const navigate = useNavigate()
 
   // 编辑关卡
-  const handleEdit = (levelId: string) => {
-    navigate(`/app/level-config?edit=${levelId}`)
+  const handleEdit = (level: LevelConfig) => {
+    const typeParam = level.type ? `&type=${level.type}` : ''
+    navigate(`/app/level-config?edit=${level.id}${typeParam}`)
   }
 
   // 删除关卡
@@ -97,20 +98,46 @@ function MyCustomLevels() {
           <h1 className="my-custom-levels-title">我的自定义关卡</h1>
           
           <div className="my-custom-levels-nav-buttons">
-            <Button
-              type="primary"
-              ghost
-              onClick={() => navigate('/app/level-set')}
-            >
-              ← 返回绘画闯关
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate('/app/level-config')}
-            >
-              创建新关卡
-            </Button>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                type="primary"
+                ghost
+                onClick={() => navigate('/app/level-set')}
+              >
+                ← 返回绘画闯关
+              </Button>
+              <Button
+                type="primary"
+                ghost
+                onClick={() => navigate('/app/level-set-guess')}
+                style={{
+                  borderColor: '#667eea',
+                  color: '#667eea'
+                }}
+              >
+                ← 返回猜词闯关
+              </Button>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate('/app/level-config?type=draw')}
+              >
+                创建绘画新关卡
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate('/app/level-config?type=guess')}
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none'
+                }}
+              >
+                创建猜词新关卡
+              </Button>
+            </div>
           </div>
 
           {/* 关卡列表 */}
@@ -125,7 +152,12 @@ function MyCustomLevels() {
                   <div className="my-custom-level-card-header">
                     <div className="my-custom-level-card-icon">{level.icon}</div>
                     <div className="my-custom-level-card-info">
-                      <h3 className="my-custom-level-card-title">{level.title}</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h3 className="my-custom-level-card-title">{level.title}</h3>
+                        <Tag color={level.type === 'guess' ? 'purple' : 'blue'}>
+                          {level.type === 'guess' ? '猜词闯关' : '绘画闯关'}
+                        </Tag>
+                      </div>
                       <p className="my-custom-level-card-id">ID: {level.id}</p>
                     </div>
                   </div>
@@ -147,7 +179,7 @@ function MyCustomLevels() {
                       onClick={(e) => {
                         console.log('Edit button onClick fired! Level ID:', level.id)
                         e.stopPropagation()
-                        handleEdit(level.id)
+                        handleEdit(level)
                       }}
                     >
                       编辑
@@ -172,15 +204,29 @@ function MyCustomLevels() {
             <div className="my-custom-levels-empty">
               <div className="my-custom-levels-empty-icon">📝</div>
               <h3>还没有自定义关卡</h3>
-              <p>点击上方"创建新关卡"按钮开始创建你的第一个关卡吧！</p>
-              <Button
-                type="primary"
-                size="large"
-                icon={<PlusOutlined />}
-                onClick={() => navigate('/app/level-config')}
-              >
-                立即创建
-              </Button>
+              <p>点击上方按钮开始创建你的第一个关卡吧！</p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<PlusOutlined />}
+                  onClick={() => navigate('/app/level-config?type=draw')}
+                >
+                  创建绘画关卡
+                </Button>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<PlusOutlined />}
+                  onClick={() => navigate('/app/level-config?type=guess')}
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none'
+                  }}
+                >
+                  创建猜词关卡
+                </Button>
+              </div>
             </div>
           )}
           
