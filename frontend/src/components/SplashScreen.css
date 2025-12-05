@@ -1,0 +1,176 @@
+.splash-screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.splash-screen-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 60px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.splash-logo {
+  margin-bottom: 30px;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logo-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.logo-circle svg {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.splash-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 20px 0 5px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.splash-subtitle {
+  font-size: 14px;
+  color: #999;
+  margin: 0 0 30px 0;
+  letter-spacing: 0.5px;
+}
+
+.splash-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.splash-message {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.splash-progress {
+  width: 100%;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.splash-progress :global(.ant-progress) {
+  margin-bottom: 8px;
+}
+
+.splash-percent {
+  position: absolute;
+  right: 0;
+  top: -25px;
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+}
+
+.splash-tips {
+  text-align: center;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.splash-tips p {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+  .splash-screen-container {
+    padding: 40px 20px;
+    max-width: 90vw;
+  }
+
+  .splash-title {
+    font-size: 24px;
+  }
+
+  .splash-subtitle {
+    font-size: 12px;
+  }
+
+  .logo-circle {
+    width: 100px;
+    height: 100px;
+  }
+}

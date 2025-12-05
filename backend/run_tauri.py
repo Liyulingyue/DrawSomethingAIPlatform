@@ -22,10 +22,7 @@ if sys.platform == 'win32':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # 设置默认环境变量(在加载 .env 之前,避免业务代码启动时报错)
-os.environ.setdefault('TEXT2IMAGE_MODEL_KEY', 'not-configured')
-os.environ.setdefault('MODEL_KEY', 'not-configured')
-os.environ.setdefault('ADMIN_USER', 'admin')
-os.environ.setdefault('ADMIN_PASSWORD', 'admin123')
+# 注意：这些默认值现在在 config.py 中设置，这里不再需要
 
 # 加载环境变量
 load_dotenv()

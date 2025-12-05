@@ -1,6 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
-// 暂时启用控制台以便调试
-// #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::{Manager, api::process::{Command, CommandEvent}};
 use std::sync::{Arc, Mutex};
@@ -94,12 +93,20 @@ fn get_backend_url(state: tauri::State<AppState>) -> String {
     }
 }
 
+// 清理函数：清理后端状态
+fn cleanup_backend(_app_handle: &tauri::AppHandle) {
+    #[cfg(debug_assertions)]
+    println!("🔴 应用关闭中,后端进程将自动清理...");
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(AppState {
             backend_port: Arc::new(Mutex::new(None)),
         })
         .setup(|app| {
+            // 仅在调试模式下打印启动信息
+            #[cfg(debug_assertions)]
             println!("=== 应用启动中 ===");
             
             let app_handle = app.handle();
@@ -107,15 +114,21 @@ fn main() {
             let backend_port = state.backend_port.clone();
             
             // 启动后端 sidecar
+            #[cfg(debug_assertions)]
             println!("启动后端服务...");
+            #[cfg(debug_assertions)]
             println!("[调试] 准备启动 backend sidecar");
             
             match Command::new_sidecar("backend") {
                 Ok(command) => {
+                    #[cfg(debug_assertions)]
                     println!("[调试] Sidecar 命令创建成功");
                     match command.spawn() {
                         Ok((mut rx, _child)) => {
+                            // CommandChild 会在 Drop 时自动清理，不需要手动保存
+                            #[cfg(debug_assertions)]
                             println!("✅ 后端进程已启动");
+                            #[cfg(debug_assertions)]
                             println!("[调试] 开始监听后端输出...");
                             
                             // 为异步任务克隆一份
@@ -124,97 +137,113 @@ fn main() {
                             // 异步读取后端输出
                             tauri::async_runtime::spawn(async move {
                                 let mut port_found = false;
+                                #[cfg(debug_assertions)]
                                 println!("[调试] 异步任务已启动,开始接收后端事件");
                                 
                                 while let Some(event) = rx.recv().await {
                                     match event {
                                         CommandEvent::Stdout(line) => {
+                                            #[cfg(debug_assertions)]
                                             println!("[后端] {}", line);
                                             
                                             // 尝试从输出中解析端口号
                                             if !port_found {
+                                                #[cfg(debug_assertions)]
                                                 println!("[调试] 尝试从 stdout 解析端口: {}", line);
                                                 if let Some(port) = parse_port_from_line(&line) {
+                                                    #[cfg(debug_assertions)]
                                                     println!("✅ 从 stdout 检测到后端端口: {}", port);
                                                     *backend_port_async.lock().unwrap() = Some(port);
                                                     port_found = true;
                                                 } else {
+                                                    #[cfg(debug_assertions)]
                                                     println!("[调试] 此行未能解析出端口");
                                                 }
                                             }
                                         }
                                         CommandEvent::Stderr(line) => {
+                                            #[cfg(debug_assertions)]
                                             eprintln!("[后端错误] {}", line);
                                             
                                             // 也尝试从 stderr 解析端口(uvicorn 输出在这里)
                                             if !port_found {
+                                                #[cfg(debug_assertions)]
                                                 println!("[调试] 尝试从 stderr 解析端口: {}", line);
                                                 if let Some(port) = parse_port_from_line(&line) {
+                                                    #[cfg(debug_assertions)]
                                                     println!("✅ 从 stderr 检测到后端端口: {}", port);
                                                     *backend_port_async.lock().unwrap() = Some(port);
                                                     port_found = true;
                                                 } else {
+                                                    #[cfg(debug_assertions)]
                                                     println!("[调试] 此行未能解析出端口");
                                                 }
                                             }
                                         }
                                         CommandEvent::Error(err) => {
+                                            #[cfg(debug_assertions)]
                                             eprintln!("[后端进程错误] {}", err);
                                         }
                                         CommandEvent::Terminated(payload) => {
+                                            #[cfg(debug_assertions)]
                                             println!("[后端] 进程终止，退出码: {:?}", payload.code);
                                         }
                                         _ => {}
                                     }
                                 }
-                            });
-                            
-                            // 等待一下让后端启动,并轮询检查端口
-                            println!("[调试] 等待后端启动,最多等待 60 秒...");
-                            for i in 0..60 {
-                                std::thread::sleep(std::time::Duration::from_secs(1));
-                                let current_port = *backend_port.lock().unwrap();
-                                println!("[调试] 第 {} 秒,端口状态: {:?}", i + 1, current_port);
-                                if current_port.is_some() {
-                                    println!("✅ 端口已检测到,提前结束等待");
-                                    break;
-                                }
-                            }
-                            
-                            // 检查端口状态
-                            let current_port = *backend_port.lock().unwrap();
-                            println!("[调试] 等待后端口最终状态: {:?}", current_port);
-                            
-                            // 如果没有从输出中获取到端口,尝试读取端口文件
-                            if backend_port.lock().unwrap().is_none() {
-                                println!("尝试从文件读取端口信息...");
-                                if let Some(data_dir) = dirs::data_local_dir() {
-                                    let port_file = data_dir.join("DrawSomethingAI").join("server_info.json");
-                                    if port_file.exists() {
-                                        if let Ok(content) = std::fs::read_to_string(&port_file) {
-                                            if let Ok(info) = serde_json::from_str::<serde_json::Value>(&content) {
-                                                if let Some(port) = info["backend_port"].as_u64() {
-                                                    println!("✅ 从文件读取到端口: {}", port);
-                                                    *backend_port.lock().unwrap() = Some(port as u16);
+                                
+                                // 如果后端进程退出后仍未获取到端口,尝试从文件读取
+                                if backend_port_async.lock().unwrap().is_none() {
+                                    #[cfg(debug_assertions)]
+                                    println!("后端退出,尝试从文件读取端口信息...");
+                                    if let Some(data_dir) = dirs::data_local_dir() {
+                                        let port_file = data_dir.join("DrawSomethingAI").join("server_info.json");
+                                        if port_file.exists() {
+                                            if let Ok(content) = std::fs::read_to_string(&port_file) {
+                                                if let Ok(info) = serde_json::from_str::<serde_json::Value>(&content) {
+                                                    if let Some(port) = info["backend_port"].as_u64() {
+                                                        #[cfg(debug_assertions)]
+                                                        println!("✅ 从文件读取到端口: {}", port);
+                                                        *backend_port_async.lock().unwrap() = Some(port as u16);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
+                            });
+                            
+                            // 立即返回,不阻塞窗口 - 前端会通过轮询检查端口
+                            #[cfg(debug_assertions)]
+                            println!("✅ 后端启动任务已提交到后台,主线程立即返回以保持窗口响应");
                         }
                         Err(e) => {
+                            #[cfg(debug_assertions)]
                             eprintln!("❌ 启动后端进程失败: {}", e);
                         }
                     }
                 }
                 Err(e) => {
+                    #[cfg(debug_assertions)]
                     eprintln!("❌ 创建后端命令失败: {}", e);
                 }
             }
             
+            #[cfg(debug_assertions)]
             println!("=== 应用初始化完成 ===");
             Ok(())
+        })
+        .on_window_event(|event| {
+            // 监听窗口关闭事件
+            match event.event() {
+                tauri::WindowEvent::CloseRequested { .. } => {
+                    #[cfg(debug_assertions)]
+                    println!("🔴 窗口关闭中,杀死后端进程...");
+                    
+                    cleanup_backend(&event.window().app_handle());
+                }
+                _ => {}
+            }
         })
         .invoke_handler(tauri::generate_handler![get_backend_url])
         .run(tauri::generate_context!())

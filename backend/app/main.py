@@ -46,3 +46,9 @@ app.include_router(sketch_router)
 @app.get("/")
 async def root():
     return {"msg": "DrawSomethingAIPlatform backend running"}
+
+
+@app.get("/health")
+async def health():
+    """健康检查端点，用于前端验证后端是否可用"""
+    return {"status": "ok", "message": "Backend is running"}
