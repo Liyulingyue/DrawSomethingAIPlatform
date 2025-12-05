@@ -49,7 +49,7 @@ async def generate_sketch(request: GenerateSketchRequest):
         if calls_remaining <= 0:
             raise HTTPException(status_code=402, detail=f"调用次数不足，剩余: {calls_remaining}")
         
-        # 生成简笔画
+        # 生成并分解简笔画
         result = sketch_service.generate_and_decompose(
             prompt=request.prompt,
             max_steps=request.max_steps,

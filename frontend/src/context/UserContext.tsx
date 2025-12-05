@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
-import { message } from 'antd'
 import { api } from '../utils/api'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002'

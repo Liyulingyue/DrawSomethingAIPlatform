@@ -9,3 +9,4 @@ alembic
 opencv-python-headless
 numpy
 Pillow
+pyinstaller

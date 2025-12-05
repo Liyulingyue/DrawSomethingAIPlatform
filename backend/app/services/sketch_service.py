@@ -20,14 +20,14 @@ class SketchService:
         self.model_key = config.TEXT2IMAGE_MODEL_KEY
         self.model_name = config.TEXT2IMAGE_MODEL_NAME
         
-        if not self.model_key:
-            raise ValueError("TEXT2IMAGE_MODEL_KEY environment variable is required")
-        
-        # 初始化 OpenAI 客户端
-        self.client = OpenAI(
-            api_key=self.model_key,
-            base_url=self.model_url,
-        )
+        # 只在 key 有效时才初始化客户端(允许 'not-configured' 占位符)
+        if self.model_key and self.model_key != 'not-configured':
+            self.client = OpenAI(
+                api_key=self.model_key,
+                base_url=self.model_url,
+            )
+        else:
+            self.client = None
     
     def generate_image(self, prompt: str) -> bytes:
         """
@@ -39,6 +39,12 @@ class SketchService:
         Returns:
             图片二进制数据
         """
+        if not self.client:
+            raise ValueError(
+                "AI image generation is not available. "
+                "Please configure TEXT2IMAGE_MODEL_KEY in your .env file."
+            )
+        
         images_base64 = self.client.images.generate(
             prompt=prompt, 
             model=self.model_name, 
