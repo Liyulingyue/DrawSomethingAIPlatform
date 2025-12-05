@@ -4,6 +4,7 @@ import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, Ch
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
+import { getApiBaseUrlSync } from '../config/api'
 import { 
   getAIConfig, 
   saveAIConfigWithNotification, 
@@ -160,7 +161,7 @@ function ConfigAI() {
       })
       
       // 调用后端测试连接 API
-      const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002'
+      const backendUrl = getApiBaseUrlSync()
       const testUrl = `${backendUrl}/ai/test-connection`
       
       console.log('📤 发送测试请求到后端:', testUrl)

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Dropdown, Button, message, Spin } from 'antd';
 import { HeartFilled, FilterOutlined, DeleteOutlined } from '@ant-design/icons';
-import { API_BASE_URL } from '../utils/api';
+import { getApiBaseUrlSync } from '../utils/api';
 import { useUser } from '../context/UserContext';
 import AppSidebar from '../components/AppSidebar';
 import SidebarTrigger from '../components/SidebarTrigger';
@@ -34,7 +34,7 @@ const Gallery: React.FC = () => {
 
   const fetchGalleryItems = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/gallery/list`);
+      const response = await fetch(`${getApiBaseUrlSync()}/gallery/list`);
       if (response.ok) {
         const data = await response.json();
         // Ensure each item has a likes field
@@ -103,7 +103,7 @@ const Gallery: React.FC = () => {
 
   const handleLike = async (filename: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/gallery/like/${filename}`, {
+      const response = await fetch(`${getApiBaseUrlSync()}/gallery/like/${filename}`, {
         method: 'POST',
       });
 
@@ -128,7 +128,7 @@ const Gallery: React.FC = () => {
 
   const handleDelete = async (filename: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/gallery/${filename}`, {
+      const response = await fetch(`${getApiBaseUrlSync()}/gallery/${filename}`, {
         method: 'DELETE',
         headers: {
           'session-id': localStorage.getItem('sessionId') || '',

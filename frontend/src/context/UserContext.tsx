@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
-import { api } from '../utils/api'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002'
+import { api, getApiBaseUrlSync } from '../utils/api'
 
 interface UserContextValue {
   userId: number | null
@@ -71,7 +69,7 @@ export function UserProvider({ children }: UserProviderProps) {
         // 验证session是否仍然有效
         const verifySession = async () => {
           try {
-            const verifyResponse = await fetch(`${API_BASE_URL}/auth/user/verify_session`, {
+            const verifyResponse = await fetch(`${getApiBaseUrlSync()}/auth/user/verify_session`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -85,7 +83,7 @@ export function UserProvider({ children }: UserProviderProps) {
               const verifyData = await verifyResponse.json()
               if (verifyData.valid) {
                 // 会话有效，获取用户信息
-                const infoResponse = await fetch(`${API_BASE_URL}/auth/user/get_info`, {
+                const infoResponse = await fetch(`${getApiBaseUrlSync()}/auth/user/get_info`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
@@ -180,7 +178,7 @@ export function UserProvider({ children }: UserProviderProps) {
 
     try {
       // 首先验证会话有效性
-      const verifyResponse = await fetch(`${API_BASE_URL}/auth/user/verify_session`, {
+      const verifyResponse = await fetch(`${getApiBaseUrlSync()}/auth/user/verify_session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +192,7 @@ export function UserProvider({ children }: UserProviderProps) {
         const verifyData = await verifyResponse.json()
         if (verifyData.valid) {
           // 会话有效，获取用户信息
-          const infoResponse = await fetch(`${API_BASE_URL}/auth/user/get_info`, {
+          const infoResponse = await fetch(`${getApiBaseUrlSync()}/auth/user/get_info`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

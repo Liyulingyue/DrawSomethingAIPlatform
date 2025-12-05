@@ -81,43 +81,130 @@ def start_embedded_postgres():
         # 数据目录
         data_dir = get_app_data_dir() / 'pgdata'
         
-        # 初始化数据库（如果未初始化）
-        if not data_dir.exists():
+        # 如果数据目录已存在，检查并清理旧的 lock 文件
+        if data_dir.exists():
+            postmaster_pid = data_dir / 'postmaster.pid'
+            if postmaster_pid.exists():
+                try:
+                    # 尝试读取 PID
+                    with open(postmaster_pid, 'r') as f:
+                        pid_content = f.read().strip().split('\n')[0]  # 第一行是 PID
+                    print(f"[WARNING] Found existing postmaster.pid: {pid_content}")
+                    
+                    # 尝试杀死该进程
+                    try:
+                        old_pid = int(pid_content)
+                        import os
+                        # 尝试杀死旧进程
+                        os.kill(old_pid, 9)
+                        print(f"[OK] Killed stale PostgreSQL process (PID: {old_pid})")
+                        time.sleep(1)
+                    except (ValueError, ProcessLookupError):
+                        # PID 可能无效或进程已不存在
+                        print("[INFO] Stale process not found or already terminated")
+                    except Exception as e:
+                        print(f"[WARNING] Could not kill old process: {e}")
+                    
+                    # 删除 lock 文件
+                    print("[INFO] Attempting to remove stale lock file...")
+                    postmaster_pid.unlink()
+                    print("[OK] Removed stale postmaster.pid")
+                    
+                    # 也删除其他可能的 lock 文件
+                    for lock_file in ['postmaster.pid.lock', '.s.PGSQL.lock']:
+                        lock_path = data_dir / lock_file
+                        if lock_path.exists():
+                            try:
+                                lock_path.unlink()
+                                print(f"[OK] Removed {lock_file}")
+                            except:
+                                pass
+                except Exception as e:
+                    print(f"[WARNING] Could not clean lock files: {e}")
+        
+        # 初始化数据库（如果未初始化或损坏）
+        pg_version_file = data_dir / 'PG_VERSION'
+        needs_init = not data_dir.exists() or not pg_version_file.exists()
+        
+        if needs_init:
+            if data_dir.exists():
+                print(f"[WARNING] Data directory exists but PG_VERSION missing - database may be corrupted")
+                print(f"[INFO] Backing up corrupted database...")
+                import shutil
+                backup_dir = get_app_data_dir() / 'pgdata_backup'
+                if backup_dir.exists():
+                    shutil.rmtree(backup_dir)
+                shutil.move(str(data_dir), str(backup_dir))
+                print(f"[OK] Backed up to: {backup_dir}")
+            
             print("[INFO] Initializing PostgreSQL data directory...")
+            print(f"[DEBUG] initdb path: {initdb_exe}")
             result = subprocess.run(
                 [str(initdb_exe), '-D', str(data_dir), '-U', 'postgres', '-E', 'UTF8'],
                 capture_output=True,
-                text=True
+                text=True,
+                timeout=60
             )
             if result.returncode != 0:
                 print(f"[ERROR] Initialization failed: {result.stderr}")
+                print(f"[DEBUG] initdb stdout: {result.stdout}")
                 return None
             print("[OK] Initialization completed")
+        else:
+            print(f"[INFO] PostgreSQL data directory already exists: {data_dir}")
         
         # 启动 PostgreSQL
         pg_port = find_free_port()
         print(f"[INFO] Starting PostgreSQL (port: {pg_port})...")
+        print(f"[DEBUG] PostgreSQL executable: {postgres_exe}")
+        print(f"[DEBUG] Data directory: {data_dir}")
+        print(f"[DEBUG] Listening on: 127.0.0.1:{pg_port}")
         
         postgres_process = subprocess.Popen(
             [
                 str(postgres_exe),
                 '-D', str(data_dir),
                 '-p', str(pg_port),
-                '-h', '127.0.0.1'
+                '-h', '127.0.0.1',
+                '-F'  # 前台模式，这样日志会输出到 stderr
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            universal_newlines=True,
             creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
         )
         
-        # 等待 PostgreSQL 启动
-        time.sleep(2)
-        
-        if postgres_process.poll() is not None:
-            print("[ERROR] PostgreSQL failed to start")
-            return None
-        
-        print("[OK] PostgreSQL started")
+        # 等待 PostgreSQL 启动并能够接受连接（最多30秒）
+        max_wait = 30
+        for i in range(max_wait):
+            # 检查进程是否已崩溃
+            if postgres_process.poll() is not None:
+                stdout, stderr = postgres_process.communicate()
+                print("[ERROR] PostgreSQL process exited immediately")
+                if stdout:
+                    print(f"[ERROR] stdout: {stdout.decode('utf-8', errors='ignore')}")
+                if stderr:
+                    print(f"[ERROR] stderr: {stderr.decode('utf-8', errors='ignore')}")
+                return None
+            
+            # 尝试连接到 PostgreSQL
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.settimeout(1)
+                    result = s.connect_ex(('127.0.0.1', pg_port))
+                    if result == 0:
+                        print(f"[OK] PostgreSQL started and accepting connections (waited {i} seconds)")
+                        time.sleep(1)  # 再等1秒确保完全就绪
+                        break
+            except:
+                pass
+            
+            if i < max_wait - 1:
+                time.sleep(1)
+            else:
+                print("[ERROR] PostgreSQL did not accept connections within 30 seconds")
+                postgres_process.terminate()
+                return None
         
         # 返回连接信息
         return {
@@ -139,12 +226,31 @@ def stop_postgres():
     global postgres_process
     if postgres_process:
         print("[INFO] Stopping PostgreSQL...")
-        postgres_process.terminate()
         try:
-            postgres_process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            postgres_process.kill()
+            postgres_process.terminate()
+            try:
+                postgres_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                print("[WARNING] PostgreSQL did not stop gracefully, killing...")
+                postgres_process.kill()
+                postgres_process.wait()
+        except Exception as e:
+            print(f"[WARNING] Error stopping PostgreSQL: {e}")
         print("[OK] PostgreSQL stopped")
+    
+    # 也尝试杀死任何剩余的 postgres 进程
+    try:
+        import psutil
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if 'postgres' in proc.name().lower() or 'postgres.exe' in proc.name().lower():
+                    print(f"[INFO] Found lingering PostgreSQL process: {proc.pid}")
+                    proc.terminate()
+            except:
+                pass
+    except:
+        # psutil 不可用，这没关系
+        pass
 
 
 def apply_migrations():
@@ -189,7 +295,11 @@ def write_port_file(backend_port, postgres_info=None):
     with open(port_file, 'w') as f:
         json.dump(info, f)
     
-    print(f"[INFO] Port info written to: {port_file}")
+    # Print port to stdout/stderr so Rust can capture it immediately
+    print(f"[PORT] Backend port allocated: {backend_port}", flush=True)
+    sys.stderr.write(f"[PORT] Backend port allocated: {backend_port}\n")
+    sys.stderr.flush()
+    print(f"[INFO] Port info written to: {port_file}", flush=True)
 
 
 if __name__ == "__main__":
@@ -234,32 +344,58 @@ TEXT2IMAGE_MODEL_NAME=Stable-Diffusion-XL
         os.environ['DATABASE_URL'] = db_url
         print(f"[OK] PostgreSQL database configured: {postgres_info['host']}:{postgres_info['port']}")
         
-        # 只在有 PostgreSQL 时才应用迁移
+        # 应用迁移（必须在数据库启动后进行）
+        print("[INFO] Applying database migrations...")
         apply_migrations()
     else:
-        # 使用 SQLite 作为后备数据库
+        # PostgreSQL 启动失败 - 降级到 SQLite
+        print("[ERROR] Failed to start embedded PostgreSQL!")
+        print("[ERROR] Application cannot start without database.")
+        print("[ERROR] Please check:")
+        print("  1. Is PostgreSQL installation complete at: backend/resources/postgres/")
+        print("  2. Is there enough disk space?")
+        print("  3. Are ports in use?")
+        print("")
+        print("[INFO] Fallback: Using SQLite database (limited functionality)...")
+        
+        # 使用 SQLite 作为临时后备
         app_data = get_app_data_dir()
         sqlite_path = app_data / 'drawsomething.db'
         db_url = f"sqlite:///{sqlite_path}"
         os.environ['DATABASE_URL'] = db_url
-        print(f"[WARNING] Using SQLite database as fallback: {sqlite_path}")
-        print("[INFO] Database features will be limited without PostgreSQL")
+        print(f"[WARNING] Using SQLite database: {sqlite_path}")
+        
+        # 即使降级，也尝试应用迁移（可能会失败，但至少尝试）
+        print("[INFO] Attempting to apply migrations to SQLite...")
+        try:
+            apply_migrations()
+        except Exception as e:
+            print(f"[WARNING] Migration failed on SQLite: {e}")
+            print("[WARNING] Database schema may be incomplete. Some features will not work.")
+        
+        print("[WARNING] PostgreSQL is required for production use.")
     
-    # 查找可用端口
+    # 导入应用（在启动 Uvicorn 前导入）
+    from app.main import app
+    import uvicorn
+    
+    # 查找可用端口（必须在 PostgreSQL 启动后，以避免冲突）
     backend_port = find_free_port()
+    print(f"[INFO] Backend port allocated: {backend_port}")
     
     # 写入端口信息
     write_port_file(backend_port, postgres_info)
     
-    # 导入并启动应用
-    from app.main import app
-    import uvicorn
-    
     print("="*50)
     print(f"[INFO] Starting backend service (port: {backend_port})...")
     print(f"[INFO] Access URL: http://127.0.0.1:{backend_port}")
+    if postgres_info:
+        print(f"[OK] Using PostgreSQL database")
+    else:
+        print(f"[WARNING] Using SQLite fallback database")
     print("="*50)
     
+    # 使用明确指定的端口启动 Uvicorn
     uvicorn.run(
         app,
         host="127.0.0.1",

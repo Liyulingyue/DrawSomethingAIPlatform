@@ -13,6 +13,21 @@ struct AppState {
 fn parse_port_from_line(line: &str) -> Option<u16> {
     println!("[调试] parse_port_from_line 输入: {}", line);
     
+    // 优先检查 [PORT] 标记
+    if line.contains("[PORT]") {
+        // 提取 [PORT] 后面的数字
+        if let Some(start) = line.find("[PORT]") {
+            let after_tag = &line[start..];
+            let numbers: String = after_tag.chars().filter(|c| c.is_numeric()).collect();
+            if let Ok(port) = numbers.parse::<u16>() {
+                if port > 1024 && port < 65535 {
+                    println!("[调试] 从 [PORT] 标记找到有效端口: {}", port);
+                    return Some(port);
+                }
+            }
+        }
+    }
+    
     // 使用正则表达式的替代方案:提取所有连续的数字
     let mut numbers = Vec::new();
     let mut current_num = String::new();
@@ -39,13 +54,21 @@ fn parse_port_from_line(line: &str) -> Option<u16> {
     println!("[调试] 提取到的所有数字: {:?}", numbers);
     
     // 查找有效的端口号(1024-65535)
-    for num in numbers {
-        if num > 1024 && num < 65535 {
-            // 额外检查:如果包含关键字,优先选择
-            if line.contains("port") || line.contains("端口") || line.contains("://") {
+    // 优先选择关键字明确的端口
+    for num in &numbers {
+        if *num > 1024 && *num < 65535 {
+            if line.contains("port") || line.contains("端口") || line.contains("://127.0.0.1") {
                 println!("[调试] 找到有效端口: {}", num);
-                return Some(num);
+                return Some(*num);
             }
+        }
+    }
+    
+    // 如果没有关键字,选择最后一个有效的端口号(通常是最相关的)
+    for num in numbers.iter().rev() {
+        if *num > 1024 && *num < 65535 {
+            println!("[调试] 找到有效端口: {}", num);
+            return Some(*num);
         }
     }
     
@@ -147,8 +170,8 @@ fn main() {
                             });
                             
                             // 等待一下让后端启动,并轮询检查端口
-                            println!("[调试] 等待后端启动,最多等待 10 秒...");
-                            for i in 0..10 {
+                            println!("[调试] 等待后端启动,最多等待 60 秒...");
+                            for i in 0..60 {
                                 std::thread::sleep(std::time::Duration::from_secs(1));
                                 let current_port = *backend_port.lock().unwrap();
                                 println!("[调试] 第 {} 秒,端口状态: {:?}", i + 1, current_port);

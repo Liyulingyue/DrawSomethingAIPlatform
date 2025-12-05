@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, LargeBinary
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, LargeBinary, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
@@ -8,7 +8,28 @@ from .config import config
 
 DATABASE_URL = config.DATABASE_URL
 
-engine = create_engine(config.DATABASE_URL)
+# SQLite 特殊配置：启用外键支持和改进并发
+if 'sqlite' in DATABASE_URL.lower():
+    print("[DEBUG] Detected SQLite database, applying SQLite-specific settings")
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        pool_pre_ping=True,
+        echo=False
+    )
+    
+    # 为 SQLite 启用外键约束和 WAL 模式（改进并发）
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_conn, connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")
+        print("[DEBUG] SQLite PRAGMA configured: foreign_keys=ON, journal_mode=WAL")
+        cursor.close()
+else:
+    print("[DEBUG] Using PostgreSQL database")
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

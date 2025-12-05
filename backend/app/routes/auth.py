@@ -28,21 +28,33 @@ async def cleanup_users():
 
 @router.post("/app/login")
 async def admin_login(request: dict):
-    username = request.get("username")
-    password = request.get("password")
-    
-    admin_user = config.ADMIN_USER
-    admin_password = config.ADMIN_PASSWORD
-    
-    if not admin_user or not admin_password:
-        return {"success": False, "message": "Admin credentials not configured"}
-    
-    if username == admin_user and password == admin_password:
-        session_id = str(uuid.uuid4())
-        register_session(session_id, username, is_admin=True)
-        return {"success": True, "session_id": session_id, "username": username, "is_admin": True}
-    else:
-        return {"success": False, "message": "Invalid credentials"}
+    import traceback
+    print("[DEBUG] /auth/app/login called")
+    try:
+        username = request.get("username")
+        password = request.get("password")
+        print(f"[DEBUG] Login attempt - username: {username}")
+        
+        admin_user = config.ADMIN_USER
+        admin_password = config.ADMIN_PASSWORD
+        print(f"[DEBUG] Admin config - user: {admin_user}, password configured: {bool(admin_password)}")
+        
+        if not admin_user or not admin_password:
+            print("[WARNING] Admin credentials not configured")
+            return {"success": False, "message": "Admin credentials not configured"}
+        
+        if username == admin_user and password == admin_password:
+            session_id = str(uuid.uuid4())
+            print(f"[DEBUG] Admin login successful, session_id: {session_id}")
+            register_session(session_id, username, is_admin=True)
+            return {"success": True, "session_id": session_id, "username": username, "is_admin": True}
+        else:
+            print(f"[DEBUG] Admin login failed - credentials mismatch")
+            return {"success": False, "message": "Invalid credentials"}
+    except Exception as e:
+        print(f"[ERROR] Admin login error: {e}")
+        traceback.print_exc()
+        return {"success": False, "message": str(e)}
 
 
 @router.post("/user/login")

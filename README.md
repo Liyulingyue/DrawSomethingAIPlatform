@@ -113,6 +113,39 @@ npm run dev
 
 > 💡 **推荐**：在移动设备上使用 `/app` 路由获得更好的触屏体验！
 
+## 📦 桌面版打包指南 (Tauri)
+
+本项目支持打包为独立的 Windows 桌面应用（.exe），内嵌后端和数据库，无需用户手动配置环境。
+
+### 前置要求
+
+- **Node.js** (>= 16.0)
+- **Python** (>= 3.8)
+- **Rust** (需安装并配置好环境)
+
+### 一键打包（推荐）
+
+我们提供了一键打包脚本，自动处理依赖、构建前后端并生成安装包：
+
+```powershell
+cd scripts
+.\build_tauri.ps1
+```
+
+脚本会自动完成：
+1. 下载嵌入式 PostgreSQL 数据库
+2. 构建前端资源
+3. 打包后端为独立可执行文件
+4. 打包 Tauri 应用
+
+### 打包产物
+
+打包完成后，文件位于 `frontend/src-tauri/target/release/bundle/`：
+- `nsis/*.exe`: 免安装版/安装程序
+- `msi/*.msi`: Windows 安装包
+
+> 📖 **详细指南**：更多高级配置、分步打包流程和故障排查，请参阅 [TAURI_BUILD_GUIDE.md](docs/TAURI_BUILD_GUIDE.md)。
+
 ## 📱 移动端使用建议
 
 ### 推荐浏览器

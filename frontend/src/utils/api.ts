@@ -1,6 +1,9 @@
 import axios from 'axios'
 import { getApiBaseUrlSync, initApiConfig } from '../config/api'
 
+// 重新导出 getApiBaseUrlSync 供其他模块使用
+export { getApiBaseUrlSync, initApiConfig }
+
 // 初始化 API 配置（应用启动时会调用）
 let isInitialized = false
 export const ensureApiInitialized = async () => {
@@ -15,11 +18,11 @@ export const ensureApiInitialized = async () => {
   }
 }
 
-// 动态获取 API_BASE_URL
+// 动态获取 API_BASE_URL（向后兼容）
 export const getApiBaseUrl = () => getApiBaseUrlSync()
 
-// 向后兼容的常量（初始值，会在运行时更新）
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002'
+// 获取当前 API 基础 URL（会在运行时更新）
+export const API_BASE_URL = getApiBaseUrlSync()
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

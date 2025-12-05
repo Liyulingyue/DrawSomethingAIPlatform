@@ -6,11 +6,10 @@ import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { UserOutlined, LogoutOutlined, CrownOutlined, CreditCardOutlined } from '@ant-design/icons'
+import { getApiBaseUrlSync } from '../config/api'
 import './AppLogin.css'
 
 const { Title, Text } = Typography
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8002'
 
 function AppLogin() {
   const navigate = useNavigate()
@@ -60,7 +59,7 @@ function AppLogin() {
 
     // 如果管理员登录失败，尝试普通用户登录
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/user/login`, {
+      const response = await fetch(`${getApiBaseUrlSync()}/auth/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +96,7 @@ function AppLogin() {
       // 如果有sessionId，先调用后端登出API
       const sessionId = localStorage.getItem('sessionId')
       if (sessionId) {
-        await fetch(`${API_BASE_URL}/auth/user/logout`, {
+        await fetch(`${getApiBaseUrlSync()}/auth/user/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -135,7 +134,7 @@ function AppLogin() {
         return
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/user/recharge`, {
+      const response = await fetch(`${getApiBaseUrlSync()}/auth/user/recharge`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

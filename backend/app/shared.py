@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from .database import SessionLocal, User, UserSession
+from .database import SessionLocal, User, UserSession, hash_password
 from .config import config
 
 # Gallery configuration
@@ -15,7 +15,23 @@ def register_session(session_id: str, username: str, is_admin: bool = False) -> 
         # 查找或创建用户
         user = db.query(User).filter(User.username == username).first()
         if not user:
-            user = User(username=username, is_admin=is_admin)
+            # 对于管理员用户，使用管理员密码哈希
+            if is_admin:
+                admin_password = config.ADMIN_PASSWORD
+                password_hash = hash_password(admin_password) if admin_password else hash_password('admin123')
+                # 管理员默认无限额度
+                calls_remaining = 999999
+            else:
+                # 对于普通用户，使用用户名作为临时密码（用户会在登录后修改）
+                password_hash = hash_password(username)
+                calls_remaining = 0
+            
+            user = User(
+                username=username, 
+                is_admin=is_admin,
+                password_hash=password_hash,
+                calls_remaining=calls_remaining
+            )
             db.add(user)
             db.commit()
             db.refresh(user)
