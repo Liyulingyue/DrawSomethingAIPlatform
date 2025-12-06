@@ -26,6 +26,10 @@
         "all": false,
         "request": true,
         "scope": ["http://**", "https://**"]
+      },
+      "window": {
+        "all": false,
+        "close": true
       }
     },
     "bundle": {

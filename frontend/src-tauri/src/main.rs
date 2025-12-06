@@ -1,11 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{Manager, api::process::{Command, CommandEvent}};
+use tauri::{Manager, api::process::{Command, CommandEvent, CommandChild}};
 use std::sync::{Arc, Mutex};
 
 struct AppState {
     backend_port: Arc<Mutex<Option<u16>>>,
+    backend_child: Arc<Mutex<Option<CommandChild>>>,
 }
 
 // 从日志行中解析端口号
@@ -93,16 +94,75 @@ fn get_backend_url(state: tauri::State<AppState>) -> String {
     }
 }
 
-// 清理函数：清理后端状态
-fn cleanup_backend(_app_handle: &tauri::AppHandle) {
+// 清理函数：清理后端状态并终止后端进程
+fn cleanup_backend(app_handle: &tauri::AppHandle) {
     #[cfg(debug_assertions)]
-    println!("🔴 应用关闭中,后端进程将自动清理...");
+    println!("🔴 应用关闭中,终止后端进程...");
+    
+    let state: tauri::State<AppState> = app_handle.state();
+    let mut backend_child = state.backend_child.lock().unwrap();
+    
+    if let Some(mut child) = backend_child.take() {
+        #[cfg(debug_assertions)]
+        println!("🔴 正在杀死后端进程及其子进程...");
+        
+        // 在Windows上，使用taskkill /F /T来杀死整个进程树
+        #[cfg(target_os = "windows")]
+        {
+            let pid = child.pid();
+            #[cfg(debug_assertions)]
+            println!("🔴 后端进程PID: {}", pid);
+            
+            // 使用taskkill强制终止进程树
+            let output = std::process::Command::new("taskkill")
+                .args(&["/F", "/T", "/PID", &pid.to_string()])
+                .output();
+            
+            match output {
+                Ok(result) => {
+                    if result.status.success() {
+                        #[cfg(debug_assertions)]
+                        println!("✅ 后端进程树已成功终止 (taskkill)");
+                    } else {
+                        #[cfg(debug_assertions)]
+                        eprintln!("⚠️ taskkill 返回非零状态");
+                        // 备用方案：直接kill
+                        let _ = child.kill();
+                    }
+                }
+                Err(_e) => {
+                    #[cfg(debug_assertions)]
+                    eprintln!("❌ taskkill 执行失败, 尝试直接kill");
+                    let _ = child.kill();
+                }
+            }
+        }
+        
+        // 非Windows平台使用默认kill
+        #[cfg(not(target_os = "windows"))]
+        {
+            match child.kill() {
+                Ok(_) => {
+                    #[cfg(debug_assertions)]
+                    println!("✅ 后端进程已终止");
+                }
+                Err(_e) => {
+                    #[cfg(debug_assertions)]
+                    eprintln!("❌ 终止后端进程失败");
+                }
+            }
+        }
+    } else {
+        #[cfg(debug_assertions)]
+        println!("⚠️ 没有找到后端进程句柄");
+    }
 }
 
 fn main() {
     tauri::Builder::default()
         .manage(AppState {
             backend_port: Arc::new(Mutex::new(None)),
+            backend_child: Arc::new(Mutex::new(None)),
         })
         .setup(|app| {
             // 仅在调试模式下打印启动信息
@@ -112,6 +172,16 @@ fn main() {
             let app_handle = app.handle();
             let state: tauri::State<AppState> = app_handle.state();
             let backend_port = state.backend_port.clone();
+            
+            // 检查是否已经有后端进程在运行
+            {
+                let backend_child = state.backend_child.lock().unwrap();
+                if backend_child.is_some() {
+                    #[cfg(debug_assertions)]
+                    println!("⚠️ 后端进程已经在运行，跳过启动");
+                    return Ok(());
+                }
+            }
             
             // 启动后端 sidecar
             #[cfg(debug_assertions)]
@@ -124,10 +194,13 @@ fn main() {
                     #[cfg(debug_assertions)]
                     println!("[调试] Sidecar 命令创建成功");
                     match command.spawn() {
-                        Ok((mut rx, _child)) => {
-                            // CommandChild 会在 Drop 时自动清理，不需要手动保存
+                        Ok((mut rx, child)) => {
+                            // 保存后端进程句柄以便后续终止
+                            let backend_child_arc = state.backend_child.clone();
+                            *backend_child_arc.lock().unwrap() = Some(child);
+                            
                             #[cfg(debug_assertions)]
-                            println!("✅ 后端进程已启动");
+                            println!("✅ 后端进程已启动并保存句柄");
                             #[cfg(debug_assertions)]
                             println!("[调试] 开始监听后端输出...");
                             
@@ -228,11 +301,32 @@ fn main() {
         .on_window_event(|event| {
             // 监听窗口关闭事件
             match event.event() {
-                tauri::WindowEvent::CloseRequested { .. } => {
+                tauri::WindowEvent::CloseRequested { api, .. } => {
                     #[cfg(debug_assertions)]
-                    println!("🔴 窗口关闭中,杀死后端进程...");
+                    println!("🔴 窗口关闭请求,发送事件到前端并开始清理...");
                     
-                    cleanup_backend(&event.window().app_handle());
+                    // 阻止默认关闭行为
+                    api.prevent_close();
+                    
+                    let window = event.window().clone();
+                    let app_handle = window.app_handle();
+                    
+                    // 发送关闭请求事件到前端
+                    let _ = window.emit("tauri://close-requested", ());
+                    
+                    // 在新线程中执行清理,避免阻塞事件循环
+                    std::thread::spawn(move || {
+                        #[cfg(debug_assertions)]
+                        println!("🔴 开始清理后端进程...");
+                        
+                        cleanup_backend(&app_handle);
+                        
+                        #[cfg(debug_assertions)]
+                        println!("✅ 清理完成,关闭窗口");
+                        
+                        // 清理完成后关闭窗口
+                        let _ = window.close();
+                    });
                 }
                 _ => {}
             }

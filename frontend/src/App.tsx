@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { UserProvider } from './context/UserContext'
 import { isTauri } from './utils/api'
 import SplashScreen from './components/SplashScreen'
+import { TauriCloseHandler } from './components/TauriCloseHandler'
 import AppHome from './pages/AppHome'
 import LevelSet from './pages/LevelSet'
 import LevelSetGuess from './pages/LevelSetGuess'
@@ -132,6 +133,7 @@ function App() {
 
   return (
     <AntApp>
+      <TauriCloseHandler />
       {shouldShowSplash && <SplashScreen visible={!isInitialized} progress={progress} message={message} />}
       {isInitialized && (
         <UserProvider>

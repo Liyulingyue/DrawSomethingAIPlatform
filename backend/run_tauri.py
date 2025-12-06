@@ -171,8 +171,8 @@ def start_embedded_postgres():
             creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
         )
         
-        # 等待 PostgreSQL 启动并能够接受连接（最多30秒）
-        max_wait = 30
+        # 等待 PostgreSQL 启动并能够接受连接（最多120秒）
+        max_wait = 120
         for i in range(max_wait):
             # 检查进程是否已崩溃
             if postgres_process.poll() is not None:
