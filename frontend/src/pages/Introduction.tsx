@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button, Card, Collapse } from 'antd'
 import { QuestionCircleOutlined, RocketOutlined, BulbOutlined, SettingOutlined, GithubOutlined, BugOutlined, HeartOutlined, HomeOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -14,6 +15,7 @@ function Introduction() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
   const isInTauriMode = isTauri()
+  const { t } = useTranslation()
 
   const handleDonate = () => {
     navigate('/app/donate')
@@ -28,53 +30,45 @@ function Introduction() {
         <div className="introduction-content">
           {/* 标题区域 */}
           <div className="introduction-header">
-            <h1 className="introduction-title">🎨 你画AI猜</h1>
-            <p className="introduction-subtitle">DrawSomething AI Platform</p>
-            <p className="introduction-description">
-              一个基于 AI 视觉识别的趣味绘画挑战平台
-            </p>
+            <h1 className="introduction-title">{t('introduction.title')}</h1>
+            <p className="introduction-subtitle">{t('introduction.subtitle')}</p>
+            <p className="introduction-description">{t('introduction.description')}</p>
           </div>
 
           {/* 简介卡片 */}
           <Card className="introduction-card" bordered={false}>
             <h2 className="section-title">
-              <QuestionCircleOutlined /> 什么是"你画AI猜"？
+              <QuestionCircleOutlined /> {t('introduction.what_is.title')}
             </h2>
-            <p className="section-content">
-              "你画AI猜"是一个创新的绘画挑战平台，结合了人工智能图像识别技术和趣味游戏玩法。
-              你只需要在画板上绘制指定的物品，AI 就会智能识别你的作品，判断你是否成功完成挑战。
-            </p>
-            <p className="section-content">
-              无论是新手还是资深画家，都能在这里找到属于自己的乐趣。通过 AI 的即时反馈，
-              你可以不断提升绘画技巧，挑战更高难度的关卡！
-            </p>
+            <p className="section-content">{t('introduction.what_is.p1')}</p>
+            <p className="section-content">{t('introduction.what_is.p2')}</p>
           </Card>
 
           {/* 功能特性 */}
           <Card className="introduction-card" bordered={false}>
             <h2 className="section-title">
-              <RocketOutlined /> 核心功能
+              <RocketOutlined /> {t('introduction.features.title')}
             </h2>
             <div className="features-grid">
               <div className="feature-item">
                 <div className="feature-icon">🏆</div>
-                <h3>绘画闯关</h3>
-                <p>从新手入门到高级挑战，循序渐进提升绘画能力。每个关卡都有精心设计的关键词列表。</p>
+                <h3>{t('introduction.features.level_draw.title')}</h3>
+                <p>{t('introduction.features.level_draw.desc')}</p>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">🎨</div>
-                <h3>自由绘画</h3>
-                <p>没有限制，随心所欲地创作。输入任意目标词，让 AI 识别你的作品。</p>
+                <h3>{t('introduction.features.free_draw.title')}</h3>
+                <p>{t('introduction.features.free_draw.desc')}</p>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">🤖</div>
-                <h3>AI 智能识别</h3>
-                <p>基于先进的视觉语言模型，AI 能够准确识别你的绘画内容并给出详细分析。</p>
+                <h3>{t('introduction.features.ai.title')}</h3>
+                <p>{t('introduction.features.ai.desc')}</p>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">⚙️</div>
-                <h3>自定义配置</h3>
-                <p>支持配置自己的 AI 服务，使用百度 AI Studio 或其他兼容的 AI 模型。</p>
+                <h3>{t('introduction.features.config.title')}</h3>
+                <p>{t('introduction.features.config.desc')}</p>
               </div>
             </div>
           </Card>
@@ -82,75 +76,75 @@ function Introduction() {
           {/* 使用指南 */}
           <Card className="introduction-card" bordered={false}>
             <h2 className="section-title">
-              <BulbOutlined /> 快速开始
+              <BulbOutlined /> {t('introduction.quick_start.title')}
             </h2>
             <Collapse defaultActiveKey={['login']} ghost>
-              <Panel header="📋 登录说明（可选）" key="login">
+              <Panel header={t('introduction.panels.login.header')} key="login">
                 <div className="guide-content">
-                  <p><strong>不登录不影响正常游戏：</strong></p>
+                  <p><strong>{t('introduction.panels.login.note')}</strong></p>
                   <ul>
-                    <li>✅ <strong>可以正常绘画：</strong>所有绘画功能都可正常使用</li>
-                    <li>✅ <strong>可以体验AI识别：</strong>如果您配置了自定义AI服务</li>
-                    <li>✅ <strong>可以自由创作：</strong>绘画闯关和自由绘画模式都可用</li>
+                    <li>✅ <strong>{t('introduction.panels.login.bullets.can_draw')}</strong></li>
+                    <li>✅ <strong>{t('introduction.panels.login.bullets.can_use_ai')}</strong></li>
+                    <li>✅ <strong>{t('introduction.panels.login.bullets.can_create')}</strong></li>
                   </ul>
-                  <p><strong>登录后的额外功能：</strong></p>
+                  <p><strong>{t('introduction.panels.login.extras_title')}</strong></p>
                   <ul>
-                    <li>💰 <strong>使用服务器AI资源：</strong>无需配置即可使用平台提供的AI服务</li>
-                    <li>🖼️ <strong>作品管理：</strong>登录用户可以删除自己发布的画廊作品，未登录只能发布画廊作品，而无法主动删除</li>
-                    <li>🏆 <strong>解锁高级功能：</strong>未来可能推出的更多功能</li>
+                    <li>💰 <strong>{t('introduction.panels.login.extras.server_ai')}</strong></li>
+                    <li>🖼️ <strong>{t('introduction.panels.login.extras.gallery')}</strong></li>
+                    <li>🏆 <strong>{t('introduction.panels.login.extras.unlock')}</strong></li>
                   </ul>
-                  <p className="tip">💡 提示：如果您想使用平台AI服务进行识别，请先进行登录。登录后系统会自动为您分配点数用于AI调用。</p>
+                  <p className="tip">{t('introduction.panels.login.tip')}</p>
                 </div>
               </Panel>
-              <Panel header="2️⃣ 配置 AI 服务（首次使用）" key="1">
+              <Panel header={t('introduction.panels.ai_setup.header')} key="1">
                 <div className="guide-content">
-                  <p>首次使用需要配置 AI 服务：</p>
+                  <p>{t('introduction.panels.ai_setup.desc')}</p>
                   <ul>
-                    <li>进入"AI 配置"页面</li>
-                    <li>输入 API URL：<code>https://aistudio.baidu.com/llm/lmapi/v3</code></li>
-                    <li>输入你的 API Key（在 <a href="https://aistudio.baidu.com/account/accessToken" target="_blank" rel="noopener noreferrer">百度 AI Studio</a> 获取）</li>
-                    <li>输入模型名称：<code>ernie-4.5-vl-28b-a3b</code></li>
-                    <li>点击"测试连接"确保配置正确</li>
-                    <li>点击"保存配置"</li>
+                    <li>{t('introduction.panels.ai_setup.steps.enter_config_page')}</li>
+                    <li>{t('introduction.panels.ai_setup.steps.input_api_url')}: <code>https://aistudio.baidu.com/llm/lmapi/v3</code></li>
+                    <li>{t('introduction.panels.ai_setup.steps.input_api_key')} (<a href="https://aistudio.baidu.com/account/accessToken" target="_blank" rel="noopener noreferrer">百度 AI Studio</a>)</li>
+                    <li>{t('introduction.panels.ai_setup.steps.input_model_name')}: <code>ernie-4.5-vl-28b-a3b</code></li>
+                    <li>{t('introduction.panels.ai_setup.steps.test_connection')}</li>
+                    <li>{t('introduction.panels.ai_setup.steps.save_config')}</li>
                   </ul>
-                  <p className="tip">💡 提示：如果没有配置 AI 服务，系统无法使用。</p>
+                  <p className="tip">{t('introduction.panels.ai_setup.tip')}</p>
                 </div>
               </Panel>
-              <Panel header="3️⃣ 选择游戏模式" key="2">
+              <Panel header={t('introduction.panels.choose_mode.header')} key="2">
                 <div className="guide-content">
-                  <p><strong>绘画闯关：</strong></p>
+                  <p><strong>{t('introduction.panels.choose_mode.mode.level_draw.title')}</strong></p>
                   <ul>
-                    <li>选择一个关卡（如"新手入门"）</li>
-                    <li>点击"开始挑战"从第一关开始</li>
-                    <li>或者点击"选关挑战"选择特定关键词</li>
-                    <li>成功完成后自动进入下一关</li>
+                    <li>{t('introduction.panels.choose_mode.mode.level_draw.step.choose_level')}</li>
+                    <li>{t('introduction.panels.choose_mode.mode.level_draw.step.start_challenge')}</li>
+                    <li>{t('introduction.panels.choose_mode.mode.level_draw.step.select_level')}</li>
+                    <li>{t('introduction.panels.choose_mode.mode.level_draw.step.next_level')}</li>
                   </ul>
-                  <p><strong>自由绘画：</strong></p>
+                  <p><strong>{t('introduction.panels.choose_mode.mode.free_draw.title')}</strong></p>
                   <ul>
-                    <li>输入任意目标词（如"苹果"、"房子"）</li>
-                    <li>在画板上自由创作</li>
-                    <li>提交后查看 AI 识别结果</li>
-                  </ul>
-                </div>
-              </Panel>
-              <Panel header="4️⃣ 开始绘画" key="3">
-                <div className="guide-content">
-                  <ul>
-                    <li>使用画笔工具在画板上绘制</li>
-                    <li>可以选择不同的颜色和笔刷大小</li>
-                    <li>画错了可以使用橡皮擦或清空画板</li>
-                    <li>完成后点击"提交猜词"</li>
+                    <li>{t('introduction.panels.choose_mode.mode.free_draw.step.input_target')}</li>
+                    <li>{t('introduction.panels.choose_mode.mode.free_draw.step.draw')}</li>
+                    <li>{t('introduction.panels.choose_mode.mode.free_draw.step.submit')}</li>
                   </ul>
                 </div>
               </Panel>
-              <Panel header="5️⃣ 查看结果" key="4">
+              <Panel header={t('introduction.panels.start_draw.header')} key="3">
                 <div className="guide-content">
-                  <p>提交后，AI 会分析你的绘画并给出：</p>
                   <ul>
-                    <li>✅ <strong>成功/失败判断：</strong>AI 是否识别出目标词</li>
-                    <li>🔍 <strong>识别结果：</strong>AI 认为你画的是什么</li>
-                    <li>📋 <strong>备选答案：</strong>其他可能的识别结果</li>
-                    <li>💬 <strong>AI 分析：</strong>详细的识别分析和建议</li>
+                    <li>{t('introduction.panels.start_draw.step.brush')}</li>
+                    <li>{t('introduction.panels.start_draw.step.color_brush')}</li>
+                    <li>{t('introduction.panels.start_draw.step.erase')}</li>
+                    <li>{t('introduction.panels.start_draw.step.submit_guess')}</li>
+                  </ul>
+                </div>
+              </Panel>
+              <Panel header={t('introduction.panels.view_result.header')} key="4">
+                <div className="guide-content">
+                  <p>{t('introduction.panels.view_result.desc')}</p>
+                  <ul>
+                    <li>✅ <strong>{t('introduction.panels.view_result.items.success_fail')}</strong></li>
+                    <li>🔍 <strong>{t('introduction.panels.view_result.items.recognition')}</strong></li>
+                    <li>📋 <strong>{t('introduction.panels.view_result.items.alternatives')}</strong></li>
+                    <li>💬 <strong>{t('introduction.panels.view_result.items.analysis')}</strong></li>
                   </ul>
                 </div>
               </Panel>
@@ -159,25 +153,23 @@ function Introduction() {
 
           {/* 提示技巧 */}
           <Card className="introduction-card" bordered={false}>
-            <h2 className="section-title">
-              💡 绘画技巧
-            </h2>
+            <h2 className="section-title">{t('introduction.tips.title')}</h2>
             <div className="tips-grid">
               <div className="tip-item">
                 <span className="tip-emoji">🎯</span>
-                <p>抓住关键特征，画出物品最明显的标志性元素</p>
+                <p>{t('introduction.tips.items.featured')}</p>
               </div>
               <div className="tip-item">
                 <span className="tip-emoji">✏️</span>
-                <p>线条清晰，避免模糊不清的涂鸦</p>
+                <p>{t('introduction.tips.items.clear_lines')}</p>
               </div>
               <div className="tip-item">
                 <span className="tip-emoji">🎨</span>
-                <p>适当添加细节，让 AI 更容易识别</p>
+                <p>{t('introduction.tips.items.add_detail')}</p>
               </div>
               <div className="tip-item">
                 <span className="tip-emoji">🔄</span>
-                <p>失败了不要气馁，根据 AI 反馈改进你的作品</p>
+                <p>{t('introduction.tips.items.dont_give_up')}</p>
               </div>
             </div>
           </Card>
@@ -189,10 +181,8 @@ function Introduction() {
                 <BugOutlined />
               </div>
               <div className="feedback-text">
-                <h3 className="feedback-title">发现问题？有改进建议？</h3>
-                <p className="feedback-description">
-                  欢迎前往 GitHub 项目页面反馈 Bug、提出建议或贡献代码！
-                </p>
+                <h3 className="feedback-title">{t('introduction.feedback.title')}</h3>
+                <p className="feedback-description">{t('introduction.feedback.description')}</p>
                 <Button
                   type="primary"
                   icon={<GithubOutlined />}
@@ -201,7 +191,7 @@ function Introduction() {
                   rel="noopener noreferrer"
                   className="feedback-button"
                 >
-                  前往 GitHub 反馈
+                  {t('introduction.feedback.button')}
                 </Button>
               </div>
             </div>
@@ -216,7 +206,7 @@ function Introduction() {
               onClick={() => navigate('/app/home')}
               className="action-button"
             >
-              开始使用
+              {t('introduction.actions.start')}
             </Button>
             <Button
               size="large"
@@ -224,7 +214,7 @@ function Introduction() {
               onClick={() => navigate('/app/configAI')}
               className="action-button"
             >
-              配置 AI
+              {t('introduction.actions.config')}
             </Button>
             {!isInTauriMode && (
               <Button
@@ -233,7 +223,7 @@ function Introduction() {
                 onClick={handleDonate}
                 className="action-button action-button-donate"
               >
-                支持我们
+                {t('introduction.actions.donate')}
               </Button>
             )}
             <Button
@@ -242,7 +232,7 @@ function Introduction() {
               onClick={() => navigate('/app/home')}
               className="action-button"
             >
-              返回主页
+              {t('introduction.actions.back_home')}
             </Button>
           </div>
 

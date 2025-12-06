@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Dropdown, Button, message, Spin } from 'antd';
 import { HeartFilled, FilterOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { getApiBaseUrlSync } from '../utils/api';
 import { useUser } from '../context/UserContext';
 import AppSidebar from '../components/AppSidebar';
@@ -25,6 +26,7 @@ const Gallery: React.FC = () => {
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc'>('time-desc');
   const { isAdmin, userId, refreshUserInfo } = useUser();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchGalleryItems();
@@ -81,22 +83,22 @@ const Gallery: React.FC = () => {
   const sortMenuItems = [
     {
       key: 'time-desc',
-      label: '最新优先',
+      label: t('gallery.sort.newest'),
       onClick: () => handleSortChange('time-desc')
     },
     {
       key: 'time-asc',
-      label: '最早优先',
+      label: t('gallery.sort.oldest'),
       onClick: () => handleSortChange('time-asc')
     },
     {
       key: 'likes-desc',
-      label: '点赞最多',
+      label: t('gallery.sort.mostLiked'),
       onClick: () => handleSortChange('likes-desc')
     },
     {
       key: 'likes-asc',
-      label: '点赞最少',
+      label: t('gallery.sort.leastLiked'),
       onClick: () => handleSortChange('likes-asc')
     }
   ];
@@ -136,14 +138,14 @@ const Gallery: React.FC = () => {
       });
 
       if (response.ok) {
-        message.success('删除成功');
+        message.success(t('gallery.messages.deleteSuccess'));
         setGalleryItems(prevItems => prevItems.filter(item => item.filename !== filename));
       } else {
-        message.error('删除失败');
+        message.error(t('gallery.messages.deleteFailed'));
       }
     } catch (error) {
       console.error('Error deleting gallery item:', error);
-      message.error('删除失败');
+      message.error(t('gallery.messages.deleteFailed'));
     }
   };
 
@@ -154,7 +156,7 @@ const Gallery: React.FC = () => {
       <div className="gallery-container">
         {/* 标题区域 */}
         <div className="gallery-title-section">
-          <h1 className="gallery-page-title">画廊</h1>
+          <h1 className="gallery-page-title">{t('gallery.title')}</h1>
           <Dropdown
             menu={{ items: sortMenuItems }}
             placement="bottomRight"
@@ -164,7 +166,7 @@ const Gallery: React.FC = () => {
               type="text"
               icon={<FilterOutlined />}
               className="gallery-filter-button"
-              aria-label="排序筛选"
+              aria-label={t('gallery.sort.filterLabel')}
             />
           </Dropdown>
         </div>
@@ -185,7 +187,7 @@ const Gallery: React.FC = () => {
                 fontSize: '1.2rem', 
                 color: '#666'
               }}>
-                正在加载画廊...
+                {t('gallery.loading')}
               </div>
             </div>
           ) : galleryItems.length > 0 ? (
@@ -194,7 +196,7 @@ const Gallery: React.FC = () => {
                 <div key={item.filename} className="gallery-item">
                   <img
                     src={item.image_data!}
-                    alt={`由 ${item.name} 绘制`}
+                    alt={t('gallery.image.alt', { name: item.name })}
                     className="gallery-image"
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
@@ -257,7 +259,7 @@ const Gallery: React.FC = () => {
             </div>
           ) : (
             <div className="gallery-empty">
-              <p>画廊中还没有作品，快去绘制并发布吧！</p>
+              <p>{t('gallery.empty')}</p>
             </div>
           )}
         </div>
@@ -275,7 +277,7 @@ const Gallery: React.FC = () => {
         {previewImg && (
           <img
             src={previewImg}
-            alt="大图预览"
+            alt={t('gallery.image.previewAlt')}
             style={{ maxWidth: '100%', maxHeight: '80vh', display: 'block', margin: '0 auto' }}
           />
         )}

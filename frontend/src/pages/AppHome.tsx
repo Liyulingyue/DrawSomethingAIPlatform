@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'antd'
-import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, GithubOutlined, PictureOutlined, UserOutlined, HeartOutlined } from '@ant-design/icons'
+import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, PictureOutlined, UserOutlined, HeartOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -17,6 +19,7 @@ function AppHome() {
   
   // 检测是否在 Tauri 环境中
   const isInTauriMode = isTauri()
+  const { t } = useTranslation()
   
   // 在页面加载时检查 AI 配置
   useEffect(() => {
@@ -104,22 +107,16 @@ function AppHome() {
         onConfig={handleConfigModalOk}
         onCancel={handleConfigModalCancel}
       />
-      <a 
-        href="https://github.com/Liyulingyue/DrawSomethingAIPlatform" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="github-link"
-        title="查看项目源码"
-      >
-        <GithubOutlined />
-      </a>
+      <div className="top-right-actions">
+        <LanguageSwitcher />
+      </div>
       <div className="app-home-container">
         <div className="app-home-content">
-          <div className="app-home-header">
-            <h1 className="app-home-title">🎨 你画AI猜</h1>
-            <p className="app-home-subtitle">DrawSomething AI Platform</p>
-            <p className="app-home-hint">💡 第一次使用建议阅读使用说明</p>
-          </div>
+              <div className="app-home-header">
+                    <h1 className="app-home-title">{t('title')}</h1>
+                    <p className="app-home-subtitle">{t('subtitle')}</p>
+                    <p className="app-home-hint">{t('hint')}</p>
+                  </div>
           <div className="app-home-buttons">
         <Button
           type="primary"
@@ -127,8 +124,8 @@ function AppHome() {
           icon={<TrophyOutlined />}
           onClick={handleLevelSelect}
           className="app-home-button app-home-button-primary"
-        >
-          绘画闯关
+          >
+          {t('buttons.level_draw')}
         </Button>
         <Button
           type="primary"
@@ -136,8 +133,8 @@ function AppHome() {
           icon={<TrophyOutlined />}
           onClick={handleLevelSetGuess}
           className="app-home-button app-home-button-secondary"
-        >
-          猜词闯关
+          >
+          {t('buttons.level_guess')}
         </Button>
         {/* Tauri 模式下不显示登录按钮（自动登录管理员） */}
         {!isInTauriMode && (
@@ -147,8 +144,8 @@ function AppHome() {
             icon={<UserOutlined />}
             onClick={handleLogin}
             className="app-home-button app-home-button-login"
-          >
-            用户登录
+            >
+            {t('buttons.login')}
           </Button>
         )}
         <Button
@@ -157,8 +154,8 @@ function AppHome() {
           icon={<EditOutlined />}
           onClick={handleFreeDraw}
           className="app-home-button"
-        >
-          自由绘画
+          >
+          {t('buttons.free_draw')}
         </Button>
         <Button
           type="default"
@@ -166,8 +163,8 @@ function AppHome() {
           icon={<PictureOutlined />}
           onClick={handleGallery}
           className="app-home-button app-home-button-gallery"
-        >
-          画廊
+          >
+          {t('buttons.gallery')}
         </Button>
         <Button
           type="default"
@@ -175,8 +172,8 @@ function AppHome() {
           icon={<SettingOutlined />}
           onClick={handleConfigAI}
           className="app-home-button app-home-button-config"
-        >
-          AI 配置
+          >
+          {t('buttons.config_ai')}
         </Button>
         <Button
           type="default"
@@ -184,8 +181,8 @@ function AppHome() {
           icon={<InfoCircleOutlined />}
           onClick={handleIntroduction}
           className="app-home-button app-home-button-info"
-        >
-          使用说明
+          >
+          {t('buttons.introduction')}
         </Button>
         {/* Tauri 模式下不显示支持我们按钮（桌面应用） */}
         {!isInTauriMode && (
@@ -195,8 +192,8 @@ function AppHome() {
             icon={<HeartOutlined />}
             onClick={handleDonate}
             className="app-home-button app-home-button-donate"
-          >
-            支持我们
+            >
+            {t('buttons.donate')}
           </Button>
         )}
       </div>

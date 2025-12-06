@@ -1,0 +1,241 @@
+{
+  "title": "🎨 你画AI猜",
+  "subtitle": "DrawSomething AI Platform",
+  "hint": "💡 第一次使用建议阅读使用说明",
+  "buttons": {
+    "level_draw": "绘画闯关",
+    "level_guess": "猜词闯关",
+    "login": "用户登录",
+    "free_draw": "自由绘画",
+    "gallery": "画廊",
+    "config_ai": "AI 配置",
+    "introduction": "使用说明",
+    "donate": "支持我们"
+  }
+
+  ,
+  "view_source": "查看项目源码"
+  ,
+  "sidebar": {
+    "title": "DrawSomething AI",
+    "home": "主页",
+    "login": "登录",
+    "level_draw": "绘画闯关",
+    "level_guess": "猜词闯关",
+    "my_custom_levels": "我的自定义关卡",
+    "free_draw": "自由绘画",
+    "gallery": "画廊",
+    "introduction": "使用说明",
+    "config_ai": "AI 配置",
+    "donate": "支持我们",
+    "version": "版本 {{version}}",
+    "copyright": "© {{year}} DrawSomething AI Platform",
+    "repository": "开源仓库",
+    "repository_title": "在 GitHub 上查看"
+  }
+  ,
+  "introduction": {
+    "title": "🎨 你画AI猜",
+    "subtitle": "DrawSomething AI Platform",
+    "description": "一个基于 AI 视觉识别的趣味绘画挑战平台",
+    "what_is": {
+      "title": "什么是\"你画AI猜\"？",
+      "p1": "\"你画AI猜\"是一个创新的绘画挑战平台，结合了人工智能图像识别技术和趣味游戏玩法。",
+      "p2": "无论是新手还是资深画家，都能在这里找到属于自己的乐趣。通过 AI 的即时反馈，你可以不断提升绘画技巧，挑战更高难度的关卡！"
+    },
+    "features": {
+      "title": "核心功能",
+      "level_draw": {"title": "绘画闯关", "desc": "从新手入门到高级挑战，循序渐进提升绘画能力。每个关卡都有精心设计的关键词列表。"},
+      "free_draw": {"title": "自由绘画", "desc": "没有限制，随心所欲地创作。输入任意目标词，让 AI 识别你的作品。"},
+      "ai": {"title": "AI 智能识别", "desc": "基于先进的视觉语言模型，AI 能够准确识别你的绘画内容并给出详细分析。"},
+      "config": {"title": "自定义配置", "desc": "支持配置自己的 AI 服务，使用百度 AI Studio 或其他兼容的 AI 模型。"}
+    },
+    "quick_start": {"title": "快速开始"},
+    "panels": {
+      "login": {
+        "header": "📋 登录说明（可选）",
+        "note": "不登录不影响正常游戏：",
+        "bullets": {"can_draw": "可以正常绘画：所有绘画功能都可正常使用", "can_use_ai": "可以体验AI识别：如果您配置了自定义AI服务", "can_create": "可以自由创作：绘画闯关和自由绘画模式都可用"},
+        "extras_title": "登录后的额外功能：",
+        "extras": {"server_ai": "使用服务器AI资源：无需配置即可使用平台提供的AI服务", "gallery": "作品管理：登录用户可以删除自己发布的画廊作品，未登录只能发布画廊作品，而无法主动删除", "unlock": "解锁高级功能：未来可能推出的更多功能"},
+        "tip": "💡 提示：如果您想使用平台AI服务进行识别，请先进行登录。登录后系统会自动为您分配点数用于AI调用。"
+      },
+      "ai_setup": {
+        "header": "2️⃣ 配置 AI 服务（首次使用）",
+        "desc": "首次使用需要配置 AI 服务：",
+        "steps": {"enter_config_page": "进入\"AI 配置\"页面", "input_api_url": "输入 API URL", "input_api_key": "输入你的 API Key", "input_model_name": "输入模型名称", "test_connection": "点击\"测试连接\"确保配置正确", "save_config": "点击\"保存配置\""},
+        "tip": "💡 提示：如果没有配置 AI 服务，系统无法使用。"
+      },
+      "choose_mode": {
+        "header": "3️⃣ 选择游戏模式",
+        "mode": {"level_draw": {"title": "绘画闯关", "step": {"choose_level": "选择一个关卡（如\"新手入门\"）", "start_challenge": "点击\"开始挑战\"从第一关开始", "select_level": "或者点击\"选关挑战\"选择特定关键词", "next_level": "成功完成后自动进入下一关"}},
+          "free_draw": {"title": "自由绘画", "step": {"input_target": "输入任意目标词（如\"苹果\"、\"房子\"）", "draw": "在画板上自由创作", "submit": "提交后查看 AI 识别结果"}}}
+      },
+      "start_draw": {"header": "4️⃣ 开始绘画", "step": {"brush": "使用画笔工具在画板上绘制", "color_brush": "可以选择不同的颜色和笔刷大小", "erase": "画错了可以使用橡皮擦或清空画板", "submit_guess": "完成后点击\"提交猜词\""}},
+      "view_result": {"header": "5️⃣ 查看结果", "desc": "提交后，AI 会分析你的绘画并给出：", "items": {"success_fail": "成功/失败判断：AI 是否识别出目标词", "recognition": "识别结果：AI 认为你画的是什么", "alternatives": "备选答案：其他可能的识别结果", "analysis": "AI 分析：详细的识别分析和建议"}}
+    },
+    "tips": {"title": "💡 绘画技巧", "items": {"featured": "抓住关键特征，画出物品最明显的标志性元素", "clear_lines": "线条清晰，避免模糊不清的涂鸦", "add_detail": "适当添加细节，让 AI 更容易识别", "dont_give_up": "失败了不要气馁，根据 AI 反馈改进你的作品"}},
+    "feedback": {"title": "发现问题？有改进建议？", "description": "欢迎前往 GitHub 项目页面反馈 Bug、提出建议或贡献代码！", "button": "前往 GitHub 反馈"},
+    "actions": {"start": "开始使用", "config": "配置 AI", "donate": "支持我们", "back_home": "返回主页"}
+  }
+  ,
+  "aiConfigModal": {
+    "title": "AI 服务未配置",
+    "ok": "去配置",
+    "cancel": "稍后再说",
+    "detecting": "检测到您还未配置 AI 服务。",
+    "drawing_guess": "绘画猜词",
+    "ai_draw": "AI 画你猜",
+    "needs_config": "需要配置",
+    "vision_model": "视觉模型",
+    "generation_model": "文生图模型",
+    "recommended": {
+      "title": "推荐方案：百度飞桨 AI Studio",
+      "bullet1": "零成本使用，注册即可获得",
+      "bullet2": "支持视觉识别和图像生成"
+    },
+    "how_to_get": "获取方式：访问",
+    "baidu_ai_studio": "百度 AI Studio",
+    "get_access_token": "注册并获取 Access Token"
+  }
+  ,
+  "donate": {
+    "title": "支持我们",
+    "subtitle": "您的支持可以避免我们因Token消耗而入不敷出",
+    "about": {
+      "title": "关于服务点调用",
+      "p1": "登录使用服务点调用时，会消耗开发者的AI接口费用",
+      "p2": "目前这个功能完全免费，没有使用限制。",
+      "p3": "您的打赏可以鼓励开发者继续维护，也能帮助分摊一些API成本。",
+      "note": "我们计划支持用户购买调用额度，从而免去用户配置模型的麻烦。但对于开发/测试环境，该功能不便于集成，因此该功能目前采用免费的方式提供，希望大家玩的开心！"
+    },
+    "recommend": {
+      "amount": "推荐打赏金额：0.5元",
+      "note": "AI接口费用并不昂贵，这与我们后续的付费计划金额一致"
+    },
+    "methods": {
+      "wechat": {
+        "title": "微信赞赏码",
+        "alt": "微信赞赏码",
+        "placeholder": "微信赞赏码二维码",
+        "hint": "请将 wechat-qr.jpg 放在 public 文件夹中"
+      }
+    }
+  }
+  ,
+  "configAI": {
+    "title": "AI 配置",
+    "subtitle": "配置视觉模型（你画AI猜）和文生图模型（AI画你猜）的连接参数",
+    "tabs": {
+      "vision": "👁️ 视觉模型 (你画AI猜)",
+      "image": "🎨 文生图模型 (AI画你猜)"
+    },
+    "form": {
+      "visionUrl": "视觉模型 API URL",
+      "visionKey": "视觉模型 API Key",
+      "visionModelName": "视觉模型名称",
+      "imageUrl": "文生图模型 API URL",
+      "imageKey": "文生图模型 API Key",
+      "imageModelName": "文生图模型名称",
+      "callPreference": "调用偏好(统一设置)"
+    },
+    "placeholders": {
+      "visionUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "visionKey": "请输入百度 AI Studio 的 Access Token",
+      "visionModelName": "ernie-4.5-vl-28b-a3b",
+      "imageUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "imageKey": "请输入百度 AI Studio 的 Access Token",
+      "imageModelName": "ernie-4.5-vl-28b-a3b"
+    },
+    "buttons": {
+      "testVision": "测试视觉模型",
+      "testImage": "测试文生图模型",
+      "reset": "重置",
+      "save": "保存配置"
+    },
+    "messages": {
+      "serverLoginRequired": "💰 服务器调用点需要登录后才能使用。",
+      "configSaved": "AI 配置已保存并生效",
+      "configComplete": "✅ AI 配置完整，可以正常使用 AI 功能",
+      "configIncomplete": "⚠️ 配置信息不完整，自定义服务可能无法使用",
+      "saveFailed": "保存失败，请重试",
+      "resetSuccess": "已重置为默认配置",
+      "resetFailed": "重置失败，请重试",
+      "fillComplete": "请先填写完整的 {{modelType}} URL、API Key 和模型名称",
+      "testingConnection": "开始测试 {{modelType}} 连接...",
+      "testSuccess": "🎉 {{modelType}} 连接测试成功",
+      "serviceConnected": "{{modelType}} 服务连接正常！",
+      "generatedImage": "生成的测试图像:",
+      "aiReply": "AI 回复:",
+      "readyToUse": "现在您可以保存这个配置并开始使用 {{modelType}} 功能了！",
+      "testFailed": "❌ {{modelType}} 连接测试失败",
+      "cannotConnect": "无法连接到 {{modelType}} 服务",
+      "errorInfo": "错误信息:",
+      "possibleSolutions": "可能的解决方案:",
+      "checkApiKey": "检查 API Key 是否正确",
+      "checkUrl": "验证 URL 地址是否有效",
+      "checkModelName": "确认模型名称是否支持",
+      "checkNetwork": "检查网络连接状态",
+      "backendError": "🔌 后端服务错误",
+      "backendApiFailed": "后端 API 调用失败",
+      "errorDetails": "错误详情:",
+      "checkBackendRunning": "请检查后端服务是否正常运行",
+      "backendApiCallFailed": "后端 API 调用失败: {{status}} {{statusText}}",
+      "testError": "测试 {{modelType}} 连接时发生错误: {{error}}",
+      "backendNotConnected": "无法连接到后端服务，请确保后端服务已启动",
+      "unknownError": "未知错误",
+      "backendConnectionFailed": "🔌 后端连接失败",
+      "connectionException": "⚠️ 连接异常",
+      "cannotConnectBackend": "无法连接到后端服务",
+      "testException": "测试 {{modelType}} 连接时发生异常",
+      "solutions": "解决方案:",
+      "ensureBackendRunning": "确保后端服务正在运行 (python run.py)",
+      "checkBackendPort": "检查后端端口是否为 8002",
+      "checkFirewall": "确认防火墙没有阻止连接"
+    },
+    "validation": {
+      "enterValidUrl": "请输入有效的 URL",
+      "enterVisionUrl": "请输入视觉模型 API URL",
+      "enterImageUrl": "请输入文生图模型 API URL",
+      "enterVisionKey": "请输入视觉模型 API Key",
+      "enterImageKey": "请输入文生图模型 API Key",
+      "enterVisionModelName": "请输入视觉模型名称",
+      "enterImageModelName": "请输入文生图模型名称",
+      "selectCallPreference": "请选择调用偏好"
+    },
+    "preferences": {
+      "custom": "自定义服务",
+      "server": "服务器调用点",
+      "serverTip": "💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务"
+    },
+    "footer": {
+      "hint": "💡 提示：配置信息将保存在浏览器本地存储中，获取 API Key：访问",
+      "baiduLink": "🔗 百度 AI Studio Access Token",
+      "help": "💡 视觉模型用于\"你画AI猜\"游戏，文生图模型用于\"AI画你猜\"游戏。选择服务器调用点时优先使用平台服务，点数不足时自动回退到自定义服务。请配置自定义服务参数作为备用方案。"
+    },
+    "links": {
+      "getToken": "🔗 获取百度 AI Studio Access Token"
+    }
+  }
+  ,
+  "gallery": {
+    "title": "画廊",
+    "loading": "正在加载画廊...",
+    "empty": "画廊中还没有作品，快去绘制并发布吧！",
+    "sort": {
+      "filterLabel": "排序筛选",
+      "newest": "最新优先",
+      "oldest": "最早优先",
+      "mostLiked": "点赞最多",
+      "leastLiked": "点赞最少"
+    },
+    "messages": {
+      "deleteSuccess": "删除成功",
+      "deleteFailed": "删除失败"
+    },
+    "image": {
+      "alt": "由 {{name}} 绘制",
+      "previewAlt": "大图预览"
+    }
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "title": "🎨 Draw & AI & Guesses",
+  "subtitle": "DrawSomething AI Platform",
+  "hint": "💡 It's recommended to read the guide if this is your first time",
+  "buttons": {
+    "level_draw": "Drawing Levels",
+    "level_guess": "Guessing Levels",
+    "login": "User Login",
+    "free_draw": "Free Draw",
+    "gallery": "Gallery",
+    "config_ai": "AI Configuration",
+    "introduction": "Introduction",
+    "donate": "Support Us"
+  }
+
+  ,
+  "view_source": "View source on GitHub"
+  ,
+  "sidebar": {
+    "title": "DrawSomething AI",
+    "home": "Home",
+    "login": "Login",
+    "level_draw": "Drawing Levels",
+    "level_guess": "Guessing Levels",
+    "my_custom_levels": "My Custom Levels",
+    "free_draw": "Free Draw",
+    "gallery": "Gallery",
+    "introduction": "Introduction",
+    "config_ai": "AI Configuration",
+    "donate": "Support Us",
+    "version": "Version {{version}}",
+    "copyright": "© {{year}} DrawSomething AI Platform",
+    "repository": "Open Source Repo",
+    "repository_title": "View on GitHub"
+  }
+  ,
+  "introduction": {
+    "title": "🎨 Draw, AI Guesses",
+    "subtitle": "DrawSomething AI Platform",
+    "description": "A fun drawing challenge platform powered by AI vision recognition",
+    "what_is": {
+      "title": "What is \"Draw, AI Guesses\"?",
+      "p1": "\"Draw, AI Guesses\" is an innovative drawing challenge platform that combines AI image recognition with fun game mechanics.",
+      "p2": "Whether you are a beginner or an experienced artist, you can enjoy the platform and improve your skills through AI feedback."
+    },
+    "features": {
+      "title": "Core Features",
+      "level_draw": {
+        "title": "Drawing Levels",
+        "desc": "Progress from beginner to advanced with carefully designed keywords for each level."
+      },
+      "free_draw": {"title": "Free Draw", "desc": "Create freely and let AI recognize your drawing based on any target word."},
+      "ai": {"title": "AI Recognition", "desc": "Advanced vision-language models accurately recognize and analyze drawings."},
+      "config": {"title": "Custom Configuration", "desc": "Support configuring your own AI service such as Baidu AI Studio."}
+    },
+    "quick_start": {"title": "Quick Start"},
+    "panels": {
+      "login": {
+        "header": "📋 Login (optional)",
+        "note": "Not logging in will not affect gameplay:",
+        "bullets": {"can_draw": "Can draw normally", "can_use_ai": "Can experience AI recognition if you've configured an AI service", "can_create": "Can freely create"},
+        "extras_title": "Additional features after login:",
+        "extras": {"server_ai": "Use server AI resources without configuration", "gallery": "Manage your published gallery items", "unlock": "Unlock future premium features"},
+        "tip": "Tip: If you want to use the platform's AI services, please log in first. The system will allocate points for AI usage after login."
+      },
+      "ai_setup": {
+        "header": "2️⃣ Configure AI Service (first use)",
+        "desc": "You need to configure an AI service before first use:",
+        "steps": {
+          "enter_config_page": "Open the 'AI Configuration' page",
+          "input_api_url": "Input API URL",
+          "input_api_key": "Input your API Key",
+          "input_model_name": "Input model name",
+          "test_connection": "Click 'Test Connection'",
+          "save_config": "Click 'Save Configuration'"
+        },
+        "tip": "Tip: Without AI configuration the system won't use AI recognition."
+      },
+      "choose_mode": {
+        "header": "3️⃣ Choose game mode",
+        "mode": {
+          "level_draw": {"title": "Drawing Levels", "step": {"choose_level": "Choose a level", "start_challenge": "Click 'Start Challenge'", "select_level": "Or click 'Select Level' to choose specific keywords", "next_level": "Automatically proceed to next level on success"}},
+          "free_draw": {"title": "Free Draw", "step": {"input_target": "Enter a target word (e.g. 'apple', 'house')", "draw": "Draw on the canvas", "submit": "Submit and check AI recognition results"}}
+        }
+      },
+      "start_draw": {"header": "4️⃣ Start Drawing", "step": {"brush": "Use the brush tool to draw on the canvas", "color_brush": "Choose colors and brush sizes", "erase": "Use eraser or clear canvas if needed", "submit_guess": "Click 'Submit Guess' when done"}},
+      "view_result": {"header": "5️⃣ View Results", "desc": "After submitting, AI will analyze your drawing and provide:", "items": {"success_fail": "Success/Failure judgement", "recognition": "Recognition result", "alternatives": "Alternative answers", "analysis": "Detailed AI analysis and suggestions"}}
+    },
+    "tips": {"title": "💡 Drawing Tips", "items": {"featured": "Focus on key features and draw the most recognizable elements", "clear_lines": "Keep lines clear and avoid fuzzy doodles", "add_detail": "Add details appropriately for easier AI recognition", "dont_give_up": "Don't give up on failure; improve based on AI feedback"}},
+    "feedback": {"title": "Found an issue? Got a suggestion?", "description": "Welcome to report bugs, propose improvements, or contribute on the GitHub project page!", "button": "Open GitHub"},
+    "actions": {"start": "Get Started", "config": "Configure AI", "donate": "Support Us", "back_home": "Back to Home"}
+  }
+  ,
+  "aiConfigModal": {
+    "title": "AI Service Not Configured",
+    "ok": "Configure Now",
+    "cancel": "Remind me later",
+    "detecting": "We detected you have not configured AI services yet.",
+    "drawing_guess": "Drawing Guesses",
+    "ai_draw": "AI Draw",
+    "needs_config": "requires a",
+    "vision_model": "vision model",
+    "generation_model": "text-to-image model",
+    "recommended": {
+      "title": "Recommended: Baidu PaddlePaddle AI Studio",
+      "bullet1": "Free to use; register to obtain",
+      "bullet2": "Supports vision recognition and image generation"
+    },
+    "how_to_get": "How to get:",
+    "baidu_ai_studio": "Baidu AI Studio",
+    "get_access_token": "register and obtain an Access Token"
+  }
+  ,
+  "donate": {
+    "title": "Support Us",
+    "subtitle": "Your support helps us cover AI token usage costs",
+    "about": {
+      "title": "About service point usage",
+      "p1": "Using service points under login will consume the developer's AI API quota.",
+      "p2": "Currently, this feature is completely free with no usage limit.",
+      "p3": "Your donations encourage the developer and help cover some API costs.",
+      "note": "We plan to support purchasing quota to spare users from configuring models. For dev/testing environments this is impractical, therefore the feature is offered free for now — enjoy!"
+    },
+    "recommend": {"amount": "Recommended donation: 0.5 CNY", "note": "AI API costs aren't expensive and align with our future paid plans"},
+    "methods": {"wechat": {"title": "WeChat Donation QR Code", "alt": "WeChat QR Code for donation", "placeholder": "WeChat donation QR code", "hint": "Please place wechat-qr.jpg in the public folder"}}
+  }
+  ,
+  "configAI": {
+    "title": "AI Configuration",
+    "subtitle": "Configure connection parameters for vision model (Draw & AI Guesses) and text-to-image model (AI Draw)",
+    "tabs": {
+      "vision": "👁️ Vision Model (Draw & AI Guesses)",
+      "image": "🎨 Text-to-Image Model (AI Draw)"
+    },
+    "form": {
+      "visionUrl": "Vision Model API URL",
+      "visionKey": "Vision Model API Key",
+      "visionModelName": "Vision Model Name",
+      "imageUrl": "Text-to-Image Model API URL",
+      "imageKey": "Text-to-Image Model API Key",
+      "imageModelName": "Text-to-Image Model Name",
+      "callPreference": "Call Preference (Unified Setting)"
+    },
+    "placeholders": {
+      "visionUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "visionKey": "Enter your Baidu AI Studio Access Token",
+      "visionModelName": "ernie-4.5-vl-28b-a3b",
+      "imageUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "imageKey": "Enter your Baidu AI Studio Access Token",
+      "imageModelName": "ernie-4.5-vl-28b-a3b"
+    },
+    "buttons": {
+      "testVision": "Test Vision Model",
+      "testImage": "Test Text-to-Image Model",
+      "reset": "Reset",
+      "save": "Save Configuration"
+    },
+    "messages": {
+      "serverLoginRequired": "💰 Server endpoint requires login to use.",
+      "configSaved": "AI configuration saved and activated",
+      "configComplete": "✅ AI configuration is complete, you can now use AI features normally",
+      "configIncomplete": "⚠️ Configuration information is incomplete, custom services may not work",
+      "saveFailed": "Save failed, please try again",
+      "resetSuccess": "Reset to default configuration",
+      "resetFailed": "Reset failed, please try again",
+      "fillComplete": "Please fill in the complete {{modelType}} URL, API Key and model name first",
+      "testingConnection": "Starting to test {{modelType}} connection...",
+      "testSuccess": "🎉 {{modelType}} connection test successful",
+      "serviceConnected": "{{modelType}} service connected successfully!",
+      "generatedImage": "Generated test image:",
+      "aiReply": "AI Reply:",
+      "readyToUse": "You can now save this configuration and start using {{modelType}} features!",
+      "testFailed": "❌ {{modelType}} connection test failed",
+      "cannotConnect": "Cannot connect to {{modelType}} service",
+      "errorInfo": "Error Information:",
+      "possibleSolutions": "Possible solutions:",
+      "checkApiKey": "Check if API Key is correct",
+      "checkUrl": "Verify if URL address is valid",
+      "checkModelName": "Confirm if model name is supported",
+      "checkNetwork": "Check network connection status",
+      "backendError": "🔌 Backend service error",
+      "backendApiFailed": "Backend API call failed",
+      "errorDetails": "Error details:",
+      "checkBackendRunning": "Please check if backend service is running normally",
+      "backendApiCallFailed": "Backend API call failed: {{status}} {{statusText}}",
+      "testError": "Error occurred while testing {{modelType}} connection: {{error}}",
+      "backendNotConnected": "Cannot connect to backend service, please ensure backend service is started",
+      "unknownError": "Unknown error",
+      "backendConnectionFailed": "🔌 Backend connection failed",
+      "connectionException": "⚠️ Connection exception",
+      "cannotConnectBackend": "Cannot connect to backend service",
+      "testException": "Exception occurred while testing {{modelType}} connection",
+      "solutions": "Solutions:",
+      "ensureBackendRunning": "Ensure backend service is running (python run.py)",
+      "checkBackendPort": "Check if backend port is 8002",
+      "checkFirewall": "Confirm firewall is not blocking connection"
+    },
+    "validation": {
+      "enterValidUrl": "Please enter a valid URL",
+      "enterVisionUrl": "Please enter vision model API URL",
+      "enterImageUrl": "Please enter text-to-image model API URL",
+      "enterVisionKey": "Please enter vision model API Key",
+      "enterImageKey": "Please enter text-to-image model API Key",
+      "enterVisionModelName": "Please enter vision model name",
+      "enterImageModelName": "Please enter text-to-image model name",
+      "selectCallPreference": "Please select call preference"
+    },
+    "preferences": {
+      "custom": "Custom Service",
+      "server": "Server Endpoint",
+      "serverTip": "💡 Server endpoint requires login to use, prioritizes platform services, automatically switches to custom services when points are insufficient"
+    },
+    "footer": {
+      "hint": "💡 Hint: Configuration information will be saved in browser local storage, get API Key: visit",
+      "baiduLink": "🔗 Baidu AI Studio Access Token",
+      "help": "💡 Vision model is used for \"Draw & AI Guesses\" game, text-to-image model is used for \"AI Draw\" game. When selecting server endpoint, platform services are prioritized, automatically fallback to custom services when points are insufficient. Please configure custom service parameters as backup."
+    },
+    "links": {
+      "getToken": "🔗 Get Baidu AI Studio Access Token"
+    }
+  }
+  ,
+  "gallery": {
+    "title": "Gallery",
+    "loading": "Loading gallery...",
+    "empty": "No artworks in the gallery yet, go draw and publish some!",
+    "sort": {
+      "filterLabel": "Sort and Filter",
+      "newest": "Newest First",
+      "oldest": "Oldest First",
+      "mostLiked": "Most Liked",
+      "leastLiked": "Least Liked"
+    },
+    "messages": {
+      "deleteSuccess": "Deleted successfully",
+      "deleteFailed": "Delete failed"
+    },
+    "image": {
+      "alt": "Drawn by {{name}}",
+      "previewAlt": "Large image preview"
+    }
+  }
+}

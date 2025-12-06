@@ -1,7 +1,0 @@
-transformers
-modelscope
-torch
-fastapi
-uvicorn
-pillow
-pydantic

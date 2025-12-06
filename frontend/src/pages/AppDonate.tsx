@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { HeartOutlined, QrcodeOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -7,6 +8,7 @@ import './AppDonate.css'
 
 function AppDonate() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <>
@@ -17,27 +19,25 @@ function AppDonate() {
           <div className="app-donate-header">
             <h1 className="app-donate-title">
               <HeartOutlined style={{ marginRight: '12px' }} />
-              支持我们
+              {t('donate.title')}
             </h1>
             <p className="app-donate-subtitle">
-              您的支持可以避免我们因Token消耗而入不敷出
+              {t('donate.subtitle')}
             </p>
           </div>
 
           {/* 服务点调用说明 */}
           <div className="donate-info-box">
             <div className="donate-info-content">
-              <h3 className="donate-info-title">💡 关于服务点调用</h3>
+              <h3 className="donate-info-title">💡 {t('donate.about.title')}</h3>
               <div className="donate-info-text">
-                <p><strong>登录使用服务点调用时，会消耗开发者的AI接口费用</strong></p>
-                <p>目前这个功能<strong>完全免费</strong>，<strong>没有使用限制</strong>。</p>
-                <p>您的打赏可以鼓励开发者继续维护，也能帮助分摊一些API成本。</p>
+                <p><strong>{t('donate.about.p1')}</strong></p>
+                <p>{t('donate.about.p2')}</p>
+                <p>{t('donate.about.p3')}</p>
                 <p className="donate-recommendation">
-                  💰 <strong>推荐打赏金额：0.5元</strong>（AI接口费用并不昂贵，这与我们后续的付费计划金额一致）
+                  💰 <strong>{t('donate.recommend.amount')}</strong>（{t('donate.recommend.note')})
                 </p>
-                <p className="donate-info-note">
-                  <small>我们计划支持用户购买调用额度，从而免去用户配置模型的麻烦。但对于开发/测试环境，该功能不便于集成，因此该功能目前采用免费的方式提供，希望大家玩的开心！</small>
-                </p>
+                <p className="donate-info-note"><small>{t('donate.about.note')}</small></p>
               </div>
             </div>
           </div>
@@ -49,12 +49,12 @@ function AppDonate() {
                 <div className="donate-icon wechat">
                   <span>微信</span>
                 </div>
-                <h3>微信赞赏码</h3>
+                <h3>{t('donate.methods.wechat.title')}</h3>
               </div>
               <div className="donate-qr-container">
                 <img 
                   src="/wechat-qr.jpg" 
-                  alt="微信赞赏码" 
+                  alt={t('donate.methods.wechat.alt')} 
                   className="donate-qr-image"
                   onLoad={(e) => {
                     // 图片加载成功，确保占位符隐藏
@@ -74,8 +74,8 @@ function AppDonate() {
                 />
                 <div className="donate-qr-placeholder" style={{ display: 'none' }}>
                   <QrcodeOutlined style={{ fontSize: '48px', color: '#666' }} />
-                  <p>微信赞赏码二维码</p>
-                  <small>请将 wechat-qr.jpg 放在 public 文件夹中</small>
+                  <p>{t('donate.methods.wechat.placeholder')}</p>
+                  <small>{t('donate.methods.wechat.hint')}</small>
                 </div>
               </div>
             </div>

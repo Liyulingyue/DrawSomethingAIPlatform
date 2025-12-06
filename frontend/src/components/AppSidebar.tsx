@@ -11,8 +11,10 @@ import {
   PictureOutlined,
   UserOutlined,
   HeartOutlined,
+  GithubOutlined,
 } from '@ant-design/icons'
 import { isTauri } from '../utils/api'
+import { useTranslation } from 'react-i18next'
 import './AppSidebar.css'
 
 interface AppSidebarProps {
@@ -26,59 +28,60 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
 
   // 检测是否在 Tauri 环境中
   const isInTauriMode = isTauri()
+  const { t } = useTranslation()
 
   const menuItems = [
     {
       key: '/app/home',
       icon: <HomeOutlined />,
-      label: '主页',
+      label: t('sidebar.home'),
     },
     // Tauri 模式下不显示登录按钮（自动登录管理员）
     ...(!isInTauriMode ? [{
       key: '/app/login',
       icon: <UserOutlined />,
-      label: '登录',
+      label: t('sidebar.login'),
     }] : []),
     {
       key: '/app/level-set',
       icon: <TrophyOutlined />,
-      label: '绘画闯关',
+      label: t('sidebar.level_draw'),
     },
     {
       key: '/app/level-set-guess',
       icon: <TrophyOutlined />,
-      label: '猜词闯关',
+      label: t('sidebar.level_guess'),
     },
     {
       key: '/app/my-custom-levels',
       icon: <PlusOutlined />,
-      label: '我的自定义关卡',
+      label: t('sidebar.my_custom_levels'),
     },
     {
       key: '/app/draw',
       icon: <EditOutlined />,
-      label: '自由绘画',
+      label: t('sidebar.free_draw'),
     },
     {
       key: '/app/gallery',
       icon: <PictureOutlined />,
-      label: '画廊',
+      label: t('sidebar.gallery'),
     },
     {
       key: '/app/introduction',
       icon: <InfoCircleOutlined />,
-      label: '使用说明',
+      label: t('sidebar.introduction'),
     },
     {
       key: '/app/configAI',
       icon: <SettingOutlined />,
-      label: 'AI 配置',
+      label: t('sidebar.config_ai'),
     },
     // Tauri 模式下不显示支持我们按钮（桌面应用）
     ...(!isInTauriMode ? [{
       key: '/app/donate',
       icon: <HeartOutlined />,
-      label: '支持我们',
+      label: t('sidebar.donate'),
     }] : []),
   ]
 
@@ -91,7 +94,7 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
     <Drawer
       title={
         <div className="app-sidebar-header">
-          <span className="app-sidebar-title">DrawSomething AI</span>
+          <span className="app-sidebar-title">{t('sidebar.title')}</span>
           <Button
             type="text"
             icon={<CloseOutlined />}
@@ -118,9 +121,21 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       />
       
       <div className="app-sidebar-footer">
+        <div className="app-sidebar-repository">
+          <a 
+            href="https://github.com/Liyulingyue/DrawSomethingAIPlatform" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="app-sidebar-repo-link"
+            title={t('sidebar.repository_title')}
+          >
+            <GithubOutlined />
+            <span>{t('sidebar.repository')}</span>
+          </a>
+        </div>
         <div className="app-sidebar-info">
-          <p className="app-sidebar-version">Version 1.0.0</p>
-          <p className="app-sidebar-copyright">© 2025 DrawSomething AI Platform</p>
+          <p className="app-sidebar-version">{t('sidebar.version', { version: '1.0.0' })}</p>
+          <p className="app-sidebar-copyright">{t('sidebar.copyright', { year: 2025 })}</p>
         </div>
       </div>
     </Drawer>

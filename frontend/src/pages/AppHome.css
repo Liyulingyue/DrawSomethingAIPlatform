@@ -1,34 +1,12 @@
-/* GitHub 链接样式 */
-.github-link {
+/* 语言切换器和顶部操作栏样式 */
+.top-right-actions {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 999;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #333;
-  border-radius: 50%;
-  font-size: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  text-decoration: none;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.8);
-}
-
-.github-link:hover {
-  background: rgba(255, 255, 255, 1);
-  color: #000;
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-}
-
-.github-link:active {
-  transform: translateY(-2px) scale(1.02);
+  gap: 12px;
 }
 
 .app-home-container {
@@ -286,12 +264,10 @@
 }
 
 @media (max-width: 480px) {
-  .github-link {
-    top: 15px;
-    right: 15px;
-    width: 42px;
-    height: 42px;
-    font-size: 20px;
+  .top-right-actions {
+    top: 12px;
+    right: 12px;
+    gap: 8px;
   }
 
   .app-home-container {

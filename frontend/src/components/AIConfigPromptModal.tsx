@@ -1,5 +1,6 @@
 import { Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 
 interface AIConfigPromptModalProps {
   open: boolean
@@ -12,19 +13,20 @@ interface AIConfigPromptModalProps {
  * 用于提示用户配置 AI 服务
  */
 export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPromptModalProps) => {
+  const { t } = useTranslation()
   return (
     <Modal
       open={open}
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: '22px' }} />
-          <span>AI 服务未配置</span>
+          <span>{t('aiConfigModal.title')}</span>
         </div>
       }
       onOk={onConfig}
       onCancel={onCancel}
-      okText="去配置"
-      cancelText="稍后再说"
+      okText={t('aiConfigModal.ok')}
+      cancelText={t('aiConfigModal.cancel')}
       width={520}
       centered
       maskClosable={false}
@@ -37,13 +39,13 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
       }}
     >
       <div style={{ padding: '20px 0' }}>
-        <p style={{ 
+          <p style={{ 
           marginBottom: '16px', 
           fontSize: '15px',
           color: '#262626',
           lineHeight: '1.6'
         }}>
-          检测到您还未配置 AI 服务。
+          {t('aiConfigModal.detecting')}
         </p>
         
         <p style={{ 
@@ -52,8 +54,8 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
           color: '#262626',
           lineHeight: '1.6'
         }}>
-          <strong style={{ color: '#1890ff' }}>绘画猜词</strong> 需要配置 <strong>视觉模型</strong> API Key，
-          <strong style={{ color: '#52c41a' }}>AI 画你猜</strong> 需要配置 <strong>文生图模型</strong> API Key。
+          <strong style={{ color: '#1890ff' }}>{t('aiConfigModal.drawing_guess')}</strong> {t('aiConfigModal.needs_config')} <strong>{t('aiConfigModal.vision_model')}</strong> API Key，
+          <strong style={{ color: '#52c41a' }}>{t('aiConfigModal.ai_draw')}</strong> {t('aiConfigModal.needs_config')} <strong>{t('aiConfigModal.generation_model')}</strong> API Key。
         </p>
         
         <div style={{ 
@@ -81,7 +83,7 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
                 fontWeight: 600,
                 color: '#262626'
               }}>
-                推荐方案：百度飞桨 AI Studio
+                {t('aiConfigModal.recommended.title')}
               </p>
               <p style={{ 
                 fontSize: '14px', 
@@ -89,8 +91,8 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
                 margin: 0,
                 lineHeight: '1.5'
               }}>
-                • 零成本使用，注册即可获得<br />
-                • 支持视觉识别和图像生成
+                • {t('aiConfigModal.recommended.bullet1')}<br />
+                • {t('aiConfigModal.recommended.bullet2')}
               </p>
             </div>
           </div>
@@ -102,14 +104,14 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
           padding: '12px 16px',
           borderRadius: '4px'
         }}>
-          <p style={{ 
+            <p style={{ 
             fontSize: '14px', 
             color: '#595959', 
             margin: 0,
             lineHeight: '1.6'
           }}>
             <span style={{ marginRight: '6px' }}>🔗</span>
-            获取方式：访问{' '}
+            {t('aiConfigModal.how_to_get')}{' '}
             <a 
               href="https://aistudio.baidu.com/account/accessToken" 
               target="_blank" 
@@ -127,9 +129,9 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
                 e.currentTarget.style.borderBottom = '1px dashed #1890ff'
               }}
             >
-              百度 AI Studio
+              {t('aiConfigModal.baidu_ai_studio')}
             </a>
-            {' '}注册并获取 Access Token
+            {' '}{t('aiConfigModal.get_access_token')}
           </p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import 'antd/dist/reset.css'
 import './index.css'
 import App from './App.tsx'
 import { ensureApiInitialized } from './utils/api'
+import './i18n'
 
 // 在 Tauri 环境中，拦截外部链接在默认浏览器中打开
 if (typeof window !== 'undefined' && '__TAURI__' in window) {
