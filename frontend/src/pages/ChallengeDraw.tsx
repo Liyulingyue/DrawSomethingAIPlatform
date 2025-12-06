@@ -37,6 +37,7 @@ function ChallengeDraw() {
   const [submitting, setSubmitting] = useState(false)
   const [showGalleryModal, setShowGalleryModal] = useState(false)
   const [galleryName, setGalleryName] = useState(username || '佚名')
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -89,7 +90,13 @@ function ChallengeDraw() {
       }
     }
 
+    // 监听窗口大小变化
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth > 1024)
+    }
+
     document.addEventListener('touchmove', preventScroll, { passive: false })
+    window.addEventListener('resize', handleResize)
 
     return () => {
       // 清理：恢复页面滚动
@@ -99,6 +106,7 @@ function ChallengeDraw() {
       document.body.style.width = ''
       document.body.style.height = ''
       document.removeEventListener('touchmove', preventScroll)
+      window.removeEventListener('resize', handleResize)
     }
   }, [])
 
@@ -161,16 +169,16 @@ function ChallengeDraw() {
         console.log('📝 使用关卡提示信息:', levelConfig.clue)
       }
 
-      // 如果有自定义 AI 配置，则使用
-      if (aiConfig.url && aiConfig.key && aiConfig.modelName) {
+      // 如果有自定义视觉模型配置，则使用
+      if (aiConfig.visionUrl && aiConfig.visionKey && aiConfig.visionModelName) {
         requestBody.config = {
-          url: aiConfig.url,
-          key: aiConfig.key,
-          model: aiConfig.modelName,
+          url: aiConfig.visionUrl,
+          key: aiConfig.visionKey,
+          model: aiConfig.visionModelName,
         }
-        console.log('✅ 使用自定义 AI 配置')
+        console.log('✅ 使用自定义视觉模型配置')
       } else {
-        console.log('ℹ️ 使用默认 AI 配置')
+        console.log('ℹ️ 使用默认视觉模型配置')
       }
 
       // 添加调用偏好参数
@@ -560,57 +568,117 @@ function ChallengeDraw() {
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
-      <div className="challenge-draw-container">
-        {/* 标题区域 */}
-        <div className="challenge-draw-title-section">
-          <div className="challenge-draw-level-info">
-            <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-            <h1 className="challenge-draw-page-title">{levelConfig?.title || '绘画闯关'}</h1>
+      {isDesktop ? (
+        // 桌面端布局：左右分开
+        <div className="challenge-draw-container desktop-layout">
+          {/* 左侧面板 */}
+          <div className="challenge-draw-left-panel">
+            {/* 标题区域 */}
+            <div className="challenge-draw-title-section">
+              <div className="challenge-draw-level-info">
+                <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
+                <h1 className="challenge-draw-page-title">{levelConfig?.title || '绘画闯关'}</h1>
+              </div>
+            </div>
+
+            {/* 目标词区域 */}
+            <div className="challenge-draw-header">
+              <div className="challenge-draw-target-word">
+                <label className="challenge-target-word-label">目标词：</label>
+                <div className="challenge-target-word-display">
+                  {keyword || '未选择'}
+                </div>
+              </div>
+            </div>
+
+            {/* 按钮区域 */}
+            <div className="challenge-draw-button-section">
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleSubmitGuess}
+                loading={submitting}
+                disabled={submitting}
+                className="submit-guess-button"
+              >
+                {submitting ? '正在识别...' : '提交猜词'}
+              </Button>
+              <Button
+                size="large"
+                onClick={handleSkipChallenge}
+                disabled={submitting}
+                className="skip-challenge-button"
+              >
+                跳过关卡
+              </Button>
+            </div>
+
+            {/* 版权声明 - 放在左侧面板底部 */}
+            <AppFooter className="app-footer-light desktop-footer" />
+          </div>
+
+          {/* 右侧画板区域 */}
+          <div className="challenge-draw-content">
+            <MobileDrawBoard
+              ref={drawBoardRef}
+              onDraw={handleDraw}
+            />
           </div>
         </div>
-
-        {/* 目标词区域 - 只读显示 */}
-        <div className="challenge-draw-header">
-          <div className="challenge-draw-target-word">
-            <label className="challenge-target-word-label">目标词：</label>
-            <div className="challenge-target-word-display">
-              {keyword || '未选择'}
+      ) : (
+        // 移动端布局：竖向
+        <div className="challenge-draw-container mobile-layout">
+          {/* 标题区域 */}
+          <div className="challenge-draw-title-section">
+            <div className="challenge-draw-level-info">
+              <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
+              <h1 className="challenge-draw-page-title">{levelConfig?.title || '绘画闯关'}</h1>
             </div>
           </div>
-        </div>
 
-        {/* 画板区域 - 占据中间大部分空间 */}
-        <div className="challenge-draw-content">
-          <MobileDrawBoard
-            ref={drawBoardRef}
-            onDraw={handleDraw}
-          />
-        </div>
+          {/* 目标词区域 - 只读显示 */}
+          <div className="challenge-draw-header">
+            <div className="challenge-draw-target-word">
+              <label className="challenge-target-word-label">目标词：</label>
+              <div className="challenge-target-word-display">
+                {keyword || '未选择'}
+              </div>
+            </div>
+          </div>
 
-        {/* 按钮区域 */}
-        <div className="challenge-draw-button-section">
-          <Button
-            type="primary"
-            size="large"
-            onClick={handleSubmitGuess}
-            loading={submitting}
-            disabled={submitting}
-            className="submit-guess-button"
-          >
-            {submitting ? '正在识别...' : '提交猜词'}
-          </Button>
-          <Button
-            size="large"
-            onClick={handleSkipChallenge}
-            disabled={submitting}
-            className="skip-challenge-button"
-          >
-            跳过关卡
-          </Button>
-        </div>
+          {/* 画板区域 - 占据中间大部分空间 */}
+          <div className="challenge-draw-content">
+            <MobileDrawBoard
+              ref={drawBoardRef}
+              onDraw={handleDraw}
+            />
+          </div>
 
-        <AppFooter className="app-footer-light" />
-      </div>
+          {/* 按钮区域 */}
+          <div className="challenge-draw-button-section">
+            <Button
+              type="primary"
+              size="large"
+              onClick={handleSubmitGuess}
+              loading={submitting}
+              disabled={submitting}
+              className="submit-guess-button"
+            >
+              {submitting ? '正在识别...' : '提交猜词'}
+            </Button>
+            <Button
+              size="large"
+              onClick={handleSkipChallenge}
+              disabled={submitting}
+              className="skip-challenge-button"
+            >
+              跳过关卡
+            </Button>
+          </div>
+
+          <AppFooter className="app-footer-light" />
+        </div>
+      )}
 
       <Modal
         title="发布到画廊"

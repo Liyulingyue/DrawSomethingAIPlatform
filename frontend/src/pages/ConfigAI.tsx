@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Input, Button, Form, Card, App, Radio } from 'antd'
+import { Input, Button, Form, Card, App, Radio, Tabs } from 'antd'
 import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getApiBaseUrlSync } from '../config/api'
+import { isTauri } from '../utils/api'
 import { 
   getAIConfig, 
   saveAIConfigWithNotification, 
@@ -18,6 +19,7 @@ import './ConfigAI.css'
 function ConfigAI() {
   const { message, modal } = App.useApp()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const isInTauriMode = isTauri()
   const [form] = Form.useForm()
   const [testing, setTesting] = useState(false)
 
@@ -31,7 +33,7 @@ function ConfigAI() {
   })
 
   // 动态验证规则：服务器调用点时，API相关字段非必填
-  const getValidationRules = (fieldName: string) => {
+  const getValidationRules = (fieldName: string, modelType: 'vision' | 'image' = 'vision') => {
     const isServerMode = currentCallPreference === 'server'
     
     switch (fieldName) {
@@ -39,16 +41,16 @@ function ConfigAI() {
         return isServerMode ? [
           { type: 'url' as const, message: '请输入有效的 URL' },
         ] : [
-          { required: true, message: '请输入 API URL' },
+          { required: true, message: `请输入 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} API URL` },
           { type: 'url' as const, message: '请输入有效的 URL' },
         ]
       case 'key':
         return isServerMode ? [] : [
-          { required: true, message: '请输入 API Key' }
+          { required: true, message: `请输入 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} API Key` }
         ]
       case 'modelName':
         return isServerMode ? [] : [
-          { required: true, message: '请输入模型名称' }
+          { required: true, message: `请输入 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 名称` }
         ]
       default:
         return []
@@ -75,9 +77,13 @@ function ConfigAI() {
   // 确保表单正确初始化
   useEffect(() => {
     const currentConfig = getAIConfig()
+    // 在Tauri模式下强制使用自定义服务
+    if (isInTauriMode && currentConfig.callPreference === 'server') {
+      currentConfig.callPreference = 'custom'
+    }
     form.setFieldsValue(currentConfig)
     setCurrentCallPreference(currentConfig.callPreference)
-  }, [form])
+  }, [form, isInTauriMode])
 
   const handleSave = (values: AIConfig) => {
     try {
@@ -124,8 +130,8 @@ function ConfigAI() {
     }
   }
 
-  const handleTestConnection = async () => {
-    console.log('🎯 用户点击了测试连接按钮')
+  const handleTestConnection = async (modelType: 'vision' | 'image' = 'vision') => {
+    console.log(`🎯 用户点击了测试连接按钮 (${modelType === 'vision' ? '视觉模型' : '文生图模型'})`)
     
     // 获取表单当前值
     const currentValues = form.getFieldsValue()
@@ -133,31 +139,37 @@ function ConfigAI() {
     
     // 检查表单值是否完整（仅在自定义模式下检查）
     if (currentValues.callPreference === 'custom') {
-      if (!currentValues.url || !currentValues.key || !currentValues.modelName) {
-        message.error('请先填写完整的 URL、API Key 和模型名称')
+      const url = modelType === 'vision' ? currentValues.visionUrl : currentValues.imageUrl
+      const key = modelType === 'vision' ? currentValues.visionKey : currentValues.imageKey
+      const modelName = modelType === 'vision' ? currentValues.visionModelName : currentValues.imageModelName
+      
+      if (!url || !key || !modelName) {
+        message.error(`请先填写完整的 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} URL、API Key 和模型名称`)
         return
       }
     }
     
     // 立即显示测试开始消息
-    message.info('开始测试连接...')
+    message.info(`开始测试 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接...`)
     
     setTesting(true)
     try {
-      console.log('📞 通过后端测试连接...')
+      console.log(`📞 通过后端测试 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接...`)
       
       // 构造测试请求
       const testRequest = {
-        url: currentValues.url?.trim() || '',
-        key: currentValues.key?.trim() || '',
-        model: currentValues.modelName?.trim() || ''
+        url: (modelType === 'vision' ? currentValues.visionUrl : currentValues.imageUrl)?.trim() || '',
+        key: (modelType === 'vision' ? currentValues.visionKey : currentValues.imageKey)?.trim() || '',
+        model: (modelType === 'vision' ? currentValues.visionModelName : currentValues.imageModelName)?.trim() || '',
+        model_type: modelType
       }
       
       console.log('🔧 测试配置:', {
         url: testRequest.url,
         model: testRequest.model,
         hasKey: !!testRequest.key,
-        callPreference: currentValues.callPreference
+        callPreference: currentValues.callPreference,
+        modelType
       })
       
       // 调用后端测试连接 API
@@ -184,27 +196,52 @@ function ConfigAI() {
         if (result.success) {
           // 显示成功弹窗
           modal.success({
-            title: '🎉 连接测试成功',
+            title: `🎉 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接测试成功`,
             content: (
               <div style={{ padding: '16px 0' }}>
                 <p style={{ marginBottom: '8px', fontSize: '16px' }}>
                   <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                  AI 服务连接正常！
+                  {modelType === 'vision' ? '视觉模型' : '文生图模型'} 服务连接正常！
                 </p>
-                <div style={{ 
-                  background: '#f6ffed', 
-                  border: '1px solid #b7eb8f', 
-                  borderRadius: '6px', 
-                  padding: '12px',
-                  marginTop: '12px'
-                }}>
-                  <strong>AI 回复:</strong>
-                  <p style={{ margin: '4px 0 0 0', fontStyle: 'italic' }}>
-                    "{result.message.replace('AI 服务连接正常！回复: ', '').replace(/"/g, '')}"
-                  </p>
-                </div>
+                {modelType === 'image' && result.image_data ? (
+                  <div style={{ 
+                    background: '#f6ffed', 
+                    border: '1px solid #b7eb8f', 
+                    borderRadius: '6px', 
+                    padding: '12px',
+                    marginTop: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <strong>生成的测试图像:</strong>
+                    <div style={{ marginTop: '8px' }}>
+                      <img 
+                        src={`data:image/png;base64,${result.image_data}`} 
+                        alt="测试图像" 
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '300px', 
+                          border: '1px solid #d9d9d9', 
+                          borderRadius: '4px' 
+                        }} 
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ 
+                    background: '#f6ffed', 
+                    border: '1px solid #b7eb8f', 
+                    borderRadius: '6px', 
+                    padding: '12px',
+                    marginTop: '12px'
+                  }}>
+                    <strong>AI 回复:</strong>
+                    <p style={{ margin: '4px 0 0 0', fontStyle: 'italic' }}>
+                      "{result.message.replace('AI 服务连接正常！回复: ', '').replace(/"/g, '')}"
+                    </p>
+                  </div>
+                )}
                 <p style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                  现在您可以保存这个配置并开始使用 AI 功能了！
+                  现在您可以保存这个配置并开始使用 {modelType === 'vision' ? '视觉模型' : '文生图模型'} 功能了！
                 </p>
               </div>
             ),
@@ -212,21 +249,21 @@ function ConfigAI() {
             okText: '好的',
             onOk: () => {
               // 可以在这里添加自动保存配置的逻辑
-              console.log('用户确认测试成功')
+              console.log(`用户确认 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 测试成功`)
             }
           })
           
-          message.success('连接测试成功！')
+          message.success(`${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接测试成功！`)
           console.log('✅ 测试成功:', result.message)
         } else {
           // 显示失败弹窗
           modal.error({
-            title: '❌ 连接测试失败',
+            title: `❌ ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接测试失败`,
             content: (
               <div style={{ padding: '16px 0' }}>
                 <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                   <CloseCircleOutlined style={{ color: '#ff4d4f', marginRight: '8px' }} />
-                  无法连接到 AI 服务
+                  无法连接到 {modelType === 'vision' ? '视觉模型' : '文生图模型'} 服务
                 </p>
                 <div style={{ 
                   background: '#fff2f0', 
@@ -294,7 +331,7 @@ function ConfigAI() {
       }
       
     } catch (error) {
-      let errorMsg = '测试连接时发生错误: '
+      let errorMsg = `测试 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接时发生错误: `
       let isBackendError = false
       
       if (error instanceof Error) {
@@ -314,7 +351,7 @@ function ConfigAI() {
         content: (
           <div style={{ padding: '16px 0' }}>
             <p style={{ marginBottom: '12px', fontSize: '16px' }}>
-              {isBackendError ? '无法连接到后端服务' : '测试连接时发生异常'}
+              {isBackendError ? '无法连接到后端服务' : `测试 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 连接时发生异常`}
             </p>
             <div style={{ 
               background: '#fff2f0', 
@@ -360,7 +397,7 @@ function ConfigAI() {
         <div className="config-ai-content">
           <div className="config-ai-header">
             <h1 className="config-ai-title">AI 配置</h1>
-            <p className="config-ai-subtitle">配置 AI 服务的连接参数</p>
+            <p className="config-ai-subtitle">配置视觉模型（你画AI猜）和文生图模型（AI画你猜）的连接参数</p>
           </div>
 
           <Card className="config-ai-card" variant="borderless">
@@ -372,57 +409,116 @@ function ConfigAI() {
               autoComplete="off"
               className="config-ai-form"
             >
-              <Form.Item
-                label="API URL"
-                name="url"
-                rules={getValidationRules('url')}
-              >
-                <Input
-                  prefix={<ApiOutlined />}
-                  placeholder="https://aistudio.baidu.com/llm/lmapi/v3"
-                  size="large"
-                  className="config-input"
-                />
-              </Form.Item>
+              <Tabs defaultActiveKey="vision" className="config-ai-tabs">
+                <Tabs.TabPane tab="👁️ 视觉模型 (你画AI猜)" key="vision">
+                  <div className="config-tab-content">
+                    <Form.Item
+                      label="视觉模型 API URL"
+                      name="visionUrl"
+                      rules={getValidationRules('url', 'vision')}
+                    >
+                      <Input
+                        prefix={<ApiOutlined />}
+                        placeholder="https://aistudio.baidu.com/llm/lmapi/v3"
+                        size="large"
+                        className="config-input"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="视觉模型 API Key"
+                      name="visionKey"
+                      rules={getValidationRules('key', 'vision')}
+                      extra={
+                        <a 
+                          href="https://aistudio.baidu.com/account/accessToken" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ color: '#1890ff', fontSize: '14px' }}
+                        >
+                          🔗 获取百度 AI Studio Access Token
+                        </a>
+                      }
+                    >
+                      <Input.Password
+                        prefix={<KeyOutlined />}
+                        placeholder="请输入百度 AI Studio 的 Access Token"
+                        size="large"
+                        className="config-input"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="视觉模型名称"
+                      name="visionModelName"
+                      rules={getValidationRules('modelName', 'vision')}
+                    >
+                      <Input
+                        prefix={<RobotOutlined />}
+                        placeholder="ernie-4.5-vl-28b-a3b"
+                        size="large"
+                        className="config-input"
+                      />
+                    </Form.Item>
+                  </div>
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="🎨 文生图模型 (AI画你猜)" key="image">
+                  <div className="config-tab-content">
+                    <Form.Item
+                      label="文生图模型 API URL"
+                      name="imageUrl"
+                      rules={getValidationRules('url', 'image')}
+                    >
+                      <Input
+                        prefix={<ApiOutlined />}
+                        placeholder="https://aistudio.baidu.com/llm/lmapi/v3"
+                        size="large"
+                        className="config-input"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="文生图模型 API Key"
+                      name="imageKey"
+                      rules={getValidationRules('key', 'image')}
+                      extra={
+                        <a 
+                          href="https://aistudio.baidu.com/account/accessToken" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ color: '#1890ff', fontSize: '14px' }}
+                        >
+                          🔗 获取百度 AI Studio Access Token
+                        </a>
+                      }
+                    >
+                      <Input.Password
+                        prefix={<KeyOutlined />}
+                        placeholder="请输入百度 AI Studio 的 Access Token"
+                        size="large"
+                        className="config-input"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="文生图模型名称"
+                      name="imageModelName"
+                      rules={getValidationRules('modelName', 'image')}
+                    >
+                      <Input
+                        prefix={<RobotOutlined />}
+                        placeholder="ernie-4.5-vl-28b-a3b"
+                        size="large"
+                        className="config-input"
+                      />
+                    </Form.Item>
+                  </div>
+                </Tabs.TabPane>
+              </Tabs>
 
               <Form.Item
-                label="API Key"
-                name="key"
-                rules={getValidationRules('key')}
-                extra={
-                  <a 
-                    href="https://aistudio.baidu.com/account/accessToken" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{ color: '#1890ff', fontSize: '14px' }}
-                  >
-                    🔗 获取百度 AI Studio Access Token
-                  </a>
-                }
-              >
-                <Input.Password
-                  prefix={<KeyOutlined />}
-                  placeholder="请输入百度 AI Studio 的 Access Token"
-                  size="large"
-                  className="config-input"
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Model Name"
-                name="modelName"
-                rules={getValidationRules('modelName')}
-              >
-                <Input
-                  prefix={<RobotOutlined />}
-                  placeholder="ernie-4.5-vl-28b-a3b"
-                  size="large"
-                  className="config-input"
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="调用偏好"
+                label="调用偏好(统一设置)"
                 name="callPreference"
                 rules={[{ required: true, message: '请选择调用偏好' }]}
               >
@@ -437,14 +533,18 @@ function ConfigAI() {
                       <SettingOutlined style={{ marginRight: '8px' }} />
                       自定义服务
                     </Radio.Button>
-                    <Radio.Button value="server" className="config-radio-button">
-                      <ApiOutlined style={{ marginRight: '8px' }} />
-                      服务器调用点
-                    </Radio.Button>
+                    {!isInTauriMode && (
+                      <Radio.Button value="server" className="config-radio-button">
+                        <ApiOutlined style={{ marginRight: '8px' }} />
+                        服务器调用点
+                      </Radio.Button>
+                    )}
                   </Radio.Group>
-                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                    💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务
-                  </div>
+                  {!isInTauriMode && (
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                      💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务
+                    </div>
+                  )}
                 </div>
               </Form.Item>
 
@@ -454,14 +554,21 @@ function ConfigAI() {
                     type="default"
                     size="large"
                     icon={<SyncOutlined spin={testing} />}
-                    onClick={() => {
-                      console.log('🔥 按钮被点击了！')
-                      handleTestConnection()
-                    }}
+                    onClick={() => handleTestConnection('vision')}
                     loading={testing}
                     className="config-test-button"
                   >
-                    测试连接
+                    测试视觉模型
+                  </Button>
+                  <Button
+                    type="default"
+                    size="large"
+                    icon={<SyncOutlined spin={testing} />}
+                    onClick={() => handleTestConnection('image')}
+                    loading={testing}
+                    className="config-test-button"
+                  >
+                    测试文生图模型
                   </Button>
                   <Button
                     type="default"
@@ -492,14 +599,16 @@ function ConfigAI() {
                 href="https://aistudio.baidu.com/account/accessToken"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#1890ff' }}
+                style={{ color: '#fff', textDecoration: 'underline' }}
               >
                 🔗 百度 AI Studio Access Token
               </a>
             </p>
-            <p className="config-ai-note config-ai-help">
-              💡 选择服务器调用点时优先使用平台服务，点数不足时自动回退到自定义服务。请配置自定义服务参数作为备用方案。
-            </p>
+            {!isInTauriMode && (
+              <p className="config-ai-note config-ai-help">
+                💡 视觉模型用于"你画AI猜"游戏，文生图模型用于"AI画你猜"游戏。选择服务器调用点时优先使用平台服务，点数不足时自动回退到自定义服务。请配置自定义服务参数作为备用方案。
+              </p>
+            )}
           </div>
         </div>
         <AppFooter className="app-footer-light" />

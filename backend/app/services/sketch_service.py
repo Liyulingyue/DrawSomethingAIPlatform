@@ -14,40 +14,42 @@ from app.config import config
 class SketchService:
     """简笔画服务类"""
     
-    def __init__(self):
-        # 从配置读取
-        self.model_url = config.TEXT2IMAGE_MODEL_URL
-        self.model_key = config.TEXT2IMAGE_MODEL_KEY
-        self.model_name = config.TEXT2IMAGE_MODEL_NAME
-        
-        # 只在 key 有效时才初始化客户端(允许 'not-configured' 占位符)
-        if self.model_key and self.model_key != 'not-configured':
-            self.client = OpenAI(
-                api_key=self.model_key,
-                base_url=self.model_url,
-            )
-        else:
-            self.client = None
-    
-    def generate_image(self, prompt: str) -> bytes:
+    def generate_image(self, prompt: str, config: Optional[Dict[str, str]] = None) -> bytes:
         """
         根据文本提示生成图片
         
         Args:
             prompt: 文本提示
+            config: 可选的配置字典，包含 'url', 'key', 'model'
             
         Returns:
             图片二进制数据
         """
-        if not self.client:
+        if not config:
             raise ValueError(
-                "AI image generation is not available. "
-                "Please configure TEXT2IMAGE_MODEL_KEY in your .env file."
+                "Image generation config is required. "
+                "Please provide config with 'url', 'key', and 'model', "
+                "or configure via environment variables."
             )
         
-        images_base64 = self.client.images.generate(
+        # 使用传入的配置
+        url = config.get('url')
+        key = config.get('key')
+        model = config.get('model')
+        
+        # 检查配置是否有效
+        if not key or key == 'not-configured' or not url or not model:
+            raise ValueError(
+                "Invalid image generation config. "
+                "Please ensure 'url', 'key', and 'model' are all configured."
+            )
+        
+        # 创建客户端
+        client = OpenAI(api_key=key, base_url=url)
+        
+        images_base64 = client.images.generate(
             prompt=prompt, 
-            model=self.model_name, 
+            model=model, 
             response_format="b64_json"
         )
         
@@ -197,7 +199,8 @@ class SketchService:
         self, 
         prompt: str, 
         max_steps: int = 20,
-        sort_method: str = "position"
+        sort_method: str = "position",
+        config: Optional[Dict[str, str]] = None
     ) -> Dict:
         """
         生成图片并分解为简笔画步骤
@@ -206,12 +209,13 @@ class SketchService:
             prompt: 文本提示
             max_steps: 最大步数
             sort_method: 排序方法
+            config: 可选的配置字典，包含 'url', 'key', 'model'
             
         Returns:
             包含完整简笔画和步骤列表的字典
         """
         # 1. 生成图片
-        image_data = self.generate_image(prompt)
+        image_data = self.generate_image(prompt, config)
         
         # 2. 读取图片
         image_array = cv2.imdecode(

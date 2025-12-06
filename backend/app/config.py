@@ -13,13 +13,13 @@ class Config:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/drawsomething")
 
     # === AI 模型配置 ===
-    MODEL_KEY: Optional[str] = os.getenv("MODEL_KEY", "not-configured")
+    MODEL_KEY: Optional[str] = os.getenv("MODEL_KEY")
     MODEL_NAME: str = os.getenv("MODEL_NAME", "ernie-4.5-vl-28b-a3b")
     MODEL_URL: str = os.getenv("MODEL_URL", "https://aistudio.baidu.com/llm/lmapi/v3")
 
     # === Text2Image 模型配置 ===
     TEXT2IMAGE_MODEL_URL: str = os.getenv("TEXT2IMAGE_MODEL_URL", "https://aistudio.baidu.com/llm/lmapi/v3")
-    TEXT2IMAGE_MODEL_KEY: Optional[str] = os.getenv("TEXT2IMAGE_MODEL_KEY", "not-configured")
+    TEXT2IMAGE_MODEL_KEY: Optional[str] = os.getenv("TEXT2IMAGE_MODEL_KEY")
     TEXT2IMAGE_MODEL_NAME: str = os.getenv("TEXT2IMAGE_MODEL_NAME", "Stable-Diffusion-XL")
 
     # === 简笔画配置 ===
@@ -27,12 +27,15 @@ class Config:
     SKETCH_SORT_METHOD: str = os.getenv("SKETCH_SORT_METHOD", "area")  # 笔画排序方法: area 或 position
 
     # === 管理员配置 ===
-    ADMIN_USER: Optional[str] = os.getenv("ADMIN_USER", "admin")
-    ADMIN_PASSWORD: Optional[str] = os.getenv("ADMIN_PASSWORD", "admin123")
+    ADMIN_USER: Optional[str] = os.getenv("ADMIN_USER")
+    ADMIN_PASSWORD: Optional[str] = os.getenv("ADMIN_PASSWORD")
 
     # === 会话配置 ===
     SESSION_TIMEOUT_SECONDS: int = int(os.getenv("SESSION_TIMEOUT_SECONDS", "3600"))  # 1 hour inactivity timeout
     SESSION_MAX_LIFETIME_SECONDS: int = int(os.getenv("SESSION_MAX_LIFETIME_SECONDS", "86400"))  # 24 hour max lifetime
+
+    # === 应用模式 ===
+    IS_TAURI_MODE: bool = os.getenv("IS_TAURI_MODE", "false").lower() == "true"  # 是否运行在 Tauri 模式（桌面应用）
 
     # === 用户配置 ===
     DEFAULT_NEW_USER_CALLS: int = int(os.getenv("DEFAULT_NEW_USER_CALLS", "20"))  # 新用户默认赠送的调用点数量

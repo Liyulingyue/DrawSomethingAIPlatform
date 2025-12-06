@@ -12,6 +12,7 @@ import {
   UserOutlined,
   HeartOutlined,
 } from '@ant-design/icons'
+import { isTauri } from '../utils/api'
 import './AppSidebar.css'
 
 interface AppSidebarProps {
@@ -23,17 +24,21 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
+  // 检测是否在 Tauri 环境中
+  const isInTauriMode = isTauri()
+
   const menuItems = [
     {
       key: '/app/home',
       icon: <HomeOutlined />,
       label: '主页',
     },
-    {
+    // Tauri 模式下不显示登录按钮（自动登录管理员）
+    ...(!isInTauriMode ? [{
       key: '/app/login',
       icon: <UserOutlined />,
       label: '登录',
-    },
+    }] : []),
     {
       key: '/app/level-set',
       icon: <TrophyOutlined />,
@@ -69,11 +74,12 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       icon: <SettingOutlined />,
       label: 'AI 配置',
     },
-    {
+    // Tauri 模式下不显示支持我们按钮（桌面应用）
+    ...(!isInTauriMode ? [{
       key: '/app/donate',
       icon: <HeartOutlined />,
       label: '支持我们',
-    },
+    }] : []),
   ]
 
   const handleMenuClick = (path: string) => {

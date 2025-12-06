@@ -8,6 +8,7 @@ import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getGuessLevelById, getShuffledKeywords } from '../config/guessLevels'
 import { generateSketch } from '../utils/sketchApi'
+import { getAIConfig } from '../utils/aiConfig'
 import { useUser } from '../context/UserContext'
 import './ChallengeGuess.css'
 
@@ -66,25 +67,12 @@ function ChallengeGuess() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [levelScore, setLevelScore] = useState(0) // 当前关卡累计积分
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024) // 桌面端检测
   const navigate = useNavigate()
   const location = useLocation()
-  const { sessionId, username, initializing } = useUser()
+  const { sessionId } = useUser() // 获取真实的 sessionId（如果已登录）
 
-  // 检查登录状态
-  useEffect(() => {
-    if (initializing) return // 等待初始化完成
-
-    if (!sessionId || !username) {
-      modal.warning({
-        title: '需要登录',
-        content: '猜词闯关功能需要消耗服务点，必须登录后才能使用。',
-        okText: '去登录',
-        onOk: () => {
-          navigate('/app/login', { replace: true })
-        }
-      })
-    }
-  }, [sessionId, username, initializing, navigate, modal])
+  // 无需登录 - 用户可以使用自定义配置调用绘画API
 
   // 解析URL参数
   const searchParams = new URLSearchParams(location.search)
@@ -103,6 +91,33 @@ function ChallengeGuess() {
   useEffect(() => {
     setLevelScore(0)
   }, [levelId])
+
+  // 监听窗口大小变化和防止滚动
+  useEffect(() => {
+    // 防止页面滚动
+    document.body.classList.add('drawing-active')
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.width = '100%'
+    document.body.style.height = '100%'
+
+    // 监听窗口大小变化
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth > 1024)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      // 清理：恢复页面滚动
+      document.body.classList.remove('drawing-active')
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+      document.body.style.height = ''
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   // 打印当前目标词和关卡信息（仅在关键参数变化时）
   useEffect(() => {
@@ -132,13 +147,40 @@ function ChallengeGuess() {
       setLoading(true)
       try {
         console.log(`🎨 正在生成简笔画: ${currentKeyword}`)
-        const result = await generateSketch({
+        
+        // 获取 AI 配置
+        const aiConfig = getAIConfig()
+        
+        // 构建请求体
+        const sketchRequest: any = {
           prompt: currentKeyword,
           max_steps: 20,
           sort_method: 'area',
           useCache: false, // 猜词闯关不使用缓存
-          sessionId: sessionId
-        })
+        }
+        
+        // 添加会话ID（如果有）
+        if (sessionId) {
+          sketchRequest.sessionId = sessionId
+        }
+        
+        // 添加AI配置（文生图模型）
+        if (aiConfig.imageUrl && aiConfig.imageKey && aiConfig.imageModelName) {
+          sketchRequest.config = {
+            url: aiConfig.imageUrl,
+            key: aiConfig.imageKey,
+            model: aiConfig.imageModelName,
+          }
+          console.log('✅ 使用自定义文生图配置')
+        } else {
+          console.log('ℹ️ 文生图模型未配置')
+        }
+        
+        // 添加调用偏好
+        sketchRequest.callPreference = aiConfig.callPreference || 'custom'
+        console.log('📞 使用调用偏好:', sketchRequest.callPreference)
+        
+        const result = await generateSketch(sketchRequest)
         
         if (cancelled) {
           console.log('🚫 请求已取消')
@@ -152,33 +194,35 @@ function ChallengeGuess() {
       } catch (error: any) {
         if (!cancelled) {
           console.error('💥 生成简笔画失败:', error)
+          console.error('📋 错误详情:', {
+            status: error?.response?.status,
+            statusText: error?.response?.statusText,
+            data: error?.response?.data,
+            message: error?.message
+          })
           
           let errorMessage = '生成简笔画失败，请稍后重试'
-          let isInsufficientCredits = false
           
-          if (error?.response?.status === 402) {
+          if (error?.response?.status === 422) {
+            // 验证错误
+            const detail = error?.response?.data?.detail
+            console.error('🔍 验证错误详情:', detail)
+            errorMessage = `请求格式错误: ${JSON.stringify(detail)}`
+          } else if (error?.response?.status === 402) {
             errorMessage = '调用次数不足，请充值后继续游戏'
-            isInsufficientCredits = true
-          } else if (error?.response?.status === 401) {
-            errorMessage = '登录已过期，请重新登录'
+          } else if (error?.response?.status === 500) {
+            // 500 错误可能是配置问题或其他服务器错误
+            const detail = error?.response?.data?.detail || ''
+            if (detail.includes('config') || detail.includes('配置')) {
+              errorMessage = '绘画API配置有误，请检查您的自定义配置。如无配置，请登录后使用服务器配置。'
+            }
           } else if (error instanceof Error) {
             if (error.message.includes('Failed to fetch')) {
               errorMessage = '无法连接到服务器，请检查网络连接'
             }
           }
           
-          if (isInsufficientCredits) {
-            modal.warning({
-              title: '调用次数不足',
-              content: '您的服务点数不足，无法生成简笔画。请充值后继续游戏。',
-              okText: '去充值',
-              onOk: () => {
-                navigate('/app/login')
-              }
-            })
-          } else {
-            message.error(errorMessage)
-          }
+          message.error(errorMessage)
         }
       } finally {
         if (!cancelled) {
@@ -586,109 +630,225 @@ function ChallengeGuess() {
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
-      <div className="challenge-guess-container">
-        {/* 标题区域 */}
-        <div className="challenge-guess-title-section">
-          <div className="challenge-guess-level-info">
-            <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-            <h1 className="challenge-guess-page-title">{levelConfig?.title || '猜词闯关'}</h1>
-          </div>
-        </div>
-
-        {/* 倒计时区域 */}
-        <div className="challenge-guess-timer">
-          <div className="challenge-timer-display">
-            <div className="timer-left">
-              <ClockCircleOutlined style={{ marginRight: '8px' }} />
-              <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
-                {formatTime(timeLeft)}/5:00
-              </span>
-            </div>
-            <div className="timer-center">
-              <span className="challenge-progress-text">
-                第 {keywordIndex + 1} / {shuffledKeywords.length} 题
-              </span>
-            </div>
-            <div className="timer-right">
-              <span className="challenge-score-text">
-                💰 {levelScore} 分
-              </span>
-              {!loading && (
-                <span className="challenge-drawing-progress">
-                  🎨 {getDrawingProgress().current}/{getDrawingProgress().total}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* 画板区域 - 占据中间大部分空间 */}
-        <div className="challenge-guess-content">
-          {loading ? (
-            <div style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center', 
-              justifyContent: 'center',
-              height: '100%',
-              gap: '1rem'
-            }}>
-              <Spin size="large" className="custom-spin" />
-              <div style={{ 
-                fontSize: '1.2rem', 
-                color: 'white', 
-                fontWeight: 500,
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
-              }}>
-                AI正在构思画作，请稍后
+      {isDesktop ? (
+        // 桌面端布局：左右分开
+        <div className="challenge-guess-container desktop-layout">
+          {/* 左侧面板 */}
+          <div className="challenge-guess-left-panel">
+            {/* 标题区域 */}
+            <div className="challenge-guess-title-section">
+              <div className="challenge-guess-level-info">
+                <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
+                <h1 className="challenge-guess-page-title">{levelConfig?.title || '猜词闯关'}</h1>
               </div>
             </div>
-          ) : (
-            <MobileDrawBoard
-              ref={drawBoardRef}
-              onDraw={handleDraw}
-              hideColorPicker={true}
-              readOnly={true}
-              displayImage={currentDisplayImage}
-            />
-          )}
-        </div>
 
-        {/* 输入区域 */}
-        <div className="challenge-guess-input-section">
-          <div className="guess-input-container">
-            <Input
-              value={guessInput}
-              onChange={(e) => setGuessInput(e.target.value)}
-              placeholder="输入您对画作的猜测..."
-              size="large"
-              onPressEnter={handleSubmitGuess}
-              disabled={submitting}
-              className="guess-input"
-            />
+            {/* 倒计时区域 */}
+            <div className="challenge-guess-timer">
+              <div className="challenge-timer-display">
+                <div className="timer-stats">
+                  <div className="timer-item">
+                    <ClockCircleOutlined />
+                    <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
+                      {formatTime(timeLeft)}/5:00
+                    </span>
+                  </div>
+                  <div className="timer-item">
+                    <span className="challenge-progress-text">
+                      第 {keywordIndex + 1} / {shuffledKeywords.length} 题
+                    </span>
+                  </div>
+                  <div className="timer-item">
+                    <span className="challenge-score-text">
+                      💰 {levelScore} 分
+                    </span>
+                  </div>
+                  {!loading && (
+                    <div className="timer-item">
+                      <span className="challenge-drawing-progress">
+                        🎨 {getDrawingProgress().current}/{getDrawingProgress().total}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 输入区域 */}
+            <div className="challenge-guess-input-section">
+              <div className="guess-input-container">
+                <Input
+                  value={guessInput}
+                  onChange={(e) => setGuessInput(e.target.value)}
+                  placeholder="输入您对画作的猜测..."
+                  size="large"
+                  onPressEnter={handleSubmitGuess}
+                  disabled={submitting}
+                  className="guess-input"
+                />
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={handleSubmitGuess}
+                  loading={submitting}
+                  disabled={submitting || !guessInput.trim()}
+                  className="submit-guess-button"
+                >
+                  {submitting ? '提交中...' : '发送'}
+                </Button>
+              </div>
+              <Button
+                size="large"
+                onClick={handleSkipChallenge}
+                disabled={submitting}
+                className="skip-challenge-button"
+              >
+                跳过此题
+              </Button>
+            </div>
+
+            {/* 版权声明 - 放在左侧面板底部 */}
+            <AppFooter className="app-footer-light desktop-footer" />
+          </div>
+
+          {/* 右侧画板区域 */}
+          <div className="challenge-guess-content">
+            {loading ? (
+              <div style={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%',
+                gap: '1rem'
+              }}>
+                <Spin size="large" className="custom-spin" />
+                <div style={{ 
+                  fontSize: '1.2rem', 
+                  color: 'white', 
+                  fontWeight: 500,
+                  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
+                }}>
+                  AI正在构思画作，请稍后
+                </div>
+              </div>
+            ) : (
+              <MobileDrawBoard
+                ref={drawBoardRef}
+                onDraw={handleDraw}
+                hideColorPicker={true}
+                readOnly={true}
+                displayImage={currentDisplayImage}
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        // 移动端布局：竖向
+        <div className="challenge-guess-container mobile-layout">
+          {/* 标题区域 */}
+          <div className="challenge-guess-title-section">
+            <div className="challenge-guess-level-info">
+              <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
+              <h1 className="challenge-guess-page-title">{levelConfig?.title || '猜词闯关'}</h1>
+            </div>
+          </div>
+
+          {/* 倒计时区域 */}
+          <div className="challenge-guess-timer">
+            <div className="challenge-timer-display">
+              <div className="timer-left">
+                <ClockCircleOutlined style={{ marginRight: '8px' }} />
+                <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
+                  {formatTime(timeLeft)}/5:00
+                </span>
+              </div>
+              <div className="timer-center">
+                <span className="challenge-progress-text">
+                  第 {keywordIndex + 1} / {shuffledKeywords.length} 题
+                </span>
+              </div>
+              <div className="timer-right">
+                <span className="challenge-score-text">
+                  💰 {levelScore} 分
+                </span>
+                {!loading && (
+                  <span className="challenge-drawing-progress">
+                    🎨 {getDrawingProgress().current}/{getDrawingProgress().total}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 画板区域 - 占据中间大部分空间 */}
+          <div className="challenge-guess-content">
+            {loading ? (
+              <div style={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%',
+                gap: '1rem'
+              }}>
+                <Spin size="large" className="custom-spin" />
+                <div style={{ 
+                  fontSize: '1.2rem', 
+                  color: 'white', 
+                  fontWeight: 500,
+                  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
+                }}>
+                  AI正在构思画作，请稍后
+                </div>
+              </div>
+            ) : (
+              <MobileDrawBoard
+                ref={drawBoardRef}
+                onDraw={handleDraw}
+                hideColorPicker={true}
+                readOnly={true}
+                displayImage={currentDisplayImage}
+              />
+            )}
+          </div>
+
+          {/* 输入区域 */}
+          <div className="challenge-guess-input-section">
+            <div className="guess-input-container">
+              <Input
+                value={guessInput}
+                onChange={(e) => setGuessInput(e.target.value)}
+                placeholder="输入您对画作的猜测..."
+                size="large"
+                onPressEnter={handleSubmitGuess}
+                disabled={submitting}
+                className="guess-input"
+              />
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleSubmitGuess}
+                loading={submitting}
+                disabled={submitting || !guessInput.trim()}
+                className="submit-guess-button"
+              >
+                {submitting ? '提交中...' : '发送'}
+              </Button>
+            </div>
             <Button
-              type="primary"
               size="large"
-              onClick={handleSubmitGuess}
-              loading={submitting}
-              disabled={submitting || !guessInput.trim()}
-              className="submit-guess-button"
+              onClick={handleSkipChallenge}
+              disabled={submitting}
+              className="skip-challenge-button"
             >
-              {submitting ? '提交中...' : '发送'}
+              跳过此题
             </Button>
           </div>
-          <Button
-            size="large"
-            onClick={handleSkipChallenge}
-            disabled={submitting}
-            className="skip-challenge-button"
-          >
-            跳过此题
-          </Button>
-        </div>
 
-        <AppFooter className="app-footer-light" />
-      </div>
+          <AppFooter className="app-footer-light" />
+        </div>
+      )}
     </>
   )
 }

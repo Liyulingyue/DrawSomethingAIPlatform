@@ -16,6 +16,12 @@ export interface GenerateSketchRequest {
   sort_method?: 'area' | 'position'
   useCache?: boolean // 是否使用缓存，默认为 true
   sessionId?: string // 用户会话ID
+  config?: {
+    url?: string
+    key?: string
+    model?: string
+  }
+  callPreference?: 'custom' | 'server'
 }
 
 export interface DecomposeImageRequest {
@@ -110,15 +116,34 @@ export async function generateSketch(request: GenerateSketchRequest): Promise<Sk
   const requestPromise = (async () => {
     try {
       console.log(`🌐 发起网络请求: ${cacheKey}`)
-      const response = await api.post('/sketch/generate', {
+      
+      // 构建请求体，排除 undefined 值
+      const requestBody: any = {
         prompt: request.prompt,
         max_steps: request.max_steps ?? 20,
-        sort_method: request.sort_method ?? 'position',
-        session_id: request.sessionId
-      }, {
+        sort_method: request.sort_method ?? 'position'
+      }
+      
+      // 只在值不为 undefined 时添加
+      if (request.sessionId !== undefined) {
+        requestBody.session_id = request.sessionId
+      }
+      
+      if (request.config !== undefined) {
+        requestBody.config = request.config
+      }
+      
+      if (request.callPreference !== undefined) {
+        requestBody.call_preference = request.callPreference
+      }
+      
+      console.log(`📤 请求体:`, requestBody)
+      
+      const response = await api.post('/sketch/generate', requestBody, {
         timeout: 60000 // 60秒超时
       })
 
+      console.log(`📥 响应:`, response.data)
       const data = response.data.data
       
       // 只在启用缓存时缓存结果

@@ -143,49 +143,41 @@ fn main() {
                                 while let Some(event) = rx.recv().await {
                                     match event {
                                         CommandEvent::Stdout(line) => {
-                                            #[cfg(debug_assertions)]
+                                            // 始终打印后端输出（用于调试）
                                             println!("[后端] {}", line);
                                             
                                             // 尝试从输出中解析端口号
                                             if !port_found {
-                                                #[cfg(debug_assertions)]
                                                 println!("[调试] 尝试从 stdout 解析端口: {}", line);
                                                 if let Some(port) = parse_port_from_line(&line) {
-                                                    #[cfg(debug_assertions)]
                                                     println!("✅ 从 stdout 检测到后端端口: {}", port);
                                                     *backend_port_async.lock().unwrap() = Some(port);
                                                     port_found = true;
                                                 } else {
-                                                    #[cfg(debug_assertions)]
                                                     println!("[调试] 此行未能解析出端口");
                                                 }
                                             }
                                         }
                                         CommandEvent::Stderr(line) => {
-                                            #[cfg(debug_assertions)]
+                                            // 始终打印后端错误输出（用于调试）
                                             eprintln!("[后端错误] {}", line);
                                             
                                             // 也尝试从 stderr 解析端口(uvicorn 输出在这里)
                                             if !port_found {
-                                                #[cfg(debug_assertions)]
                                                 println!("[调试] 尝试从 stderr 解析端口: {}", line);
                                                 if let Some(port) = parse_port_from_line(&line) {
-                                                    #[cfg(debug_assertions)]
                                                     println!("✅ 从 stderr 检测到后端端口: {}", port);
                                                     *backend_port_async.lock().unwrap() = Some(port);
                                                     port_found = true;
                                                 } else {
-                                                    #[cfg(debug_assertions)]
                                                     println!("[调试] 此行未能解析出端口");
                                                 }
                                             }
                                         }
                                         CommandEvent::Error(err) => {
-                                            #[cfg(debug_assertions)]
                                             eprintln!("[后端进程错误] {}", err);
                                         }
                                         CommandEvent::Terminated(payload) => {
-                                            #[cfg(debug_assertions)]
                                             println!("[后端] 进程终止，退出码: {:?}", payload.code);
                                         }
                                         _ => {}

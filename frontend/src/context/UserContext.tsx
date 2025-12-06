@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
-import { api, getApiBaseUrlSync } from '../utils/api'
+import { api, getApiBaseUrlSync, isTauri } from '../utils/api'
 
 interface UserContextValue {
   userId: number | null
@@ -45,6 +45,38 @@ export function UserProvider({ children }: UserProviderProps) {
   const [callsRemaining, setCallsRemaining] = useState(0)
   const [initializing, setInitializing] = useState(true)
   const [loading, setLoading] = useState(false)
+
+  // Tauri 自动登录
+  const performTauriAutoLogin = useCallback(async () => {
+    try {
+      console.log('📱 Tauri 模式检测到，尝试自动登录...')
+      const response = await fetch(`${getApiBaseUrlSync()}/auth/app/auto_login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          console.log('✅ Tauri 自动登录成功')
+          setUserId(null)
+          setSessionId(data.session_id)
+          setUsername(data.username)
+          setIsAdmin(data.is_admin)
+          setCallsRemaining(-1) // 管理员无限调用
+          safeSetItem('sessionId', data.session_id)
+          safeSetItem('username', data.username)
+          safeSetItem('isAdmin', 'true')
+          return true
+        }
+      }
+    } catch (error) {
+      console.warn('❌ Tauri 自动登录失败:', error)
+    }
+    return false
+  }, [])
 
   useEffect(() => {
     // 对于 /app 路由下的页面,使用纯前端模式,不需要后端登录
@@ -119,6 +151,18 @@ export function UserProvider({ children }: UserProviderProps) {
         }
         
         verifySession()
+        return
+      }
+
+      // Tauri 模式：尝试自动登录
+      if (isTauri()) {
+        performTauriAutoLogin().then(success => {
+          if (!success) {
+            setInitializing(false)
+          } else {
+            setInitializing(false)
+          }
+        })
         return
       }
 

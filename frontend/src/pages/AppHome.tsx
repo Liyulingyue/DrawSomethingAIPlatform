@@ -5,11 +5,15 @@ import { TrophyOutlined, EditOutlined, SettingOutlined, InfoCircleOutlined, Gith
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
+import { isTauri } from '../utils/api'
 import './AppHome.css'
 
 function AppHome() {
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  
+  // 检测是否在 Tauri 环境中
+  const isInTauriMode = isTauri()
 
   const handleLevelSelect = () => {
     navigate('/app/level-set')
@@ -82,15 +86,18 @@ function AppHome() {
         >
           猜词闯关
         </Button>
-        <Button
-          type="primary"
-          size="large"
-          icon={<UserOutlined />}
-          onClick={handleLogin}
-          className="app-home-button app-home-button-login"
-        >
-          用户登录
-        </Button>
+        {/* Tauri 模式下不显示登录按钮（自动登录管理员） */}
+        {!isInTauriMode && (
+          <Button
+            type="primary"
+            size="large"
+            icon={<UserOutlined />}
+            onClick={handleLogin}
+            className="app-home-button app-home-button-login"
+          >
+            用户登录
+          </Button>
+        )}
         <Button
           type="default"
           size="large"
@@ -127,15 +134,18 @@ function AppHome() {
         >
           使用说明
         </Button>
-        <Button
-          type="default"
-          size="large"
-          icon={<HeartOutlined />}
-          onClick={handleDonate}
-          className="app-home-button app-home-button-donate"
-        >
-          支持我们
-        </Button>
+        {/* Tauri 模式下不显示支持我们按钮（桌面应用） */}
+        {!isInTauriMode && (
+          <Button
+            type="default"
+            size="large"
+            icon={<HeartOutlined />}
+            onClick={handleDonate}
+            className="app-home-button app-home-button-donate"
+          >
+            支持我们
+          </Button>
+        )}
       </div>
         </div>
         <AppFooter className="app-footer-light" />

@@ -300,7 +300,17 @@ def write_port_file(backend_port, postgres_info=None):
 
 
 if __name__ == "__main__":
-    # 确保 .env 文件存在
+    # ========================================
+    # 第一步：设置 Tauri 模式标记（必须在导入 app 之前）
+    # ========================================
+    os.environ['IS_TAURI_MODE'] = 'true'
+    os.environ['SESSION_TIMEOUT_SECONDS'] = '999999999'  # ~31.7 年
+    os.environ['SESSION_MAX_LIFETIME_SECONDS'] = '999999999'  # ~31.7 年
+    print("[INFO] 🎯 Tauri 模式已启用")
+    
+    # ========================================
+    # 第二步：确保 .env 文件存在
+    # ========================================
     env_file = Path(__file__).parent / '.env'
     if getattr(sys, 'frozen', False):
         # PyInstaller 打包环境
@@ -328,7 +338,9 @@ TEXT2IMAGE_MODEL_NAME=Stable-Diffusion-XL
         # 重新加载环境变量
         load_dotenv(app_env_file)
     
-    # 注册退出时清理
+    # ========================================
+    # 第三步：注册退出时清理和启动数据库
+    # ========================================    # 注册退出时清理
     atexit.register(stop_postgres)
     
     # 启动嵌入式 PostgreSQL
@@ -372,6 +384,9 @@ TEXT2IMAGE_MODEL_NAME=Stable-Diffusion-XL
         
         print("[WARNING] PostgreSQL is required for production use.")
     
+    # ========================================
+    # 第四步：导入应用（环境变量已在最开始设置）
+    # ========================================
     # 导入应用（在启动 Uvicorn 前导入）
     from app.main import app
     import uvicorn

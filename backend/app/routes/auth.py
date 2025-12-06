@@ -216,3 +216,54 @@ async def recharge_calls(request: dict, db: Session = Depends(get_db)):
         "message": f"成功充值 {amount} 次调用",
         "new_calls_remaining": user.calls_remaining
     }
+
+
+@router.post("/app/auto_login")
+async def auto_login_desktop():
+    """
+    自动登录端点 - 用于 Tauri 桌面应用
+    在 exe 模式下自动使用管理员账户登录
+    
+    安全保护:
+    1. 仅在 TAURI_MODE 下允许自动登录
+    2. 不需要密码验证（因为只有本地应用可以调用）
+    3. 直接创建管理员会话
+    """
+    import traceback
+    print("[DEBUG] /auth/app/auto_login called")
+    try:
+        # 二次防护：检查是否处于 Tauri 模式
+        if not config.IS_TAURI_MODE:
+            print("[WARNING] ❌ Auto-login attempted in non-Tauri mode - REJECTED!")
+            print("[WARNING] 自动登录仅允许在 Tauri 桌面应用模式下使用")
+            return {
+                "success": False, 
+                "message": "自动登录仅可用于桌面应用"
+            }
+        
+        print("[INFO] ✅ Tauri 模式验证通过，允许自动登录")
+        
+        admin_user = config.ADMIN_USER
+        admin_password = config.ADMIN_PASSWORD
+        print(f"[DEBUG] Desktop auto-login - user: {admin_user}")
+        
+        if not admin_user or not admin_password:
+            print("[WARNING] Admin credentials not configured for auto-login")
+            return {"success": False, "message": "Admin credentials not configured"}
+        
+        # 使用管理员账户创建会话
+        session_id = str(uuid.uuid4())
+        print(f"[DEBUG] 🎉 Desktop auto-login successful, session_id: {session_id}")
+        register_session(session_id, admin_user, is_admin=True)
+        
+        return {
+            "success": True, 
+            "session_id": session_id, 
+            "username": admin_user, 
+            "is_admin": True
+        }
+    except Exception as e:
+        print(f"[ERROR] Desktop auto-login error: {e}")
+        traceback.print_exc()
+        return {"success": False, "message": str(e)}
+

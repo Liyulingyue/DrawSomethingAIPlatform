@@ -1,24 +1,45 @@
 // AI 配置管理工具类
 export interface AIConfig {
-  url: string
-  key: string
-  modelName: string
+  // 视觉模型配置（你画AI猜）
+  visionUrl: string
+  visionKey: string
+  visionModelName: string
+  
+  // 文生图模型配置（AI画你猜）
+  imageUrl: string
+  imageKey: string
+  imageModelName: string
+  
   callPreference: 'custom' | 'server'  // 调用偏好：自定义服务或服务器调用点
 }
 
 // 默认配置
 export const DEFAULT_AI_CONFIG: AIConfig = {
-  url: 'https://aistudio.baidu.com/llm/lmapi/v3',
-  key: '',
-  modelName: 'ernie-4.5-vl-28b-a3b',
+  // 视觉模型默认配置
+  visionUrl: 'https://aistudio.baidu.com/llm/lmapi/v3',
+  visionKey: '',
+  visionModelName: 'ernie-4.5-vl-28b-a3b',
+  
+  // 文生图模型默认配置
+  imageUrl: 'https://aistudio.baidu.com/llm/lmapi/v3',
+  imageKey: '',
+  imageModelName: 'Stable-Diffusion-XL',
+  
   callPreference: 'server',  // 默认使用服务器调用点
 }
 
 // 本地存储键名
 const AI_CONFIG_KEYS = {
-  URL: 'ai_url',
-  KEY: 'ai_key',
-  MODEL_NAME: 'ai_model_name',
+  // 视觉模型
+  VISION_URL: 'ai_vision_url',
+  VISION_KEY: 'ai_vision_key',
+  VISION_MODEL_NAME: 'ai_vision_model_name',
+  
+  // 文生图模型
+  IMAGE_URL: 'ai_image_url',
+  IMAGE_KEY: 'ai_image_key',
+  IMAGE_MODEL_NAME: 'ai_image_model_name',
+  
   CALL_PREFERENCE: 'ai_call_preference',
 } as const
 
@@ -33,9 +54,16 @@ export const getAIConfig = (): AIConfig => {
       : DEFAULT_AI_CONFIG.callPreference
 
     return {
-      url: localStorage.getItem(AI_CONFIG_KEYS.URL) || DEFAULT_AI_CONFIG.url,
-      key: localStorage.getItem(AI_CONFIG_KEYS.KEY) || DEFAULT_AI_CONFIG.key,
-      modelName: localStorage.getItem(AI_CONFIG_KEYS.MODEL_NAME) || DEFAULT_AI_CONFIG.modelName,
+      // 视觉模型配置
+      visionUrl: localStorage.getItem(AI_CONFIG_KEYS.VISION_URL) || DEFAULT_AI_CONFIG.visionUrl,
+      visionKey: localStorage.getItem(AI_CONFIG_KEYS.VISION_KEY) || DEFAULT_AI_CONFIG.visionKey,
+      visionModelName: localStorage.getItem(AI_CONFIG_KEYS.VISION_MODEL_NAME) || DEFAULT_AI_CONFIG.visionModelName,
+      
+      // 文生图模型配置
+      imageUrl: localStorage.getItem(AI_CONFIG_KEYS.IMAGE_URL) || DEFAULT_AI_CONFIG.imageUrl,
+      imageKey: localStorage.getItem(AI_CONFIG_KEYS.IMAGE_KEY) || DEFAULT_AI_CONFIG.imageKey,
+      imageModelName: localStorage.getItem(AI_CONFIG_KEYS.IMAGE_MODEL_NAME) || DEFAULT_AI_CONFIG.imageModelName,
+      
       callPreference,
     }
   } catch (error) {
@@ -53,9 +81,17 @@ export const saveAIConfig = (config: AIConfig): boolean => {
       console.warn('callPreference 未定义，跳过保存')
       return false
     }
-    localStorage.setItem(AI_CONFIG_KEYS.URL, config.url || '')
-    localStorage.setItem(AI_CONFIG_KEYS.KEY, config.key || '')
-    localStorage.setItem(AI_CONFIG_KEYS.MODEL_NAME, config.modelName || '')
+    
+    // 保存视觉模型配置
+    localStorage.setItem(AI_CONFIG_KEYS.VISION_URL, config.visionUrl || '')
+    localStorage.setItem(AI_CONFIG_KEYS.VISION_KEY, config.visionKey || '')
+    localStorage.setItem(AI_CONFIG_KEYS.VISION_MODEL_NAME, config.visionModelName || '')
+    
+    // 保存文生图模型配置
+    localStorage.setItem(AI_CONFIG_KEYS.IMAGE_URL, config.imageUrl || '')
+    localStorage.setItem(AI_CONFIG_KEYS.IMAGE_KEY, config.imageKey || '')
+    localStorage.setItem(AI_CONFIG_KEYS.IMAGE_MODEL_NAME, config.imageModelName || '')
+    
     localStorage.setItem(AI_CONFIG_KEYS.CALL_PREFERENCE, config.callPreference || 'server')
     return true
   } catch (error) {
@@ -67,7 +103,7 @@ export const saveAIConfig = (config: AIConfig): boolean => {
 /**
  * 检查 AI 配置是否完整
  */
-export const isAIConfigValid = (config?: AIConfig): boolean => {
+export const isAIConfigValid = (config?: AIConfig, modelType: 'vision' | 'image' = 'vision'): boolean => {
   const currentConfig = config || getAIConfig()
   
   // 如果选择服务器调用点，则配置始终有效
@@ -75,12 +111,20 @@ export const isAIConfigValid = (config?: AIConfig): boolean => {
     return true
   }
   
-  // 如果选择自定义服务，则需要检查 API 配置是否完整
-  return !!(
-    currentConfig.url &&
-    currentConfig.key &&
-    currentConfig.modelName
-  )
+  // 如果选择自定义服务，则需要检查对应模型的 API 配置是否完整
+  if (modelType === 'vision') {
+    return !!(
+      currentConfig.visionUrl &&
+      currentConfig.visionKey &&
+      currentConfig.visionModelName
+    )
+  } else {
+    return !!(
+      currentConfig.imageUrl &&
+      currentConfig.imageKey &&
+      currentConfig.imageModelName
+    )
+  }
 }
 
 /**
@@ -93,28 +137,33 @@ export const resetAIConfig = (): boolean => {
 /**
  * 获取用于 API 调用的请求头
  */
-export const getAIRequestHeaders = (): Record<string, string> => {
+export const getAIRequestHeaders = (modelType: 'vision' | 'image' = 'vision'): Record<string, string> => {
   const config = getAIConfig()
+  const key = modelType === 'vision' ? config.visionKey : config.imageKey
   return {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${config.key}`,
+    'Authorization': `Bearer ${key}`,
   }
 }
 
 /**
  * 获取 AI API 的完整请求配置
  */
-export const getAIRequestConfig = () => {
+export const getAIRequestConfig = (modelType: 'vision' | 'image' = 'vision') => {
   const config = getAIConfig()
   
-  if (!isAIConfigValid(config)) {
-    throw new Error('AI 配置不完整，请先在设置页面配置 AI 服务参数')
+  if (!isAIConfigValid(config, modelType)) {
+    const modelName = modelType === 'vision' ? '视觉模型' : '文生图模型'
+    throw new Error(`${modelName}配置不完整，请先在设置页面配置 ${modelName} 服务参数`)
   }
 
+  const url = modelType === 'vision' ? config.visionUrl : config.imageUrl
+  const modelName = modelType === 'vision' ? config.visionModelName : config.imageModelName
+
   return {
-    url: config.url,
-    headers: getAIRequestHeaders(),
-    model: config.modelName,
+    url,
+    headers: getAIRequestHeaders(modelType),
+    model: modelName,
   }
 }
 
@@ -123,6 +172,7 @@ export const getAIRequestConfig = () => {
  */
 export const createAIRequestBody = (
   messages: Array<{ role: string; content: string | Array<any> }>,
+  modelType: 'vision' | 'image' = 'vision',
   options?: {
     temperature?: number
     max_tokens?: number
@@ -130,9 +180,10 @@ export const createAIRequestBody = (
   }
 ) => {
   const config = getAIConfig()
+  const modelName = modelType === 'vision' ? config.visionModelName : config.imageModelName
   
   return {
-    model: config.modelName,
+    model: modelName,
     messages,
     temperature: options?.temperature || 0.7,
     max_tokens: options?.max_tokens || 1000,

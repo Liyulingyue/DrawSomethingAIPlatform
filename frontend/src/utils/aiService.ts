@@ -26,17 +26,17 @@ export interface AIAnalysisResult {
 export const analyzeDrawing = async (request: ImageAnalysisRequest): Promise<AIAnalysisResult> => {
   try {
     // 检查配置是否有效
-    if (!isAIConfigValid()) {
+    if (!isAIConfigValid(undefined, 'vision')) {
       return {
         success: false,
         confidence: 0,
         analysis: '配置错误',
-        error: 'AI 配置不完整，请先在设置页面配置 AI 服务参数'
+        error: '视觉模型配置不完整，请先在设置页面配置视觉模型服务参数'
       }
     }
 
     // 获取配置信息
-    const { url, headers } = getAIRequestConfig()
+    const { url, headers } = getAIRequestConfig('vision')
 
     // 构建提示词
     const defaultPrompt = `请分析这幅绘画是否表现了"${request.targetWord}"。
@@ -75,7 +75,7 @@ export const analyzeDrawing = async (request: ImageAnalysisRequest): Promise<AIA
     ]
 
     // 创建请求体
-    const requestBody = createAIRequestBody(messages, {
+    const requestBody = createAIRequestBody(messages, 'vision', {
       temperature: 0.3, // 较低的温度值，保证结果稳定
       max_tokens: 500,
       top_p: 0.8
@@ -135,11 +135,11 @@ export const analyzeDrawing = async (request: ImageAnalysisRequest): Promise<AIA
  */
 export const generateDrawingSuggestion = async (targetWord: string): Promise<string> => {
   try {
-    if (!isAIConfigValid()) {
-      return '请先配置 AI 服务以获取绘画建议'
+    if (!isAIConfigValid(undefined, 'vision')) {
+      return '请先配置视觉模型服务以获取绘画建议'
     }
 
-    const { url, headers } = getAIRequestConfig()
+    const { url, headers } = getAIRequestConfig('vision')
 
     const prompt = `请为绘画主题"${targetWord}"提供简洁的绘画建议，包括：
 1. 关键特征和形状
@@ -155,7 +155,7 @@ export const generateDrawingSuggestion = async (targetWord: string): Promise<str
       }
     ]
 
-    const requestBody = createAIRequestBody(messages, {
+    const requestBody = createAIRequestBody(messages, 'vision', {
       temperature: 0.7,
       max_tokens: 200
     })
@@ -187,34 +187,38 @@ export const generateDrawingSuggestion = async (targetWord: string): Promise<str
  * -H "Authorization: Bearer $OPENAI_API_KEY" \
  * -d '{"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Hello!"}]}'
  */
-export const testAIConnection = async (): Promise<{ success: boolean; message: string }> => {
-  console.log('🚀 testAIConnection 函数开始执行')
+export const testAIConnection = async (modelType: 'vision' | 'image' = 'vision'): Promise<{ success: boolean; message: string }> => {
+  console.log(`🚀 testAIConnection 函数开始执行 (${modelType === 'vision' ? '视觉模型' : '文生图模型'})`)
   
   try {
-    console.log('🔍 检查 AI 配置有效性...')
-    if (!isAIConfigValid()) {
+    console.log(`🔍 检查 ${modelType === 'vision' ? '视觉模型' : '文生图模型'} 配置有效性...`)
+    if (!isAIConfigValid(undefined, modelType)) {
       console.log('❌ AI 配置无效')
       return {
         success: false,
-        message: 'AI 配置不完整，请检查 URL、API Key 和模型名称'
+        message: `${modelType === 'vision' ? '视觉模型' : '文生图模型'}配置不完整，请检查 URL、API Key 和模型名称`
       }
     }
     console.log('✅ AI 配置有效')
 
     console.log('🔧 获取配置信息...')
     const config = getAIConfig()
+    const url = modelType === 'vision' ? config.visionUrl : config.imageUrl
+    const modelName = modelType === 'vision' ? config.visionModelName : config.imageModelName
+    const hasKey = modelType === 'vision' ? !!config.visionKey : !!config.imageKey
+    
     console.log('📋 当前配置:', {
-      url: config.url,
-      modelName: config.modelName,
-      hasKey: !!config.key
+      url,
+      modelName,
+      hasKey
     })
     
-    const { url, headers } = getAIRequestConfig()
-    console.log('🌐 请求配置:', { url, headers })
+    const { url: requestUrl, headers } = getAIRequestConfig(modelType)
+    console.log('🌐 请求配置:', { requestUrl, headers })
 
     // 构造标准 OpenAI 格式的测试请求
     const requestBody = {
-      model: config.modelName,
+      model: modelName,
       messages: [
         {
           role: "user",

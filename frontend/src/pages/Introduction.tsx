@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
+import { isTauri } from '../utils/api'
 import './Introduction.css'
 
 const { Panel } = Collapse
@@ -12,6 +13,7 @@ const { Panel } = Collapse
 function Introduction() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
+  const isInTauriMode = isTauri()
 
   const handleDonate = () => {
     navigate('/app/donate')
@@ -224,14 +226,16 @@ function Introduction() {
             >
               配置 AI
             </Button>
-            <Button
-              size="large"
-              icon={<HeartOutlined />}
-              onClick={handleDonate}
-              className="action-button action-button-donate"
-            >
-              支持我们
-            </Button>
+            {!isInTauriMode && (
+              <Button
+                size="large"
+                icon={<HeartOutlined />}
+                onClick={handleDonate}
+                className="action-button action-button-donate"
+              >
+                支持我们
+              </Button>
+            )}
             <Button
               size="large"
               icon={<HomeOutlined />}

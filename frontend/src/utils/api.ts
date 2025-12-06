@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { getApiBaseUrlSync, initApiConfig } from '../config/api'
+import { getApiBaseUrlSync, initApiConfig, isTauri } from '../config/api'
 
 // 重新导出 getApiBaseUrlSync 供其他模块使用
-export { getApiBaseUrlSync, initApiConfig }
+export { getApiBaseUrlSync, initApiConfig, isTauri }
 
 // 初始化 API 配置（应用启动时会调用）
 let isInitialized = false

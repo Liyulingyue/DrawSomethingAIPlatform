@@ -17,6 +17,7 @@ function AppDraw() {
   const [targetWord, setTargetWord] = useState('')
   const [clue, setClue] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024)
   const { sessionId, refreshUserInfo, username } = useUser()
   const [galleryName, setGalleryName] = useState(username || '佚名')
   const [showSuccessGalleryModal, setShowSuccessGalleryModal] = useState(false)
@@ -41,7 +42,13 @@ function AppDraw() {
       }
     }
 
+    // 监听窗口大小变化
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth > 1024)
+    }
+
     document.addEventListener('touchmove', preventScroll, { passive: false })
+    window.addEventListener('resize', handleResize)
 
     return () => {
       // 清理：恢复页面滚动
@@ -51,6 +58,7 @@ function AppDraw() {
       document.body.style.width = ''
       document.body.style.height = ''
       document.removeEventListener('touchmove', preventScroll)
+      window.removeEventListener('resize', handleResize)
     }
   }, [])
 
@@ -110,16 +118,16 @@ function AppDraw() {
         console.log('📝 使用用户提供的线索:', clue.trim())
       }
 
-      // 如果有自定义 AI 配置，则使用
-      if (aiConfig.url && aiConfig.key && aiConfig.modelName) {
+      // 如果有自定义视觉模型配置，则使用
+      if (aiConfig.visionUrl && aiConfig.visionKey && aiConfig.visionModelName) {
         requestBody.config = {
-          url: aiConfig.url,
-          key: aiConfig.key,
-          model: aiConfig.modelName,
+          url: aiConfig.visionUrl,
+          key: aiConfig.visionKey,
+          model: aiConfig.visionModelName,
         }
-        console.log('✅ 使用自定义 AI 配置')
+        console.log('✅ 使用自定义视觉模型配置')
       } else {
-        console.log('ℹ️ 使用默认 AI 配置')
+        console.log('ℹ️ 使用默认视觉模型配置')
       }
 
       // 添加调用偏好参数
@@ -300,60 +308,122 @@ function AppDraw() {
     <>
       <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
-      <div className="app-draw-container">
-        {/* 标题区域 */}
-        <div className="app-draw-title-section">
-          <h1 className="app-draw-page-title">绘画</h1>
-        </div>
+      
+      {isDesktop ? (
+        // 桌面布局：左侧面板 (25%) + 右侧画布 (75%)
+        <div className="app-draw-container desktop-layout">
+          <div className="app-draw-left-panel">
+            {/* 标题区域 */}
+            <div className="app-draw-title-section">
+              <h1 className="app-draw-page-title">绘画</h1>
+            </div>
 
-        {/* 目标词区域 */}
-        <div className="app-draw-header">
-          <div className="app-draw-target-word">
-            <label className="target-word-label">目标词：</label>
-            <Input
-              placeholder="输入要绘画的词"
-              value={targetWord}
-              onChange={(e) => setTargetWord(e.target.value)}
-              className="target-word-input"
-              size="large"
+            {/* 目标词区域 */}
+            <div className="app-draw-header">
+              <div className="app-draw-target-word">
+                <label className="target-word-label">目标词：</label>
+                <Input
+                  placeholder="输入要绘画的词"
+                  value={targetWord}
+                  onChange={(e) => setTargetWord(e.target.value)}
+                  className="target-word-input"
+                  size="large"
+                />
+              </div>
+              <div className="app-draw-clue">
+                <label className="clue-label">猜词线索：</label>
+                <Input
+                  placeholder="可选，例如：这是一种动物"
+                  value={clue}
+                  onChange={(e) => setClue(e.target.value)}
+                  className="clue-input"
+                  size="large"
+                />
+              </div>
+            </div>
+
+            {/* 提交按钮区域 */}
+            <div className="app-draw-submit-section">
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleSubmitGuess}
+                loading={submitting}
+                disabled={submitting}
+                className="submit-guess-button"
+              >
+                {submitting ? '正在识别...' : '提交猜词'}
+              </Button>
+            </div>
+
+            <AppFooter />
+          </div>
+
+          {/* 画板区域 */}
+          <div className="app-draw-content">
+            <MobileDrawBoard
+              ref={drawBoardRef}
+              onDraw={handleDraw}
             />
           </div>
-          <div className="app-draw-clue">
-            <label className="clue-label">猜词线索：</label>
-            <Input
-              placeholder="可选，例如：这是一种动物"
-              value={clue}
-              onChange={(e) => setClue(e.target.value)}
-              className="clue-input"
-              size="large"
+        </div>
+      ) : (
+        // 移动设备布局：竖向排列
+        <div className="app-draw-container">
+          {/* 标题区域 */}
+          <div className="app-draw-title-section">
+            <h1 className="app-draw-page-title">绘画</h1>
+          </div>
+
+          {/* 目标词区域 */}
+          <div className="app-draw-header">
+            <div className="app-draw-target-word">
+              <label className="target-word-label">目标词：</label>
+              <Input
+                placeholder="输入要绘画的词"
+                value={targetWord}
+                onChange={(e) => setTargetWord(e.target.value)}
+                className="target-word-input"
+                size="large"
+              />
+            </div>
+            <div className="app-draw-clue">
+              <label className="clue-label">猜词线索：</label>
+              <Input
+                placeholder="可选，例如：这是一种动物"
+                value={clue}
+                onChange={(e) => setClue(e.target.value)}
+                className="clue-input"
+                size="large"
+              />
+            </div>
+          </div>
+
+          {/* 画板区域 - 占据中间大部分空间 */}
+          <div className="app-draw-content">
+            <MobileDrawBoard
+              ref={drawBoardRef}
+              onDraw={handleDraw}
             />
           </div>
-        </div>
 
-        {/* 画板区域 - 占据中间大部分空间 */}
-        <div className="app-draw-content">
-          <MobileDrawBoard
-            ref={drawBoardRef}
-            onDraw={handleDraw}
-          />
-        </div>
+          {/* 提交按钮区域 */}
+          <div className="app-draw-submit-section">
+            <Button
+              type="primary"
+              size="large"
+              onClick={handleSubmitGuess}
+              loading={submitting}
+              disabled={submitting}
+              className="submit-guess-button"
+            >
+              {submitting ? '正在识别...' : '提交猜词'}
+            </Button>
+          </div>
 
-        {/* 提交按钮区域 */}
-        <div className="app-draw-submit-section">
-          <Button
-            type="primary"
-            size="large"
-            onClick={handleSubmitGuess}
-            loading={submitting}
-            disabled={submitting}
-            className="submit-guess-button"
-          >
-            {submitting ? '正在识别...' : '提交猜词'}
-          </Button>
+          <AppFooter />
         </div>
-
-        <AppFooter />
-      </div>
+      )}
 
       <Modal
         title="🎉 恭喜！发布到画廊"

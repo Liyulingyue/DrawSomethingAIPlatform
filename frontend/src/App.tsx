@@ -1,7 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { UserProvider } from './context/UserContext'
+import { isTauri } from './utils/api'
 import SplashScreen from './components/SplashScreen'
 import AppHome from './pages/AppHome'
 import LevelSet from './pages/LevelSet'
@@ -47,9 +48,9 @@ function App() {
   const [message, setMessage] = useState('正在启动应用...')
 
   // 检测是否在 Tauri 环境中（打包 EXE）
-  const isTauri = typeof window !== 'undefined' && '__TAURI__' in window
+  const isTauriMode = isTauri()
   // 只在 Tauri 环境中显示启动屏幕
-  const shouldShowSplash = isTauri
+  const shouldShowSplash = isTauriMode
 
   useEffect(() => {
     const initApp = async () => {
@@ -134,9 +135,15 @@ function App() {
       {shouldShowSplash && <SplashScreen visible={!isInitialized} progress={progress} message={message} />}
       {isInitialized && (
         <UserProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          {isTauri() ? (
+            <HashRouter>
+              <AppContent />
+            </HashRouter>
+          ) : (
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          )}
         </UserProvider>
       )}
     </AntApp>

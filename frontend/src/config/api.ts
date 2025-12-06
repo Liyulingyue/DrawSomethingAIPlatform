@@ -10,12 +10,27 @@ export const isTauri = () => {
 // 获取后端 API 基础 URL
 export const getApiBaseUrl = async (): Promise<string> => {
   if (isTauri()) {
-    // Tauri 模式：从 Rust 获取动态端口
+    // Tauri 模式：从 Rust 获取动态端口，持续等待直到就绪
     try {
       const { invoke } = await import('@tauri-apps/api/tauri');
-      const backendUrl = await invoke<string>('get_backend_url');
-      console.log('🎯 Tauri 模式 - 后端地址:', backendUrl);
-      return backendUrl;
+      
+      // 持续轮询等待后端端口就绪
+      const retryDelay = 500; // 500ms
+      let attemptCount = 0;
+      
+      while (true) {
+        attemptCount++;
+        const backendUrl = await invoke<string>('get_backend_url');
+        
+        // 检查是否获取到有效端口（不是默认的 localhost:8002）
+        if (backendUrl && !backendUrl.includes('localhost:8002')) {
+          console.log(`🎯 Tauri 模式 - 后端地址获取成功 (等待了 ${attemptCount} 次):`, backendUrl);
+          return backendUrl;
+        }
+        
+        console.log(`⏳ 等待后端端口就绪... (尝试 ${attemptCount} 次)`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
     } catch (error) {
       console.error('❌ 获取后端地址失败，使用默认值:', error);
       return 'http://localhost:8002';

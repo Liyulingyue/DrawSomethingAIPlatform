@@ -1,7 +1,7 @@
 .config-ai-container {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   padding: 2rem 1rem;
   padding-top: 4rem; /* 为顶部按钮留出空间 */
   box-sizing: border-box;
@@ -47,6 +47,36 @@
   font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
+}
+
+.config-ai-tabs .ant-tabs-tab {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  margin-right: 8px;
+}
+
+.config-ai-tabs .ant-tabs-tab:hover {
+  color: #667eea;
+}
+
+.config-ai-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #667eea;
+}
+
+.config-ai-tabs .ant-tabs-ink-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 3px;
+}
+
+.config-tab-content {
+  padding: 1rem 0;
+}
+
+.config-tab-actions {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .config-input {
@@ -97,7 +127,7 @@
 }
 
 .config-test-button {
-  min-width: 120px;
+  min-width: 140px;
   height: 48px;
   border-radius: 24px;
   font-weight: 600;
@@ -155,16 +185,20 @@
 .config-ai-note {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 24px;
-  color: #7f8c8d;
+  color: rgba(255, 255, 255, 0.95);
   font-size: 0.9rem;
   margin: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .config-ai-help {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .config-ai-link {
@@ -206,7 +240,7 @@
   .config-test-button,
   .config-reset-button,
   .config-save-button {
-    min-width: 100px;
+    min-width: 120px;
     height: 44px;
   }
 }
@@ -266,4 +300,12 @@
 .config-ai-form .ant-input-password:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* ConfigAI页面的Footer样式 - 完全透明融入背景 */
+.config-ai-container .app-footer-light {
+  background: transparent !important;
+  border-top: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
