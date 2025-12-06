@@ -1,0 +1,21 @@
+{
+  "aiConfigModal": {
+    "title": "AI 服务未配置",
+    "ok": "去配置",
+    "cancel": "稍后再说",
+    "detecting": "检测到您还未配置 AI 服务。",
+    "drawing_guess": "绘画猜词",
+    "ai_draw": "AI 画你猜",
+    "needs_config": "需要配置",
+    "vision_model": "视觉模型",
+    "generation_model": "文生图模型",
+    "recommended": {
+      "title": "推荐方案：百度飞桨 AI Studio",
+      "bullet1": "零成本使用，注册即可获得",
+      "bullet2": "支持视觉识别和图像生成"
+    },
+    "how_to_get": "获取方式：访问",
+    "baidu_ai_studio": "百度 AI Studio",
+    "get_access_token": "注册并获取 Access Token"
+  }
+}

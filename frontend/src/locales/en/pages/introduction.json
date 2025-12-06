@@ -1,0 +1,58 @@
+{
+  "introduction": {
+    "title": "🎨 Draw, AI Guesses",
+    "subtitle": "DrawSomething AI Platform",
+    "description": "A fun drawing challenge platform powered by AI vision recognition",
+    "what_is": {
+      "title": "What is \"Draw, AI Guesses\"?",
+      "p1": "\"Draw, AI Guesses\" is an innovative drawing challenge platform that combines AI image recognition with fun game mechanics.",
+      "p2": "Whether you are a beginner or an experienced artist, you can enjoy the platform and improve your skills through AI feedback."
+    },
+    "features": {
+      "title": "Core Features",
+      "level_draw": {
+        "title": "Drawing Levels",
+        "desc": "Progress from beginner to advanced with carefully designed keywords for each level."
+      },
+      "free_draw": {"title": "Free Draw", "desc": "Create freely and let AI recognize your drawing based on any target word."},
+      "ai": {"title": "AI Recognition", "desc": "Advanced vision-language models accurately recognize and analyze drawings."},
+      "config": {"title": "Custom Configuration", "desc": "Support configuring your own AI service such as Baidu AI Studio."}
+    },
+    "quick_start": {"title": "Quick Start"},
+    "panels": {
+      "login": {
+        "header": "📋 Login (optional)",
+        "note": "Not logging in will not affect gameplay:",
+        "bullets": {"can_draw": "Can draw normally", "can_use_ai": "Can experience AI recognition if you've configured an AI service", "can_create": "Can freely create"},
+        "extras_title": "Additional features after login:",
+        "extras": {"server_ai": "Use server AI resources without configuration", "gallery": "Manage your published gallery items", "unlock": "Unlock future premium features"},
+        "tip": "Tip: If you want to use the platform's AI services, please log in first. The system will allocate points for AI usage after login."
+      },
+      "ai_setup": {
+        "header": "2️⃣ Configure AI Service (first use)",
+        "desc": "You need to configure an AI service before first use:",
+        "steps": {
+          "enter_config_page": "Open the 'AI Configuration' page",
+          "input_api_url": "Input API URL",
+          "input_api_key": "Input your API Key",
+          "input_model_name": "Input model name",
+          "test_connection": "Click 'Test Connection'",
+          "save_config": "Click 'Save Configuration'"
+        },
+        "tip": "Tip: Without AI configuration the system won't use AI recognition."
+      },
+      "choose_mode": {
+        "header": "3️⃣ Choose game mode",
+        "mode": {
+          "level_draw": {"title": "Drawing Levels", "step": {"choose_level": "Choose a level", "start_challenge": "Click 'Start Challenge'", "select_level": "Or click 'Select Level' to choose specific keywords", "next_level": "Automatically proceed to next level on success"}},
+          "free_draw": {"title": "Free Draw", "step": {"input_target": "Enter a target word (e.g. 'apple', 'house')", "draw": "Draw on the canvas", "submit": "Submit and check AI recognition results"}}
+        }
+      },
+      "start_draw": {"header": "4️⃣ Start Drawing", "step": {"brush": "Use the brush tool to draw on the canvas", "color_brush": "Choose colors and brush sizes", "erase": "Use eraser or clear canvas if needed", "submit_guess": "Click 'Submit Guess' when done"}},
+      "view_result": {"header": "5️⃣ View Results", "desc": "After submitting, AI will analyze your drawing and provide:", "items": {"success_fail": "Success/Failure judgement", "recognition": "Recognition result", "alternatives": "Alternative answers", "analysis": "Detailed AI analysis and suggestions"}}
+    },
+    "tips": {"title": "💡 Drawing Tips", "items": {"featured": "Focus on key features and draw the most recognizable elements", "clear_lines": "Keep lines clear and avoid fuzzy doodles", "add_detail": "Add details appropriately for easier AI recognition", "dont_give_up": "Don't give up on failure; improve based on AI feedback"}},
+    "feedback": {"title": "Found an issue? Got a suggestion?", "description": "Welcome to report bugs, propose improvements, or contribute on the GitHub project page!", "button": "Open GitHub"},
+    "actions": {"start": "Get Started", "config": "Configure AI", "donate": "Support Us", "back_home": "Back to Home"}
+  }
+}

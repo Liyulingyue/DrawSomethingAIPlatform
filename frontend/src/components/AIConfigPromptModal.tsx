@@ -13,7 +13,7 @@ interface AIConfigPromptModalProps {
  * 用于提示用户配置 AI 服务
  */
 export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPromptModalProps) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('aiConfigModal')
   return (
     <Modal
       open={open}

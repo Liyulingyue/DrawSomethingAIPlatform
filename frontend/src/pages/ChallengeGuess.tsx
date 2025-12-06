@@ -10,6 +10,7 @@ import { getGuessLevelById, getShuffledKeywords } from '../config/guessLevels'
 import { generateSketch } from '../utils/sketchApi'
 import { getAIConfig } from '../utils/aiConfig'
 import { useUser } from '../context/UserContext'
+import { useTranslation } from 'react-i18next'
 import './ChallengeGuess.css'
 
 // 本地存储 key
@@ -71,6 +72,7 @@ function ChallengeGuess() {
   const navigate = useNavigate()
   const location = useLocation()
   const { sessionId } = useUser() // 获取真实的 sessionId（如果已登录）
+  const { t } = useTranslation('challengeGuess')
 
   // 无需登录 - 用户可以使用自定义配置调用绘画API
 
@@ -274,12 +276,13 @@ function ChallengeGuess() {
   useEffect(() => {
     if (timeLeft >= 300 && currentKeyword && !loading) {
       modal.confirm({
-        title: '⏰ 时间到！',
+        title: t('challengeGuess.modals.timeUp.title'),
         content: (
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
             <p style={{ fontSize: '16px', marginBottom: '16px' }}>
-              正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
+              {t('challengeGuess.modals.timeUp.message')}
+              <strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
             </p>
             <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
               <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 挑战结束：</p>
@@ -290,7 +293,7 @@ function ChallengeGuess() {
           </div>
         ),
         width: 480,
-        okText: '继续挑战',
+        okText: t('challengeGuess.modals.timeUp.continue'),
         onOk: handleNextKeyword,
         cancelText: '重新开始',
         onCancel: () => {
@@ -303,19 +306,19 @@ function ChallengeGuess() {
           loadedKeywordRef.current = '' // 重置加载标记
         }
       })
-      message.warning('时间到！正确答案已显示')
+      message.warning(t('challengeGuess.timeUp'))
     }
   }, [timeLeft, currentKeyword, loading, modal, message])
 
   // 提交猜测
   const handleSubmitGuess = async () => {
     if (!guessInput.trim()) {
-      message.warning('请输入您的猜测')
+      message.warning(t('challengeGuess.enterGuess'))
       return
     }
 
     if (!currentKeyword) {
-      message.error('未找到当前关键词')
+      message.error(t('challengeGuess.keywordNotFound'))
       return
     }
 
@@ -358,7 +361,7 @@ function ChallengeGuess() {
           onOk: handleNextKeyword
         })
 
-        message.success(`🎉 恭喜猜对！获得 ${score} 积分！`)
+        message.success(t('challengeGuess.guessCorrect', { score }))
       } else {
         // 猜测错误 - 检查是否时间结束
         const timeUp = timeLeft >= 300 // 5分钟 = 300秒
@@ -434,7 +437,7 @@ function ChallengeGuess() {
             cancelText: '跳过此题',
             onCancel: handleNextKeyword
           })
-          message.warning('猜错了，再试一次吧！')
+          message.warning(t('challengeGuess.guessWrong'))
         }
       }
 
@@ -490,7 +493,7 @@ function ChallengeGuess() {
   }  // 下一题
   const handleNextKeyword = () => {
     if (!levelConfig) {
-      message.warning('关卡配置未找到')
+      message.warning(t('challengeGuess.levelNotFound'))
       navigate('/app/level-set-guess')
       return
     }
@@ -516,12 +519,12 @@ function ChallengeGuess() {
       console.log(`📊 保存后的总得分: ${newTotalScore}`)
       
       modal.success({
-        title: '🎉 恭喜完成关卡！',
+        title: t('challengeGuess.modals.levelComplete.title'),
         content: (
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <CheckCircleOutlined style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }} />
             <p style={{ fontSize: '18px', marginBottom: '12px' }}>
-              成功完成【{levelConfig.title}】关卡！
+              {t('challengeGuess.modals.levelComplete.congratulations', { title: levelConfig.title })}
             </p>
             <div style={{ 
               background: '#f6ffed', 
@@ -546,13 +549,13 @@ function ChallengeGuess() {
           </div>
         ),
         width: 500,
-        okText: '返回关卡选择',
+        okText: t('challengeGuess.modals.levelComplete.backToLevels'),
         onOk: () => {
           navigate('/app/level-set-guess')
         }
       })
       
-      message.success(`🎉 恭喜完成【${levelConfig.title}】关卡所有挑战！获得 ${levelScore} 积分！`)
+      message.success(t('challengeGuess.levelCompleted', { title: levelConfig.title, score: levelScore }))
       return
     }
 
@@ -568,13 +571,12 @@ function ChallengeGuess() {
 
     // 跳转到下一个关键词
     navigate(`/app/challenge-guess?level=${levelId}&keywordIndex=${nextIndex}`)
-    message.info(`进入下一题 (${nextIndex + 1}/${totalKeywords})`)
+    message.info(t('challengeGuess.nextQuestion', { current: nextIndex + 1, total: shuffledKeywords.length }))
   }
 
   // 跳过游戏
   const handleSkipChallenge = () => {
-    const totalKeywords = shuffledKeywords.length
-    message.info(`跳过第 ${keywordIndex + 1} 题 (${keywordIndex + 1}/${totalKeywords})`)
+    message.info(t('challengeGuess.skipQuestion', { current: keywordIndex + 1, total: shuffledKeywords.length }))
 
     // 显示正确答案
     modal.info({
@@ -729,7 +731,7 @@ function ChallengeGuess() {
                   fontWeight: 500,
                   textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
                 }}>
-                  AI正在构思画作，请稍后
+                  {t('challengeGuess.loading')}
                 </div>
               </div>
             ) : (
@@ -760,17 +762,17 @@ function ChallengeGuess() {
               <div className="timer-left">
                 <ClockCircleOutlined style={{ marginRight: '8px' }} />
                 <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
-                  {formatTime(timeLeft)}/5:00
+                  {t('challengeGuess.ui.time', { time: formatTime(timeLeft) })}
                 </span>
               </div>
               <div className="timer-center">
                 <span className="challenge-progress-text">
-                  第 {keywordIndex + 1} / {shuffledKeywords.length} 题
+                  {t('challengeGuess.ui.progress', { current: keywordIndex + 1, total: shuffledKeywords.length })}
                 </span>
               </div>
               <div className="timer-right">
                 <span className="challenge-score-text">
-                  💰 {levelScore} 分
+                  {t('challengeGuess.ui.score', { score: levelScore })}
                 </span>
                 {!loading && (
                   <span className="challenge-drawing-progress">
@@ -799,7 +801,7 @@ function ChallengeGuess() {
                   fontWeight: 500,
                   textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
                 }}>
-                  AI正在构思画作，请稍后
+                  {t('challengeGuess.loading')}
                 </div>
               </div>
             ) : (
@@ -819,7 +821,7 @@ function ChallengeGuess() {
               <Input
                 value={guessInput}
                 onChange={(e) => setGuessInput(e.target.value)}
-                placeholder="输入您对画作的猜测..."
+                placeholder={t('challengeGuess.guessInput.placeholder')}
                 size="large"
                 onPressEnter={handleSubmitGuess}
                 disabled={submitting}
@@ -833,7 +835,7 @@ function ChallengeGuess() {
                 disabled={submitting || !guessInput.trim()}
                 className="submit-guess-button"
               >
-                {submitting ? '提交中...' : '发送'}
+                {submitting ? '提交中...' : t('challengeGuess.guessInput.button')}
               </Button>
             </div>
             <Button
@@ -842,7 +844,7 @@ function ChallengeGuess() {
               disabled={submitting}
               className="skip-challenge-button"
             >
-              跳过此题
+              {t('challengeGuess.guessInput.skipButton')}
             </Button>
           </div>
 

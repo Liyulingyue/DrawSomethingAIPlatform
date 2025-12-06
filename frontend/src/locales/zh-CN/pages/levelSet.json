@@ -1,0 +1,23 @@
+{
+  "levelSet": {
+    "title": "绘画闯关",
+    "comingSoon": "待更新...",
+    "startChallenge": "开始挑战",
+    "selectChallenge": "选关挑战",
+    "customLevels": {
+      "title": "我的自定义关卡",
+      "description": "查看和管理你的自定义关卡"
+    },
+    "modal": {
+      "selectLevel": "选择关卡",
+      "description": "请选择你想挑战的关键词：",
+      "noKeywords": "暂无可用关键词"
+    },
+    "messages": {
+      "comingSoon": "{{title}}关卡即将推出，敬请期待！",
+      "noKeywords": "{{title}}关卡暂无可用关键词",
+      "startChallenge": "开始挑战{{title}}关卡！第一关：{{keyword}}",
+      "keywordSelected": "已选择\"{{keyword}}\"，准备进入绘画页面！"
+    }
+  }
+}

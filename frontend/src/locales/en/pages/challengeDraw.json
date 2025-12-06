@@ -1,0 +1,89 @@
+{
+  "challengeDraw": {
+    "messages": {
+      "noDrawing": "Unable to get drawing",
+      "posterGenerated": "Poster generated and downloaded!",
+      "posterFailed": "Failed to generate poster, please try again",
+      "selectLevelFirst": "Please select level and keyword first",
+      "completeDrawing": "Please complete drawing first",
+      "challengeSuccess": "Challenge successful!",
+      "noMatch": "Recognition result doesn't match target word, try again!",
+      "networkError": "Network connection failed, please check network connection",
+      "serverError": "Server error, please try again later",
+      "unknownError": "Unknown error, please try again later",
+      "publishSuccess": "Successfully published to gallery!",
+      "publishFailed": "Publish failed, please try again later",
+      "noMoreKeywords": "This level has no more keywords",
+      "keywordNotFound": "Current keyword not in level list",
+      "levelCompleted": "🎉 Congratulations on completing all challenges in [{{title}}] level!",
+      "nextLevel": "Enter next level: {{keyword}}",
+      "skipKeyword": "Skip keyword: {{keyword}} ({{current}}/{{total}})"
+    },
+    "modals": {
+      "levelComplete": {
+        "title": "🎉 Congratulations on clearing the level!",
+        "congratulations": "Congratulations on completing all challenges in [{{title}}] level!",
+        "level": "Level:",
+        "lastKeyword": "Last Level:",
+        "aiRecognition": "AI Recognition:",
+        "alternatives": "Alternative Answers:",
+        "aiAnalysis": "AI Analysis:",
+        "noAnalysis": "No additional analysis",
+        "completed": "🏆 You have completed all challenges!",
+        "publishToGallery": "Publish to Gallery",
+        "shareDrawing": "Share Drawing",
+        "backToLevelSelect": "Back to Level Select"
+      },
+      "challengeSuccess": {
+        "title": "🎉 Challenge Success!",
+        "congratulations": "Congratulations on completing this level challenge!",
+        "level": "Level:",
+        "currentKeyword": "Current Level:",
+        "aiRecognition": "AI Recognition:",
+        "alternatives": "Alternative Answers:",
+        "aiAnalysis": "AI Analysis:",
+        "noAnalysis": "No additional analysis",
+        "progress": "Progress:",
+        "nextLevel": "Next Level",
+        "skipLevel": "Skip Level",
+        "backToLevelSelect": "Back to Level Select"
+      },
+      "tryAgain": {
+        "title": "😅 Try Again!",
+        "description": "AI couldn't accurately recognize your drawing",
+        "level": "Level:",
+        "currentKeyword": "Current Level:",
+        "aiRecognition": "AI Recognition:",
+        "alternatives": "Alternative Answers:",
+        "aiAnalysis": "AI Analysis:",
+        "noAnalysis": "No additional analysis",
+        "improvementTips": "💡 Improvement Suggestions:",
+        "tip1": "Try to draw more clearly",
+        "tip2": "Add more detailed features",
+        "tip3": "Use more obvious shapes",
+        "continueDrawing": "🎨 Continue modifying or redrawing on the canvas!",
+        "continueButton": "Continue Creating"
+      },
+      "submitFailed": {
+        "title": "⚠️ Submission Failed",
+        "description": "Error occurred while submitting guess",
+        "okText": "Got it"
+      }
+    },
+    "galleryModal": {
+      "title": "Publish to Gallery",
+      "description": "Publish your drawing to the public gallery to share with other players",
+      "nameLabel": "Gallery Name",
+      "namePlaceholder": "Please enter gallery display name",
+      "submitButton": "Publish",
+      "cancelButton": "Cancel"
+    },
+    "buttons": {
+      "submitGuess": "Submit Guess",
+      "nextLevel": "Next Level",
+      "skipLevel": "Skip",
+      "backToLevels": "Back to Levels",
+      "share": "Share"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "configAI": {
+    "title": "AI Configuration",
+    "subtitle": "Configure connection parameters for vision model (Draw & AI Guesses) and text-to-image model (AI Draw)",
+    "tabs": {
+      "vision": "👁️ Vision Model (Draw & AI Guesses)",
+      "image": "🎨 Text-to-Image Model (AI Draw)"
+    },
+    "form": {
+      "visionUrl": "Vision Model API URL",
+      "visionKey": "Vision Model API Key",
+      "visionModelName": "Vision Model Name",
+      "imageUrl": "Text-to-Image Model API URL",
+      "imageKey": "Text-to-Image Model API Key",
+      "imageModelName": "Text-to-Image Model Name",
+      "callPreference": "Call Preference (Unified Setting)"
+    },
+    "placeholders": {
+      "visionUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "visionKey": "Enter your Baidu AI Studio Access Token",
+      "visionModelName": "ernie-4.5-vl-28b-a3b",
+      "imageUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "imageKey": "Enter your Baidu AI Studio Access Token",
+      "imageModelName": "ernie-4.5-vl-28b-a3b"
+    },
+    "buttons": {
+      "testVision": "Test Vision Model",
+      "testImage": "Test Text-to-Image Model",
+      "reset": "Reset",
+      "save": "Save Configuration"
+    },
+    "messages": {
+      "serverLoginRequired": "💰 Server endpoint requires login to use.",
+      "configSaved": "AI configuration saved and activated",
+      "configComplete": "✅ AI configuration is complete, you can now use AI features normally",
+      "configIncomplete": "⚠️ Configuration information is incomplete, custom services may not work",
+      "saveFailed": "Save failed, please try again",
+      "resetSuccess": "Reset to default configuration",
+      "resetFailed": "Reset failed, please try again",
+      "fillComplete": "Please fill in the complete {{modelType}} URL, API Key and model name first",
+      "testingConnection": "Starting to test {{modelType}} connection...",
+      "testSuccess": "🎉 {{modelType}} connection test successful",
+      "serviceConnected": "{{modelType}} service connected successfully!",
+      "generatedImage": "Generated test image:",
+      "aiReply": "AI Reply:",
+      "readyToUse": "You can now save this configuration and start using {{modelType}} features!",
+      "testFailed": "❌ {{modelType}} connection test failed",
+      "cannotConnect": "Cannot connect to {{modelType}} service",
+      "errorInfo": "Error Information:",
+      "possibleSolutions": "Possible solutions:",
+      "checkApiKey": "Check if API Key is correct",
+      "checkUrl": "Verify if URL address is valid",
+      "checkModelName": "Confirm if model name is supported",
+      "checkNetwork": "Check network connection status",
+      "backendError": "🔌 Backend service error",
+      "backendApiFailed": "Backend API call failed",
+      "errorDetails": "Error details:",
+      "checkBackendRunning": "Please check if backend service is running normally",
+      "backendApiCallFailed": "Backend API call failed: {{status}} {{statusText}}",
+      "testError": "Error occurred while testing {{modelType}} connection: {{error}}",
+      "backendNotConnected": "Cannot connect to backend service, please ensure backend service is started",
+      "unknownError": "Unknown error",
+      "backendConnectionFailed": "🔌 Backend connection failed",
+      "connectionException": "⚠️ Connection exception",
+      "cannotConnectBackend": "Cannot connect to backend service",
+      "testException": "Exception occurred while testing {{modelType}} connection",
+      "solutions": "Solutions:",
+      "ensureBackendRunning": "Ensure backend service is running (python run.py)",
+      "checkBackendPort": "Check if backend port is 8002",
+      "checkFirewall": "Confirm firewall is not blocking connection"
+    },
+    "validation": {
+      "enterValidUrl": "Please enter a valid URL",
+      "enterVisionUrl": "Please enter vision model API URL",
+      "enterImageUrl": "Please enter text-to-image model API URL",
+      "enterVisionKey": "Please enter vision model API Key",
+      "enterImageKey": "Please enter text-to-image model API Key",
+      "enterVisionModelName": "Please enter vision model name",
+      "enterImageModelName": "Please enter text-to-image model name",
+      "selectCallPreference": "Please select call preference"
+    },
+    "preferences": {
+      "custom": "Custom Service",
+      "server": "Server Endpoint",
+      "serverTip": "💡 Server endpoint requires login to use, prioritizes platform services, automatically switches to custom services when points are insufficient"
+    },
+    "footer": {
+      "hint": "💡 Hint: Configuration information will be saved in browser local storage, get API Key: visit",
+      "baiduLink": "🔗 Baidu AI Studio Access Token",
+      "help": "💡 Vision model is used for \"Draw & AI Guesses\" game, text-to-image model is used for \"AI Draw\" game. When selecting server endpoint, platform services are prioritized, automatically fallback to custom services when points are insufficient. Please configure custom service parameters as backup."
+    },
+    "links": {
+      "getToken": "🔗 Get Baidu AI Studio Access Token"
+    }
+  }
+}

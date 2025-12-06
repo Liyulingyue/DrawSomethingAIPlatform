@@ -1,0 +1,49 @@
+{
+  "appLogin": {
+    "loading": "加载中...",
+    "title": "🎨 你画AI猜",
+    "subtitle": "DrawSomething AI Platform",
+    "loginStatus": {
+      "title": "登录状态",
+      "loggedIn": "您已成功登录",
+      "welcome": "欢迎使用你画AI猜平台！",
+      "adminTag": "管理员",
+      "callsRemaining": "剩余调用次数:",
+      "refreshing": "刷新中...",
+      "unlimited": "无限",
+      "recharge": "充值",
+      "logout": "退出登录",
+      "backHome": "返回主页"
+    },
+    "userLogin": {
+      "title": "用户登录",
+      "description": "输入用户名和密码登录，登录使您能够使用服务器资源进行模型推理",
+      "usernamePlaceholder": "用户名",
+      "passwordPlaceholder": "密码",
+      "loginButton": "用户登录",
+      "autoCreateHint": "💡 如果用户名不存在，将自动创建新用户"
+    },
+    "messages": {
+      "usernameRequired": "请输入用户名",
+      "passwordRequired": "请输入密码",
+      "adminLoginSuccess": "管理员登录成功，欢迎 {{username}}",
+      "loginSuccess": "登录成功，欢迎 {{username}}",
+      "loginFailed": "登录失败，请检查用户名和密码",
+      "retryLater": "登录失败，请稍后重试",
+      "logoutSuccess": "已退出登录",
+      "loginRequired": "请先登录",
+      "rechargeSuccess": "充值成功！获得 20 次调用",
+      "rechargeFailed": "充值失败"
+    },
+    "rechargeModal": {
+      "title": "充值调用次数",
+      "okText": "立即充值",
+      "cancelText": "取消",
+      "amount": "20",
+      "unit": "次调用次数",
+      "packageTitle": "🎉 充值礼包",
+      "packageDesc": "• 获得 <strong>20次</strong> AI猜词调用次数<br/>• 可用于绘画识别和AI交互<br/>• 永久有效，无过期时间",
+      "tip": "💡 每次AI猜词会消耗1次调用次数，请合理使用"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "challengeGuess": {
+    "loading": "Generating AI drawing...",
+    "timeUp": "Time's up! Correct answer shown",
+    "enterGuess": "Please enter your guess",
+    "keywordNotFound": "Current keyword not found",
+    "guessCorrect": "🎉 Congratulations! Got {{score}} points!",
+    "guessWrong": "Wrong guess, try again!",
+    "levelCompleted": "🎉 Congratulations on completing all challenges in [{{title}}] level! Got {{score}} points!",
+    "nextQuestion": "Next question ({{current}}/{{total}})",
+    "skipQuestion": "Skip question {{current}} ({{current}}/{{total}})",
+    "levelNotFound": "Level configuration not found",
+    "networkError": "Network connection failed, please check network connection",
+    "serverError": "Server error, please try again later",
+    "unknownError": "Unknown error, please try again later",
+    "guessInput": {
+      "placeholder": "Enter the word you guess...",
+      "button": "Submit Guess",
+      "skipButton": "Skip This Question"
+    },
+    "modals": {
+      "levelComplete": {
+        "title": "🎉 Congratulations on clearing the level!",
+        "congratulations": "Congratulations on completing all challenges in [{{title}}] level!",
+        "totalScore": "Total Score: {{score}} points",
+        "timeBonus": "Time Bonus: {{bonus}} points",
+        "accuracyBonus": "Accuracy Bonus: {{bonus}} points",
+        "perfectBonus": "Perfect Clear Bonus: {{bonus}} points",
+        "backToLevels": "Back to Levels"
+      },
+      "timeUp": {
+        "title": "⏰ Time's Up!",
+        "message": "Time has run out, the correct answer is:",
+        "answer": "Correct Answer: {{answer}}",
+        "continue": "Continue Challenge"
+      }
+    },
+    "ui": {
+      "score": "Score: {{score}}",
+      "time": "Time: {{time}}s",
+      "progress": "Progress: {{current}}/{{total}}",
+      "currentWord": "Current Word",
+      "yourGuess": "Your Guess"
+    }
+  }
+}

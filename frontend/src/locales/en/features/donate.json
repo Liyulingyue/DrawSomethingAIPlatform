@@ -1,0 +1,15 @@
+{
+  "donate": {
+    "title": "Support Us",
+    "subtitle": "Your support helps us cover AI token usage costs",
+    "about": {
+      "title": "About service point usage",
+      "p1": "Using service points under login will consume the developer's AI API quota.",
+      "p2": "Currently, this feature is completely free with no usage limit.",
+      "p3": "Your donations encourage the developer and help cover some API costs.",
+      "note": "We plan to support purchasing quota to spare users from configuring models. For dev/testing environments this is impractical, therefore the feature is offered free for now — enjoy!"
+    },
+    "recommend": {"amount": "Recommended donation: 0.5 CNY", "note": "AI API costs aren't expensive and align with our future paid plans"},
+    "methods": {"wechat": {"title": "WeChat Donation QR Code", "alt": "WeChat QR Code for donation", "placeholder": "WeChat donation QR code", "hint": "Please place wechat-qr.jpg in the public folder"}}
+  }
+}

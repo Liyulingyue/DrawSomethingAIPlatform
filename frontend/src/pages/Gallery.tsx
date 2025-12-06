@@ -26,7 +26,7 @@ const Gallery: React.FC = () => {
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'time-desc' | 'time-asc' | 'likes-desc' | 'likes-asc'>('time-desc');
   const { isAdmin, userId, refreshUserInfo } = useUser();
-  const { t } = useTranslation();
+  const { t } = useTranslation('gallery')
 
   useEffect(() => {
     fetchGalleryItems();

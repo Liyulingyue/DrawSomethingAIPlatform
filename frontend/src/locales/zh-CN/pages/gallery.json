@@ -1,0 +1,22 @@
+{
+  "gallery": {
+    "title": "画廊",
+    "loading": "正在加载画廊...",
+    "empty": "画廊中还没有作品，快去绘制并发布吧！",
+    "sort": {
+      "filterLabel": "排序筛选",
+      "newest": "最新优先",
+      "oldest": "最早优先",
+      "mostLiked": "点赞最多",
+      "leastLiked": "点赞最少"
+    },
+    "messages": {
+      "deleteSuccess": "删除成功",
+      "deleteFailed": "删除失败"
+    },
+    "image": {
+      "alt": "由 {{name}} 绘制",
+      "previewAlt": "大图预览"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "levelSet": {
+    "title": "Drawing Levels",
+    "comingSoon": "Coming Soon...",
+    "startChallenge": "Start Challenge",
+    "selectChallenge": "Select Level",
+    "customLevels": {
+      "title": "My Custom Levels",
+      "description": "View and manage your custom levels"
+    },
+    "modal": {
+      "selectLevel": "Select Level",
+      "description": "Please select the keyword you want to challenge:",
+      "noKeywords": "No keywords available"
+    },
+    "messages": {
+      "comingSoon": "{{title}} level is coming soon, stay tuned!",
+      "noKeywords": "{{title}} level has no available keywords",
+      "startChallenge": "Start challenging {{title}} level! First level: {{keyword}}",
+      "keywordSelected": "Selected \"{{keyword}}\", ready to enter drawing page!"
+    }
+  }
+}

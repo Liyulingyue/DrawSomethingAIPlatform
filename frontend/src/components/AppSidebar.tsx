@@ -28,7 +28,7 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
 
   // 检测是否在 Tauri 环境中
   const isInTauriMode = isTauri()
-  const { t } = useTranslation()
+  const { t } = useTranslation('sidebar')
 
   const menuItems = [
     {

@@ -11,6 +11,7 @@ import { api } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
 import { generatePoster, downloadPoster } from '../utils/posterGenerator'
 import { useUser } from '../context/UserContext'
+import { useTranslation } from 'react-i18next'
 import './ChallengeDraw.css'
 
 // 本地存储 key
@@ -32,6 +33,7 @@ const markKeywordCompleted = (levelId: string, keyword: string) => {
 function ChallengeDraw() {
   const { message, modal } = App.useApp()
   const { sessionId, username } = useUser()
+  const { t } = useTranslation('challengeDraw')
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -44,7 +46,7 @@ function ChallengeDraw() {
   const share = async (targetKeyword: string, guessResult: string, aiModel?: string) => {
     const image = drawBoardRef.current?.getImage()
     if (!image) {
-      message.error('无法获取画作')
+      message.error(t('challengeDraw.messages.noDrawing'))
       return
     }
 
@@ -57,10 +59,10 @@ function ChallengeDraw() {
       })
       
       downloadPoster(posterDataUrl, `ai-drawing-poster-${targetKeyword}.png`)
-      message.success('海报已生成并下载！')
+      message.success(t('challengeDraw.messages.posterGenerated'))
     } catch (error) {
       console.error('生成海报失败:', error)
-      message.error('生成海报失败，请重试')
+      message.error(t('challengeDraw.messages.posterFailed'))
     }
   }
 
@@ -113,7 +115,7 @@ function ChallengeDraw() {
   // 如果没有关卡信息，跳转回选关页面
   useEffect(() => {
     if (!levelId || !keyword) {
-      message.warning('请先选择关卡和关键词')
+      message.warning(t('challengeDraw.messages.selectLevelFirst'))
       navigate('/app/level-set')
     }
   }, [levelId, keyword, navigate])
@@ -133,7 +135,7 @@ function ChallengeDraw() {
   const handleSubmitGuess = async () => {
     const image = drawBoardRef.current?.getImage()
     if (!image) {
-      message.warning('请先完成绘画')
+      message.warning(t('challengeDraw.messages.completeDrawing'))
       return
     }
 
@@ -222,7 +224,7 @@ function ChallengeDraw() {
         if (isLastKeyword) {
           // 通关成功弹窗
           const modalInstance = modal.success({
-            title: '🎉 恭喜通关！',
+            title: t('challengeDraw.modals.levelComplete.title'),
             content: (
               <div style={{ 
                 maxHeight: '60vh', 
@@ -232,7 +234,7 @@ function ChallengeDraw() {
               }}>
                 <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                   <TrophyOutlined style={{ color: '#faad14', marginRight: '8px' }} />
-                  恭喜完成【{levelConfig?.title}】关卡所有挑战！
+                  {t('challengeDraw.modals.levelComplete.congratulations', { title: levelConfig?.title })}
                 </p>
                 <div style={{ 
                   background: '#fffbe6', 
@@ -241,12 +243,12 @@ function ChallengeDraw() {
                   padding: '12px',
                   marginTop: '12px'
                 }}>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>关卡：</strong>{levelConfig?.title}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>最后一关：</strong>{keyword}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别：</strong>{bestGuess}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.levelComplete.level')}</strong>{levelConfig?.title}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.levelComplete.lastKeyword')}</strong>{keyword}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.levelComplete.aiRecognition')}</strong>{bestGuess}</p>
                   {alternatives.length > 0 && (
                     <p style={{ margin: '0 0 8px 0' }}>
-                      <strong>备选答案：</strong>{alternatives.join(', ')}
+                      <strong>{t('challengeDraw.modals.levelComplete.alternatives')}</strong>{alternatives.join(', ')}
                     </p>
                   )}
                   <div style={{ 
@@ -257,14 +259,14 @@ function ChallengeDraw() {
                     overflowY: 'auto',
                     wordBreak: 'break-word'
                   }}>
-                    <strong>AI 分析：</strong>
+                    <strong>{t('challengeDraw.modals.levelComplete.aiAnalysis')}</strong>
                     <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                      {result.reason || '无额外分析'}
+                      {result.reason || t('challengeDraw.modals.levelComplete.noAnalysis')}
                     </p>
                   </div>
                 </div>
                 <p style={{ margin: '12px 0 0 0', color: '#faad14', fontSize: '14px', fontWeight: 500 }}>
-                  🏆 你已经完成了所有挑战！
+                  {t('challengeDraw.modals.levelComplete.completed')}
                 </p>
               </div>
             ),
@@ -277,17 +279,17 @@ function ChallengeDraw() {
                     setShowGalleryModal(true)
                   }}
                 >
-                  发布到画廊
+                  {t('challengeDraw.modals.levelComplete.publishToGallery')}
                 </Button>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <Button onClick={() => {
                     share(keyword, bestGuess, aiModel)
-                  }}>分享画作</Button>
+                  }}>{t('challengeDraw.modals.levelComplete.shareDrawing')}</Button>
                   <Button type="primary" onClick={() => {
                     markKeywordCompleted(levelId, keyword)
                     modalInstance.destroy()
                     navigate('/app/level-set')
-                  }}>返回选关</Button>
+                  }}>{t('challengeDraw.modals.levelComplete.backToLevelSelect')}</Button>
                 </div>
               </div>
             ),
@@ -295,7 +297,7 @@ function ChallengeDraw() {
         } else {
           // 单关成功弹窗
           const modalInstance = modal.success({
-            title: '🎉 挑战成功！',
+            title: t('challengeDraw.modals.challengeSuccess.title'),
             content: (
               <div style={{ 
                 maxHeight: '60vh', 
@@ -305,7 +307,7 @@ function ChallengeDraw() {
               }}>
                 <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                   <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                  AI 成功识别出了你的绘画！
+                  {t('challengeDraw.modals.challengeSuccess.congratulations')}
                 </p>
                 <div style={{ 
                   background: '#f6ffed', 
@@ -314,12 +316,12 @@ function ChallengeDraw() {
                   padding: '12px',
                   marginTop: '12px'
                 }}>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>进度：</strong>{progress}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>目标词：</strong>{keyword}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别：</strong>{bestGuess}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.challengeSuccess.progress')}</strong>{progress}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.challengeSuccess.currentKeyword')}</strong>{keyword}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.challengeSuccess.aiRecognition')}</strong>{bestGuess}</p>
                   {alternatives.length > 0 && (
                     <p style={{ margin: '0 0 8px 0' }}>
-                      <strong>备选答案：</strong>{alternatives.join(', ')}
+                      <strong>{t('challengeDraw.modals.challengeSuccess.alternatives')}</strong>{alternatives.join(', ')}
                     </p>
                   )}
                   <div style={{ 
@@ -330,9 +332,9 @@ function ChallengeDraw() {
                     overflowY: 'auto',
                     wordBreak: 'break-word'
                   }}>
-                    <strong>AI 分析：</strong>
+                    <strong>{t('challengeDraw.modals.challengeSuccess.aiAnalysis')}</strong>
                     <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                      {result.reason || '无额外分析'}
+                      {result.reason || t('challengeDraw.modals.challengeSuccess.noAnalysis')}
                     </p>
                   </div>
                 </div>

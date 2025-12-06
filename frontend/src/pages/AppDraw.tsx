@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { Input, Button, App, Modal, Form } from 'antd'
 import { CheckCircleOutlined, CloseCircleOutlined, PictureOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import MobileDrawBoard, { type MobileDrawBoardRef } from '../components/MobileDrawBoard'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -12,6 +13,7 @@ import './AppDraw.css'
 
 function AppDraw() {
   const { message, modal } = App.useApp()
+  const { t } = useTranslation('appDraw')
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [targetWord, setTargetWord] = useState('')
@@ -77,12 +79,12 @@ function AppDraw() {
   const handleSubmitGuess = async () => {
     const image = drawBoardRef.current?.getImage()
     if (!image) {
-      message.warning('请先完成绘画')
+      message.warning(t('appDraw.messages.pleaseDrawFirst'))
       return
     }
 
     if (!targetWord.trim()) {
-      message.warning('请先输入目标词')
+      message.warning(t('appDraw.messages.pleaseEnterTarget'))
       return
     }
 
@@ -168,11 +170,11 @@ function AppDraw() {
           reason: result.reason
         })
         setShowSuccessModal(true)
-        message.success('绘画识别成功！')
+        message.success(t('appDraw.messages.recognitionSuccess'))
       } else {
         // 显示失败弹窗
         modal.error({
-          title: '😅 再试一次！',
+          title: t('appDraw.modals.failure.title'),
           content: (
             <div style={{ 
               maxHeight: '60vh', 
@@ -182,7 +184,7 @@ function AppDraw() {
             }}>
               <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                 <CloseCircleOutlined style={{ color: '#ff4d4f', marginRight: '8px' }} />
-                AI 没能准确识别出你的绘画
+                {t('appDraw.modals.failure.description')}
               </p>
               <div style={{ 
                 background: '#fff2f0', 
@@ -191,11 +193,11 @@ function AppDraw() {
                 padding: '12px',
                 marginTop: '12px'
               }}>
-                <p style={{ margin: '0 0 8px 0' }}><strong>目标词:</strong> {targetWord}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别:</strong> {bestGuess || '无法识别'}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.failure.targetWord')}</strong> {targetWord}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.failure.aiRecognition')}</strong> {bestGuess || '无法识别'}</p>
                 {alternatives.length > 0 && (
                   <p style={{ margin: '0 0 8px 0' }}>
-                    <strong>备选答案:</strong> {alternatives.join(', ')}
+                    <strong>{t('appDraw.modals.failure.alternatives')}</strong> {alternatives.join(', ')}
                   </p>
                 )}
                 <div style={{ 
@@ -206,45 +208,45 @@ function AppDraw() {
                   overflowY: 'auto',
                   wordBreak: 'break-word'
                 }}>
-                  <strong>AI 分析:</strong>
+                  <strong>{t('appDraw.modals.failure.aiAnalysis')}</strong>
                   <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                    {result.reason || '无额外分析'}
+                    {result.reason || t('appDraw.modals.failure.noAnalysis')}
                   </p>
                 </div>
               </div>
               <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 改进建议:</p>
+                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{t('appDraw.modals.failure.improvementTips')}</p>
                 <ul style={{ margin: '0 0 0 16px', paddingLeft: '8px' }}>
-                  <li>尝试画得更清晰一些</li>
-                  <li>添加更多细节特征</li>
-                  <li>使用更明显的形状</li>
+                  <li>{t('appDraw.modals.failure.tip1')}</li>
+                  <li>{t('appDraw.modals.failure.tip2')}</li>
+                  <li>{t('appDraw.modals.failure.tip3')}</li>
                 </ul>
                 <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
-                  🎨 继续在画板上修改或重新绘制！
+                  {t('appDraw.modals.failure.continueDrawing')}
                 </p>
               </div>
             </div>
           ),
           width: 520,
-          okText: '继续创作'
+          okText: t('appDraw.modals.failure.continueButton')
         })
-        message.warning('识别结果与目标词不匹配，再试一次吧！')
+        message.warning(t('appDraw.messages.recognitionFailed'))
       }
       
     } catch (error) {
       console.error('💥 提交猜词失败:', error)
       
-      let errorMessage = '提交失败，请稍后重试'
+      let errorMessage = t('appDraw.messages.submitFailed')
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch')) {
-          errorMessage = '无法连接到服务器，请检查网络连接'
+          errorMessage = t('appDraw.messages.connectionFailed')
         } else {
           errorMessage = error.message
         }
       }
 
       modal.error({
-        title: '⚠️ 提交失败',
+        title: t('appDraw.modals.error.title'),
         content: (
           <div style={{ 
             maxHeight: '60vh', 
@@ -253,7 +255,7 @@ function AppDraw() {
             padding: '16px 0' 
           }}>
             <p style={{ marginBottom: '12px', fontSize: '16px' }}>
-              提交猜词时发生错误
+              {t('appDraw.modals.error.description')}
             </p>
             <div style={{ 
               background: '#fff2f0', 
@@ -262,18 +264,18 @@ function AppDraw() {
               padding: '12px',
               wordBreak: 'break-word'
             }}>
-              <strong>错误信息:</strong>
+              <strong>{t('appDraw.messages.errorInfo')}</strong>
               <p style={{ margin: '4px 0 0 0', color: '#ff4d4f', whiteSpace: 'pre-wrap' }}>
                 {errorMessage}
               </p>
             </div>
             <p style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-              请检查网络连接和 AI 配置是否正确
+              {t('appDraw.messages.checkNetworkAndConfig')}
             </p>
           </div>
         ),
         width: 500,
-        okText: '我知道了'
+        okText: t('appDraw.modals.error.okText')
       })
       
       message.error(errorMessage)
@@ -285,7 +287,7 @@ function AppDraw() {
   const handlePublishToGallery = async () => {
     const image = drawBoardRef.current?.getImage()
     if (!image) {
-      message.warning('请先完成绘画')
+      message.warning(t('appDraw.messages.pleaseDrawFirst'))
       return
     }
 
@@ -295,12 +297,12 @@ function AppDraw() {
         name: galleryName.trim() || '佚名'
       })
 
-      message.success('成功发布到画廊！')
+      message.success(t('appDraw.messages.publishSuccess'))
       setShowSuccessGalleryModal(false)
       setGalleryName('佚名')
     } catch (error) {
       console.error('发布到画廊失败:', error)
-      message.error('发布失败，请稍后重试')
+      message.error(t('appDraw.messages.publishFailed'))
     }
   }
 
@@ -315,15 +317,15 @@ function AppDraw() {
           <div className="app-draw-left-panel">
             {/* 标题区域 */}
             <div className="app-draw-title-section">
-              <h1 className="app-draw-page-title">绘画</h1>
+              <h1 className="app-draw-page-title">{t('appDraw.title')}</h1>
             </div>
 
             {/* 目标词区域 */}
             <div className="app-draw-header">
               <div className="app-draw-target-word">
-                <label className="target-word-label">目标词：</label>
+                <label className="target-word-label">{t('appDraw.form.targetWordLabel')}</label>
                 <Input
-                  placeholder="输入要绘画的词"
+                  placeholder={t('appDraw.form.targetWordPlaceholder')}
                   value={targetWord}
                   onChange={(e) => setTargetWord(e.target.value)}
                   className="target-word-input"
@@ -331,9 +333,9 @@ function AppDraw() {
                 />
               </div>
               <div className="app-draw-clue">
-                <label className="clue-label">猜词线索：</label>
+                <label className="clue-label">{t('appDraw.form.clueLabel')}</label>
                 <Input
-                  placeholder="可选，例如：这是一种动物"
+                  placeholder={t('appDraw.form.cluePlaceholder')}
                   value={clue}
                   onChange={(e) => setClue(e.target.value)}
                   className="clue-input"
@@ -352,7 +354,7 @@ function AppDraw() {
                 disabled={submitting}
                 className="submit-guess-button"
               >
-                {submitting ? '正在识别...' : '提交猜词'}
+                {submitting ? t('appDraw.buttons.submitting') : t('appDraw.buttons.submitGuess')}
               </Button>
             </div>
 
@@ -372,15 +374,15 @@ function AppDraw() {
         <div className="app-draw-container">
           {/* 标题区域 */}
           <div className="app-draw-title-section">
-            <h1 className="app-draw-page-title">绘画</h1>
+            <h1 className="app-draw-page-title">{t('appDraw.title')}</h1>
           </div>
 
           {/* 目标词区域 */}
           <div className="app-draw-header">
             <div className="app-draw-target-word">
-              <label className="target-word-label">目标词：</label>
+              <label className="target-word-label">{t('appDraw.form.targetWordLabel')}</label>
               <Input
-                placeholder="输入要绘画的词"
+                placeholder={t('appDraw.form.targetWordPlaceholder')}
                 value={targetWord}
                 onChange={(e) => setTargetWord(e.target.value)}
                 className="target-word-input"
@@ -388,9 +390,9 @@ function AppDraw() {
               />
             </div>
             <div className="app-draw-clue">
-              <label className="clue-label">猜词线索：</label>
+              <label className="clue-label">{t('appDraw.form.clueLabel')}</label>
               <Input
-                placeholder="可选，例如：这是一种动物"
+                placeholder={t('appDraw.form.cluePlaceholder')}
                 value={clue}
                 onChange={(e) => setClue(e.target.value)}
                 className="clue-input"
@@ -417,7 +419,7 @@ function AppDraw() {
               disabled={submitting}
               className="submit-guess-button"
             >
-              {submitting ? '正在识别...' : '提交猜词'}
+              {submitting ? t('appDraw.buttons.submitting') : t('appDraw.buttons.submitGuess')}
             </Button>
           </div>
 
@@ -426,29 +428,29 @@ function AppDraw() {
       )}
 
       <Modal
-        title="🎉 恭喜！发布到画廊"
+        title={t('appDraw.modals.publishToGallery.title')}
         open={showSuccessGalleryModal}
         onOk={handlePublishToGallery}
         onCancel={() => setShowSuccessGalleryModal(false)}
-        okText="发布"
-        cancelText="取消"
+        okText={t('appDraw.modals.publishToGallery.okText')}
+        cancelText={t('appDraw.modals.publishToGallery.cancelText')}
       >
         <Form layout="vertical">
-          <Form.Item label="您的名称">
+          <Form.Item label={t('appDraw.modals.publishToGallery.nameLabel')}>
             <Input
               value={galleryName}
               onChange={(e) => setGalleryName(e.target.value)}
-              placeholder={`输入您的名称（默认${username || '佚名'}）`}
+              placeholder={t('appDraw.modals.publishToGallery.namePlaceholder', { username: username || '佚名' })}
             />
           </Form.Item>
           <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>
-            您的精彩绘画将被分享到画廊，让更多人欣赏您的艺术作品！
+            {t('appDraw.modals.publishToGallery.description')}
           </p>
         </Form>
       </Modal>
 
       <Modal
-        title="🎉 绘画成功！"
+        title={t('appDraw.modals.success.title')}
         open={showSuccessModal}
         onCancel={() => setShowSuccessModal(false)}
         footer={null}
@@ -465,7 +467,7 @@ function AppDraw() {
           }}>
             <p style={{ marginBottom: '12px', fontSize: '16px' }}>
               <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-              AI 成功识别出了你的绘画！
+              {t('appDraw.modals.success.description')}
             </p>
             <div style={{ 
               background: '#f6ffed', 
@@ -474,11 +476,11 @@ function AppDraw() {
               padding: '12px',
               marginTop: '12px'
             }}>
-              <p style={{ margin: '0 0 8px 0' }}><strong>目标词:</strong> {successModalData.targetWord}</p>
-              <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别:</strong> {successModalData.bestGuess}</p>
+              <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.success.targetWord')}</strong> {successModalData.targetWord}</p>
+              <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.success.aiRecognition')}</strong> {successModalData.bestGuess}</p>
               {successModalData.alternatives && successModalData.alternatives.length > 0 && (
                 <p style={{ margin: '0 0 8px 0' }}>
-                  <strong>备选答案:</strong> {successModalData.alternatives.join(', ')}
+                  <strong>{t('appDraw.modals.success.alternatives')}</strong> {successModalData.alternatives.join(', ')}
                 </p>
               )}
               <div style={{ 
@@ -489,9 +491,9 @@ function AppDraw() {
                 overflowY: 'auto',
                 wordBreak: 'break-word'
               }}>
-                <strong>AI 分析:</strong>
+                <strong>{t('appDraw.modals.success.aiAnalysis')}</strong>
                 <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                  {successModalData.reason || '无额外分析'}
+                  {successModalData.reason || t('appDraw.modals.success.noAnalysis')}
                 </p>
               </div>
             </div>
@@ -505,16 +507,16 @@ function AppDraw() {
                 }}
                 style={{ marginRight: '8px' }}
               >
-                发布到画廊
+                {t('appDraw.buttons.publishToGallery')}
               </Button>
               <Button
                 onClick={() => setShowSuccessModal(false)}
               >
-                继续绘画
+                {t('appDraw.buttons.continueDrawing')}
               </Button>
             </div>
             <p style={{ margin: '12px 0 0 0', color: '#52c41a', fontSize: '14px', fontWeight: 500, textAlign: 'center' }}>
-              💡 继续在画板上自由创作吧！
+              {t('appDraw.modals.success.continueTip')}
             </p>
           </div>
         )}

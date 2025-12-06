@@ -6,6 +6,7 @@ import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { LEVEL_CONFIGS, type LevelConfig } from '../config/levels'
+import { useTranslation } from 'react-i18next'
 import './LevelSet.css'
 
 // 本地存储 key
@@ -50,6 +51,7 @@ function LevelSet() {
   const [selectedLevel, setSelectedLevel] = useState<LevelConfig | null>(null)
   const [customLevels] = useState<LevelConfig[]>(getCustomLevels())
   const navigate = useNavigate()
+  const { t } = useTranslation('levelSet')
 
   // 只获取绘画闯关类型的自定义关卡
   const drawCustomLevels = customLevels.filter(level => !level.type || level.type === 'draw')
@@ -66,20 +68,20 @@ function LevelSet() {
   const handleStartChallenge = (level: LevelConfig, e: React.MouseEvent) => {
     e.stopPropagation()
     if (level.status === 'coming-soon') {
-      message.info(`${level.title}关卡即将推出，敬请期待！`)
+      message.info(t('levelSet.messages.comingSoon', { title: level.title }))
       return
     }
 
     // 检查是否有关键词
     if (!level.keywords || level.keywords.length === 0) {
-      message.warning(`${level.title}关卡暂无可用关键词`)
+      message.warning(t('levelSet.messages.noKeywords', { title: level.title }))
       return
     }
 
     // 开始挑战：从第一个关键词开始
     const firstKeyword = level.keywords[0]
     console.log(`开始挑战: ${level.id} - ${level.title}, 第一个关键词: ${firstKeyword}`)
-    message.success(`开始挑战${level.title}关卡！第一关：${firstKeyword}`)
+    message.success(t('levelSet.messages.startChallenge', { title: level.title, keyword: firstKeyword }))
     
     // 导航到关卡游戏页面，从第一个关键词开始
     navigate(`/app/challenge-draw?level=${level.id}&keyword=${encodeURIComponent(firstKeyword)}`)
@@ -88,7 +90,7 @@ function LevelSet() {
   const handleSelectChallenge = (level: LevelConfig, e: React.MouseEvent) => {
     e.stopPropagation()
     if (level.status === 'coming-soon') {
-      message.info(`${level.title}关卡即将推出，敬请期待！`)
+      message.info(t('levelSet.messages.comingSoon', { title: level.title }))
       return
     }
     // 打开选关弹窗
@@ -100,7 +102,7 @@ function LevelSet() {
     if (!selectedLevel) return
     
     console.log(`选择关键词: ${keyword} (${selectedLevel.title})`)
-    message.success(`已选择"${keyword}"，准备进入绘画页面！`)
+    message.success(t('levelSet.messages.keywordSelected', { keyword }))
     
     // 关闭弹窗
     setModalOpen(false)
@@ -120,7 +122,7 @@ function LevelSet() {
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
       <div className="level-set-container">
         <div className="level-set-content">
-        <h1 className="level-set-title">绘画闯关</h1>
+        <h1 className="level-set-title">{t('levelSet.title')}</h1>
         
         <div className="level-cards-grid">
           {allLevels.map((level) => (
@@ -132,7 +134,7 @@ function LevelSet() {
               {level.status === 'coming-soon' && (
                 <div className="level-card-lock-overlay">
                   <LockOutlined className="level-card-lock-icon" />
-                  <span className="level-card-lock-text">待更新...</span>
+                  <span className="level-card-lock-text">{t('levelSet.comingSoon')}</span>
                 </div>
               )}
               {level.difficulty && (
@@ -151,7 +153,7 @@ function LevelSet() {
                   disabled={level.status === 'coming-soon'}
                   className="level-card-button"
                 >
-                  开始挑战
+                  {t('levelSet.startChallenge')}
                 </Button>
                 <Button
                   icon={<UnorderedListOutlined />}
@@ -159,7 +161,7 @@ function LevelSet() {
                   disabled={level.status === 'coming-soon'}
                   className="level-card-button"
                 >
-                  选关挑战
+                  {t('levelSet.selectChallenge')}
                 </Button>
               </div>
             </Card>
@@ -173,9 +175,9 @@ function LevelSet() {
           >
             <div className="level-card-create-content">
               <PlusOutlined className="level-card-create-icon" />
-              <h3 className="level-card-create-title">我的自定义关卡</h3>
+              <h3 className="level-card-create-title">{t('levelSet.customLevels.title')}</h3>
               <p className="level-card-create-description">
-                查看和管理你的自定义关卡
+                {t('levelSet.customLevels.description')}
               </p>
             </div>
           </Card>
@@ -189,7 +191,7 @@ function LevelSet() {
         title={
           <div className="level-modal-title">
             <span className="level-modal-icon">{selectedLevel?.icon}</span>
-            <span>{selectedLevel?.title} - 选择关卡</span>
+            <span>{selectedLevel?.title} - {t('levelSet.modal.selectLevel')}</span>
           </div>
         }
         open={modalOpen}
@@ -200,7 +202,7 @@ function LevelSet() {
       >
         <div className="level-modal-content">
           <p className="level-modal-description">
-            请选择你想挑战的关键词：
+            {t('levelSet.modal.description')}
           </p>
           <div className="level-keywords-grid">
             {selectedLevel?.keywords?.map((keyword, index) => {
@@ -225,7 +227,7 @@ function LevelSet() {
           </div>
           {(!selectedLevel?.keywords || selectedLevel.keywords.length === 0) && (
             <div className="level-no-keywords">
-              暂无可用关键词
+              {t('levelSet.modal.noKeywords')}
             </div>
           )}
         </div>

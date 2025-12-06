@@ -1,0 +1,22 @@
+{
+  "gallery": {
+    "title": "Gallery",
+    "loading": "Loading gallery...",
+    "empty": "No artworks in the gallery yet, go draw and publish some!",
+    "sort": {
+      "filterLabel": "Sort and Filter",
+      "newest": "Newest First",
+      "oldest": "Oldest First",
+      "mostLiked": "Most Liked",
+      "leastLiked": "Least Liked"
+    },
+    "messages": {
+      "deleteSuccess": "Deleted successfully",
+      "deleteFailed": "Delete failed"
+    },
+    "image": {
+      "alt": "Drawn by {{name}}",
+      "previewAlt": "Large image preview"
+    }
+  }
+}

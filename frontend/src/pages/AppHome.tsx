@@ -19,7 +19,7 @@ function AppHome() {
   
   // 检测是否在 Tauri 环境中
   const isInTauriMode = isTauri()
-  const { t } = useTranslation()
+  const { t } = useTranslation('common')
   
   // 在页面加载时检查 AI 配置
   useEffect(() => {

@@ -1,0 +1,96 @@
+{
+  "configAI": {
+    "title": "AI 配置",
+    "subtitle": "配置视觉模型（你画AI猜）和文生图模型（AI画你猜）的连接参数",
+    "tabs": {
+      "vision": "👁️ 视觉模型 (你画AI猜)",
+      "image": "🎨 文生图模型 (AI画你猜)"
+    },
+    "form": {
+      "visionUrl": "视觉模型 API URL",
+      "visionKey": "视觉模型 API Key",
+      "visionModelName": "视觉模型名称",
+      "imageUrl": "文生图模型 API URL",
+      "imageKey": "文生图模型 API Key",
+      "imageModelName": "文生图模型名称",
+      "callPreference": "调用偏好(统一设置)"
+    },
+    "placeholders": {
+      "visionUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "visionKey": "请输入百度 AI Studio 的 Access Token",
+      "visionModelName": "ernie-4.5-vl-28b-a3b",
+      "imageUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
+      "imageKey": "请输入百度 AI Studio 的 Access Token",
+      "imageModelName": "ernie-4.5-vl-28b-a3b"
+    },
+    "buttons": {
+      "testVision": "测试视觉模型",
+      "testImage": "测试文生图模型",
+      "reset": "重置",
+      "save": "保存配置"
+    },
+    "messages": {
+      "serverLoginRequired": "💰 服务器调用点需要登录后才能使用。",
+      "configSaved": "AI 配置已保存并生效",
+      "configComplete": "✅ AI 配置完整，可以正常使用 AI 功能",
+      "configIncomplete": "⚠️ 配置信息不完整，自定义服务可能无法使用",
+      "saveFailed": "保存失败，请重试",
+      "resetSuccess": "已重置为默认配置",
+      "resetFailed": "重置失败，请重试",
+      "fillComplete": "请先填写完整的 {{modelType}} URL、API Key 和模型名称",
+      "testingConnection": "开始测试 {{modelType}} 连接...",
+      "testSuccess": "🎉 {{modelType}} 连接测试成功",
+      "serviceConnected": "{{modelType}} 服务连接正常！",
+      "generatedImage": "生成的测试图像:",
+      "aiReply": "AI 回复:",
+      "readyToUse": "现在您可以保存这个配置并开始使用 {{modelType}} 功能了！",
+      "testFailed": "❌ {{modelType}} 连接测试失败",
+      "cannotConnect": "无法连接到 {{modelType}} 服务",
+      "errorInfo": "错误信息:",
+      "possibleSolutions": "可能的解决方案:",
+      "checkApiKey": "检查 API Key 是否正确",
+      "checkUrl": "验证 URL 地址是否有效",
+      "checkModelName": "确认模型名称是否支持",
+      "checkNetwork": "检查网络连接状态",
+      "backendError": "🔌 后端服务错误",
+      "backendApiFailed": "后端 API 调用失败",
+      "errorDetails": "错误详情:",
+      "checkBackendRunning": "请检查后端服务是否正常运行",
+      "backendApiCallFailed": "后端 API 调用失败: {{status}} {{statusText}}",
+      "testError": "测试 {{modelType}} 连接时发生错误: {{error}}",
+      "backendNotConnected": "无法连接到后端服务，请确保后端服务已启动",
+      "unknownError": "未知错误",
+      "backendConnectionFailed": "🔌 后端连接失败",
+      "connectionException": "⚠️ 连接异常",
+      "cannotConnectBackend": "无法连接到后端服务",
+      "testException": "测试 {{modelType}} 连接时发生异常",
+      "solutions": "解决方案:",
+      "ensureBackendRunning": "确保后端服务正在运行 (python run.py)",
+      "checkBackendPort": "检查后端端口是否为 8002",
+      "checkFirewall": "确认防火墙没有阻止连接"
+    },
+    "validation": {
+      "enterValidUrl": "请输入有效的 URL",
+      "enterVisionUrl": "请输入视觉模型 API URL",
+      "enterImageUrl": "请输入文生图模型 API URL",
+      "enterVisionKey": "请输入视觉模型 API Key",
+      "enterImageKey": "请输入文生图模型 API Key",
+      "enterVisionModelName": "请输入视觉模型名称",
+      "enterImageModelName": "请输入文生图模型名称",
+      "selectCallPreference": "请选择调用偏好"
+    },
+    "preferences": {
+      "custom": "自定义服务",
+      "server": "服务器调用点",
+      "serverTip": "💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务"
+    },
+    "footer": {
+      "hint": "💡 提示：配置信息将保存在浏览器本地存储中，获取 API Key：访问",
+      "baiduLink": "🔗 百度 AI Studio Access Token",
+      "help": "💡 视觉模型用于\"你画AI猜\"游戏，文生图模型用于\"AI画你猜\"游戏。选择服务器调用点时优先使用平台服务，点数不足时自动回退到自定义服务。请配置自定义服务参数作为备用方案。"
+    },
+    "links": {
+      "getToken": "🔗 获取百度 AI Studio Access Token"
+    }
+  }
+}

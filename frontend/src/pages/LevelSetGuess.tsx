@@ -7,6 +7,7 @@ import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { GUESS_LEVEL_CONFIGS, type GuessLevelConfig } from '../config/guessLevels'
 import type { LevelConfig } from '../config/levels'
+import { useTranslation } from 'react-i18next'
 import './LevelSet.css'
 
 // 本地存储 key
@@ -29,6 +30,7 @@ function LevelSetGuess() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
   const [customLevels] = useState<LevelConfig[]>(getCustomLevels())
+  const { t } = useTranslation('levelSetGuess')
 
   // 只获取猜词闯关类型的自定义关卡，并转换为GuessLevelConfig格式
   const guessCustomLevels: GuessLevelConfig[] = customLevels
@@ -48,7 +50,7 @@ function LevelSetGuess() {
     e.stopPropagation()
     
     if (level.status === 'coming-soon') {
-      message.info(`${level.title}关卡即将推出，敬请期待！`)
+      message.info(t('levelSetGuess.messages.comingSoon', { title: level.title }))
       return
     }
 
@@ -68,8 +70,8 @@ function LevelSetGuess() {
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
       <div className="level-set-container">
         <div className="level-set-content">
-        <h1 className="level-set-title">猜词闯关(Beta)</h1>
-        <p className="level-set-subtitle">看到AI生成的图片，猜出对应的词语。每关10个词，按随机顺序挑战</p>
+        <h1 className="level-set-title">{t('levelSetGuess.title')}</h1>
+        <p className="level-set-subtitle">{t('levelSetGuess.subtitle')}</p>
 
         <div className="level-cards-grid">
           {allLevels.map((level) => (
@@ -81,7 +83,7 @@ function LevelSetGuess() {
               {level.status === 'coming-soon' && (
                 <div className="level-card-lock-overlay">
                   <LockOutlined className="level-card-lock-icon" />
-                  <span className="level-card-lock-text">待更新...</span>
+                  <span className="level-card-lock-text">{t('levelSetGuess.comingSoon')}</span>
                 </div>
               )}
               {level.difficulty && (
@@ -93,7 +95,7 @@ function LevelSetGuess() {
               <h3 className="level-card-title">{level.title}</h3>
               <p className="level-card-description">{level.description}</p>
               <div className="level-card-info">
-                <span className="level-keyword-count">📝 {level.keywords.length} 个词语</span>
+                <span className="level-keyword-count">{t('levelSetGuess.keywordCount', { count: level.keywords.length })}</span>
               </div>
               <div className="level-card-buttons">
                 <Button
@@ -103,7 +105,7 @@ function LevelSetGuess() {
                   disabled={level.status === 'coming-soon'}
                   className="level-card-button"
                 >
-                  开始挑战
+                  {t('levelSetGuess.startChallenge')}
                 </Button>
               </div>
             </Card>
@@ -117,9 +119,9 @@ function LevelSetGuess() {
           >
             <div className="level-card-create-content">
               <PlusOutlined className="level-card-create-icon" />
-              <h3 className="level-card-create-title">我的自定义关卡</h3>
+              <h3 className="level-card-create-title">{t('levelSetGuess.customLevels.title')}</h3>
               <p className="level-card-create-description">
-                查看和管理你的自定义关卡
+                {t('levelSetGuess.customLevels.description')}
               </p>
             </div>
           </Card>

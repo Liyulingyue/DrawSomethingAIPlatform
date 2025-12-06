@@ -1,0 +1,70 @@
+{
+  "appDraw": {
+    "title": "Drawing",
+    "form": {
+      "targetWordLabel": "Target Word:",
+      "targetWordPlaceholder": "Enter the word to draw",
+      "clueLabel": "Drawing Clue:",
+      "cluePlaceholder": "Optional, e.g., This is an animal"
+    },
+    "buttons": {
+      "submitGuess": "Submit Guess",
+      "submitting": "Recognizing...",
+      "publishToGallery": "Publish to Gallery",
+      "continueDrawing": "Continue Drawing"
+    },
+    "messages": {
+      "pleaseDrawFirst": "Please complete your drawing first",
+      "pleaseEnterTarget": "Please enter a target word first",
+      "recognitionSuccess": "Drawing recognition successful!",
+      "recognitionFailed": "Recognition result doesn't match the target word, try again!",
+      "submitFailed": "Submission failed, please try again later",
+      "connectionFailed": "Cannot connect to server, please check network connection",
+      "submitError": "Error occurred while submitting guess",
+      "errorInfo": "Error Information:",
+      "checkNetworkAndConfig": "Please check network connection and AI configuration",
+      "publishSuccess": "Successfully published to gallery!",
+      "publishFailed": "Publishing failed, please try again later"
+    },
+    "modals": {
+      "publishToGallery": {
+        "title": "🎉 Congratulations! Publish to Gallery",
+        "okText": "Publish",
+        "cancelText": "Cancel",
+        "nameLabel": "Your Name",
+        "namePlaceholder": "Enter your name (default {{username}})",
+        "description": "Your amazing artwork will be shared in the gallery for more people to appreciate!"
+      },
+      "success": {
+        "title": "🎉 Drawing Success!",
+        "description": "AI successfully recognized your drawing!",
+        "targetWord": "Target Word:",
+        "aiRecognition": "AI Recognition:",
+        "alternatives": "Alternative Answers:",
+        "aiAnalysis": "AI Analysis:",
+        "noAnalysis": "No additional analysis",
+        "continueTip": "💡 Continue creating freely on the canvas!"
+      },
+      "failure": {
+        "title": "😅 Try Again!",
+        "description": "AI couldn't accurately recognize your drawing",
+        "targetWord": "Target Word:",
+        "aiRecognition": "AI Recognition:",
+        "alternatives": "Alternative Answers:",
+        "aiAnalysis": "AI Analysis:",
+        "noAnalysis": "No additional analysis",
+        "improvementTips": "💡 Improvement Suggestions:",
+        "tip1": "Try to draw more clearly",
+        "tip2": "Add more detailed features",
+        "tip3": "Use more obvious shapes",
+        "continueDrawing": "🎨 Continue modifying or redrawing on the canvas!",
+        "continueButton": "Continue Creating"
+      },
+      "error": {
+        "title": "⚠️ Submission Failed",
+        "description": "Error occurred while submitting guess",
+        "okText": "Got it"
+      }
+    }
+  }
+}

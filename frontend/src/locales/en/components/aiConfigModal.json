@@ -1,0 +1,21 @@
+{
+  "aiConfigModal": {
+    "title": "AI Service Not Configured",
+    "ok": "Configure Now",
+    "cancel": "Remind me later",
+    "detecting": "We detected you have not configured AI services yet.",
+    "drawing_guess": "Drawing Guesses",
+    "ai_draw": "AI Draw",
+    "needs_config": "requires a",
+    "vision_model": "vision model",
+    "generation_model": "text-to-image model",
+    "recommended": {
+      "title": "Recommended: Baidu PaddlePaddle AI Studio",
+      "bullet1": "Free to use; register to obtain",
+      "bullet2": "Supports vision recognition and image generation"
+    },
+    "how_to_get": "How to get:",
+    "baidu_ai_studio": "Baidu AI Studio",
+    "get_access_token": "register and obtain an Access Token"
+  }
+}

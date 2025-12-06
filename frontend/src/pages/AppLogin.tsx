@@ -7,6 +7,7 @@ import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { UserOutlined, LogoutOutlined, CrownOutlined, CreditCardOutlined } from '@ant-design/icons'
 import { getApiBaseUrlSync } from '../config/api'
+import { useTranslation } from 'react-i18next'
 import './AppLogin.css'
 
 const { Title, Text } = Typography
@@ -14,6 +15,7 @@ const { Title, Text } = Typography
 function AppLogin() {
   const navigate = useNavigate()
   const { username, isAdmin, callsRemaining, adminLogin, loading, initializing, refreshUserInfo } = useUser()
+  const { t } = useTranslation('appLogin')
   const [loginUsername, setLoginUsername] = useState('')
   const [password, setPassword] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -40,19 +42,19 @@ function AppLogin() {
 
   const handleLogin = async () => {
     if (!loginUsername.trim()) {
-      message.error('请输入用户名')
+      message.error(t('appLogin.messages.usernameRequired'))
       return
     }
 
     if (!password.trim()) {
-      message.error('请输入密码')
+      message.error(t('appLogin.messages.passwordRequired'))
       return
     }
 
     // 首先尝试管理员登录
     const adminResult = await adminLogin(loginUsername.trim(), password.trim())
     if (adminResult.success) {
-      message.success(`管理员登录成功，欢迎 ${adminResult.username}`)
+      message.success(t('appLogin.messages.adminLoginSuccess', { username: adminResult.username }))
       navigate('/app/gallery', { replace: true })
       return
     }
@@ -72,7 +74,7 @@ function AppLogin() {
 
       if (response.ok) {
         const data = await response.json()
-        message.success(`登录成功，欢迎 ${data.username}`)
+        message.success(t('appLogin.messages.loginSuccess', { username: data.username }))
         
         // 保存登录信息到localStorage
         localStorage.setItem('sessionId', data.session_id)
@@ -83,11 +85,11 @@ function AppLogin() {
         window.location.reload()
       } else {
         const errorData = await response.json()
-        message.error(errorData.message || '登录失败，请检查用户名和密码')
+        message.error(errorData.message || t('appLogin.messages.loginFailed'))
       }
     } catch (error) {
       console.error('Login failed:', error)
-      message.error('登录失败，请稍后重试')
+      message.error(t('appLogin.messages.retryLater'))
     }
   }
 
@@ -119,7 +121,7 @@ function AppLogin() {
     // 设置退出登录标志，防止自动生成访客用户
     localStorage.setItem('justLoggedOut', 'true')
 
-    message.success('已退出登录')
+    message.success(t('appLogin.messages.logoutSuccess'))
 
     // 强制跳转到登录页面
     window.location.href = '/app/login'
@@ -130,7 +132,7 @@ function AppLogin() {
     try {
       const sessionId = localStorage.getItem('sessionId')
       if (!sessionId) {
-        message.error('请先登录')
+        message.error(t('appLogin.messages.loginRequired'))
         return
       }
 
@@ -146,17 +148,17 @@ function AppLogin() {
       })
 
       if (response.ok) {
-        message.success(`充值成功！获得 20 次调用`)
+        message.success(t('appLogin.messages.rechargeSuccess'))
         setRechargeModalVisible(false)
         // 刷新用户信息以更新调用次数显示
         await refreshUserInfo()
       } else {
         const errorData = await response.json()
-        message.error(errorData.message || '充值失败')
+        message.error(errorData.message || t('appLogin.messages.rechargeFailed'))
       }
     } catch (error) {
       console.error('Recharge failed:', error)
-      message.error('充值失败，请稍后重试')
+      message.error(t('appLogin.messages.rechargeFailed'))
     } finally {
       setRechargeLoading(false)
     }
@@ -171,12 +173,12 @@ function AppLogin() {
         <div className="app-login-container">
           <div className="app-login-content">
             <div className="app-login-header">
-              <h1 className="app-login-title">🎨 你画AI猜</h1>
-              <p className="app-login-subtitle">DrawSomething AI Platform</p>
+              <h1 className="app-login-title">{t('appLogin.title')}</h1>
+              <p className="app-login-subtitle">{t('appLogin.subtitle')}</p>
             </div>
             <Card className="app-login-card" variant="borderless">
               <div style={{ textAlign: 'center', padding: '20px' }}>
-                <Text>加载中...</Text>
+                <Text>{t('appLogin.loading')}</Text>
               </div>
             </Card>
           </div>
@@ -193,8 +195,8 @@ function AppLogin() {
       <div className="app-login-container">
         <div className="app-login-content">
           <div className="app-login-header">
-            <h1 className="app-login-title">🎨 你画AI猜</h1>
-            <p className="app-login-subtitle">DrawSomething AI Platform</p>
+            <h1 className="app-login-title">{t('appLogin.title')}</h1>
+            <p className="app-login-subtitle">{t('appLogin.subtitle')}</p>
           </div>
 
           <Card className="app-login-card" variant="borderless">
@@ -202,8 +204,8 @@ function AppLogin() {
               // 已登录状态
               <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
                 <div>
-                  <Title level={3}>登录状态</Title>
-                  <Text type="secondary">您已成功登录</Text>
+                  <Title level={3}>{t('appLogin.loginStatus.title')}</Title>
+                  <Text type="secondary">{t('appLogin.loginStatus.loggedIn')}</Text>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -217,13 +219,13 @@ function AppLogin() {
                     <Text strong style={{ fontSize: '18px' }}>{username}</Text>
                     {isAdmin && (
                       <div style={{ marginTop: '8px' }}>
-                        <Tag icon={<CrownOutlined />} color="gold">管理员</Tag>
+                        <Tag icon={<CrownOutlined />} color="gold">{t('appLogin.loginStatus.adminTag')}</Tag>
                       </div>
                     )}
                     {!isAdmin && (
                       <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Tag color={callsRemaining > 0 ? 'blue' : 'orange'}>
-                          剩余调用次数: {refreshingStatus ? '刷新中...' : callsRemaining}
+                          {t('appLogin.loginStatus.callsRemaining')} {refreshingStatus ? t('appLogin.loginStatus.refreshing') : callsRemaining}
                         </Tag>
                         <Button
                           size="small"
@@ -231,21 +233,21 @@ function AppLogin() {
                           onClick={() => setRechargeModalVisible(true)}
                           style={{ fontSize: '12px', padding: '0 8px', height: '24px' }}
                         >
-                          充值
+                          {t('appLogin.loginStatus.recharge')}
                         </Button>
                       </div>
                     )}
                     {isAdmin && (
                       <div style={{ marginTop: '8px' }}>
                         <Tag color="gold">
-                          剩余调用次数: {refreshingStatus ? '刷新中...' : '无限'}
+                          {t('appLogin.loginStatus.callsRemaining')} {refreshingStatus ? t('appLogin.loginStatus.refreshing') : t('appLogin.loginStatus.unlimited')}
                         </Tag>
                       </div>
                     )}
                   </div>
 
                   <Text type="secondary">
-                    欢迎使用你画AI猜平台！
+                    {t('appLogin.loginStatus.welcome')}
                   </Text>
                 </div>
 
@@ -257,7 +259,7 @@ function AppLogin() {
                     block
                     danger
                   >
-                    退出登录
+                    {t('appLogin.loginStatus.logout')}
                   </Button>
                   
                   <Button 
@@ -265,7 +267,7 @@ function AppLogin() {
                     onClick={() => navigate('/app/home')} 
                     block
                   >
-                    返回主页
+                    {t('appLogin.loginStatus.backHome')}
                   </Button>
                 </Space>
               </Space>
@@ -273,29 +275,29 @@ function AppLogin() {
               // 未登录状态
               <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <div>
-                  <Title level={3}>用户登录</Title>
-                  <Text type="secondary">输入用户名和密码登录，登录使您能够使用服务器资源进行模型推理</Text>
+                  <Title level={3}>{t('appLogin.userLogin.title')}</Title>
+                  <Text type="secondary">{t('appLogin.userLogin.description')}</Text>
                 </div>
 
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                   <Input
                     value={loginUsername}
-                    placeholder="用户名"
+                    placeholder={t('appLogin.userLogin.usernamePlaceholder')}
                     onChange={(e) => setLoginUsername(e.target.value)}
                   />
 
                   <Input.Password
                     value={password}
-                    placeholder="密码"
+                    placeholder={t('appLogin.userLogin.passwordPlaceholder')}
                     onChange={(e) => setPassword(e.target.value)}
                   />
 
                   <Button type="primary" loading={loading} onClick={handleLogin} block>
-                    用户登录
+                    {t('appLogin.userLogin.loginButton')}
                   </Button>
 
                   <Text type="secondary" style={{ fontSize: '12px', textAlign: 'center', display: 'block' }}>
-                    💡 如果用户名不存在，将自动创建新用户
+                    {t('appLogin.userLogin.autoCreateHint')}
                   </Text>
                 </Space>
               </Space>
@@ -309,14 +311,14 @@ function AppLogin() {
         title={
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
             <CreditCardOutlined style={{ fontSize: '24px', color: '#1890ff', marginRight: '8px' }} />
-            <span style={{ fontSize: '18px', fontWeight: 'bold' }}>充值调用次数</span>
+            <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t('appLogin.rechargeModal.title')}</span>
           </div>
         }
         open={rechargeModalVisible}
         onOk={handleRecharge}
         onCancel={() => setRechargeModalVisible(false)}
-        okText="立即充值"
-        cancelText="取消"
+        okText={t('appLogin.rechargeModal.okText')}
+        cancelText={t('appLogin.rechargeModal.cancelText')}
         confirmLoading={rechargeLoading}
         width={400}
         centered
@@ -330,10 +332,10 @@ function AppLogin() {
             color: 'white'
           }}>
             <div style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '8px' }}>
-              20
+              {t('appLogin.rechargeModal.amount')}
             </div>
             <div style={{ fontSize: '16px', opacity: 0.9 }}>
-              次调用次数
+              {t('appLogin.rechargeModal.unit')}
             </div>
           </div>
 
@@ -345,12 +347,9 @@ function AppLogin() {
             marginBottom: '16px'
           }}>
             <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#52c41a', marginBottom: '8px' }}>
-              🎉 充值礼包
+              {t('appLogin.rechargeModal.packageTitle')}
             </div>
-            <div style={{ color: '#666', lineHeight: '1.6' }}>
-              • 获得 <strong>20次</strong> AI猜词调用次数<br/>
-              • 可用于绘画识别和AI交互<br/>
-              • 永久有效，无过期时间
+            <div style={{ color: '#666', lineHeight: '1.6' }} dangerouslySetInnerHTML={{ __html: t('appLogin.rechargeModal.packageDesc') }}>
             </div>
           </div>
 
@@ -362,7 +361,7 @@ function AppLogin() {
             fontSize: '14px',
             color: '#d46b08'
           }}>
-            💡 每次AI猜词会消耗1次调用次数，请合理使用
+            {t('appLogin.rechargeModal.tip')}
           </div>
         </div>
       </Modal>

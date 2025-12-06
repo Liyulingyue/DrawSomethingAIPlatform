@@ -8,7 +8,7 @@ import './AppDonate.css'
 
 function AppDonate() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { t } = useTranslation()
+  const { t } = useTranslation('donate')
 
   return (
     <>

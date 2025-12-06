@@ -1,0 +1,16 @@
+{
+  "levelSetGuess": {
+    "title": "Word Guessing Levels (Beta)",
+    "subtitle": "See AI-generated images and guess the corresponding words. Each level has 10 words, challenged in random order",
+    "comingSoon": "Coming Soon...",
+    "startChallenge": "Start Challenge",
+    "customLevels": {
+      "title": "My Custom Levels",
+      "description": "View and manage your custom levels"
+    },
+    "keywordCount": "📝 {{count}} words",
+    "messages": {
+      "comingSoon": "{{title}} level is coming soon, stay tuned!"
+    }
+  }
+}

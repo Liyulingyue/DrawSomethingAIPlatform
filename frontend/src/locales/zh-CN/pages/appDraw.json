@@ -1,0 +1,70 @@
+{
+  "appDraw": {
+    "title": "绘画",
+    "form": {
+      "targetWordLabel": "目标词：",
+      "targetWordPlaceholder": "输入要绘画的词",
+      "clueLabel": "猜词线索：",
+      "cluePlaceholder": "可选，例如：这是一种动物"
+    },
+    "buttons": {
+      "submitGuess": "提交猜词",
+      "submitting": "正在识别...",
+      "publishToGallery": "发布到画廊",
+      "continueDrawing": "继续绘画"
+    },
+    "messages": {
+      "pleaseDrawFirst": "请先完成绘画",
+      "pleaseEnterTarget": "请先输入目标词",
+      "recognitionSuccess": "绘画识别成功！",
+      "recognitionFailed": "识别结果与目标词不匹配，再试一次吧！",
+      "submitFailed": "提交失败，请稍后重试",
+      "connectionFailed": "无法连接到服务器，请检查网络连接",
+      "submitError": "提交猜词时发生错误",
+      "errorInfo": "错误信息:",
+      "checkNetworkAndConfig": "请检查网络连接和 AI 配置是否正确",
+      "publishSuccess": "成功发布到画廊！",
+      "publishFailed": "发布失败，请稍后重试"
+    },
+    "modals": {
+      "publishToGallery": {
+        "title": "🎉 恭喜！发布到画廊",
+        "okText": "发布",
+        "cancelText": "取消",
+        "nameLabel": "您的名称",
+        "namePlaceholder": "输入您的名称（默认{{username}}）",
+        "description": "您的精彩绘画将被分享到画廊，让更多人欣赏您的艺术作品！"
+      },
+      "success": {
+        "title": "🎉 绘画成功！",
+        "description": "AI 成功识别出了你的绘画！",
+        "targetWord": "目标词:",
+        "aiRecognition": "AI 识别:",
+        "alternatives": "备选答案:",
+        "aiAnalysis": "AI 分析:",
+        "noAnalysis": "无额外分析",
+        "continueTip": "💡 继续在画板上自由创作吧！"
+      },
+      "failure": {
+        "title": "😅 再试一次！",
+        "description": "AI 没能准确识别出你的绘画",
+        "targetWord": "目标词:",
+        "aiRecognition": "AI 识别:",
+        "alternatives": "备选答案:",
+        "aiAnalysis": "AI 分析:",
+        "noAnalysis": "无额外分析",
+        "improvementTips": "💡 改进建议:",
+        "tip1": "尝试画得更清晰一些",
+        "tip2": "添加更多细节特征",
+        "tip3": "使用更明显的形状",
+        "continueDrawing": "🎨 继续在画板上修改或重新绘制！",
+        "continueButton": "继续创作"
+      },
+      "error": {
+        "title": "⚠️ 提交失败",
+        "description": "提交猜词时发生错误",
+        "okText": "我知道了"
+      }
+    }
+  }
+}

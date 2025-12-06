@@ -1,0 +1,19 @@
+{
+  "sidebar": {
+    "title": "DrawSomething AI",
+    "home": "Home",
+    "login": "Login",
+    "level_draw": "Drawing Levels",
+    "level_guess": "Guessing Levels",
+    "my_custom_levels": "My Custom Levels",
+    "free_draw": "Free Draw",
+    "gallery": "Gallery",
+    "introduction": "Introduction",
+    "config_ai": "AI Configuration",
+    "donate": "Support Us",
+    "version": "Version {{version}}",
+    "copyright": "© {{year}} DrawSomething AI Platform",
+    "repository": "Open Source Repo",
+    "repository_title": "View on GitHub"
+  }
+}

@@ -19,7 +19,7 @@ import './ConfigAI.css'
 
 function ConfigAI() {
   const { message, modal } = App.useApp()
-  const { t } = useTranslation()
+  const { t } = useTranslation('configAI')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const isInTauriMode = isTauri()
   const [form] = Form.useForm()

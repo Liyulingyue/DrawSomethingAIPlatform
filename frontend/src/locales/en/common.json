@@ -1,0 +1,16 @@
+{
+  "title": "🎨 Draw & AI & Guesses",
+  "subtitle": "DrawSomething AI Platform",
+  "hint": "💡 It's recommended to read the guide if this is your first time",
+  "buttons": {
+    "level_draw": "Drawing Levels",
+    "level_guess": "Guessing Levels",
+    "login": "User Login",
+    "free_draw": "Free Draw",
+    "gallery": "Gallery",
+    "config_ai": "AI Configuration",
+    "introduction": "Introduction",
+    "donate": "Support Us"
+  },
+  "view_source": "View source on GitHub"
+}

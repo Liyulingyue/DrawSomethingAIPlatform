@@ -1,0 +1,49 @@
+{
+  "appLogin": {
+    "loading": "Loading...",
+    "title": "🎨 Draw & AI & Guesses",
+    "subtitle": "DrawSomething AI Platform",
+    "loginStatus": {
+      "title": "Login Status",
+      "loggedIn": "You have successfully logged in",
+      "welcome": "Welcome to DrawSomething AI Platform!",
+      "adminTag": "Administrator",
+      "callsRemaining": "Calls remaining:",
+      "refreshing": "Refreshing...",
+      "unlimited": "Unlimited",
+      "recharge": "Recharge",
+      "logout": "Logout",
+      "backHome": "Back to Home"
+    },
+    "userLogin": {
+      "title": "User Login",
+      "description": "Enter username and password to login, which enables you to use server resources for model inference",
+      "usernamePlaceholder": "Username",
+      "passwordPlaceholder": "Password",
+      "loginButton": "User Login",
+      "autoCreateHint": "💡 If the username doesn't exist, a new user will be created automatically"
+    },
+    "messages": {
+      "usernameRequired": "Please enter username",
+      "passwordRequired": "Please enter password",
+      "adminLoginSuccess": "Administrator login successful, welcome {{username}}",
+      "loginSuccess": "Login successful, welcome {{username}}",
+      "loginFailed": "Login failed, please check username and password",
+      "retryLater": "Login failed, please try again later",
+      "logoutSuccess": "Logged out successfully",
+      "loginRequired": "Please login first",
+      "rechargeSuccess": "Recharge successful! Got 20 calls",
+      "rechargeFailed": "Recharge failed"
+    },
+    "rechargeModal": {
+      "title": "Recharge Call Count",
+      "okText": "Recharge Now",
+      "cancelText": "Cancel",
+      "amount": "20",
+      "unit": "call counts",
+      "packageTitle": "🎉 Recharge Package",
+      "packageDesc": "• Get <strong>20</strong> AI guessing call counts<br/>• Can be used for drawing recognition and AI interaction<br/>• Permanent validity, no expiration",
+      "tip": "💡 Each AI guessing consumes 1 call count, please use reasonably"
+    }
+  }
+}

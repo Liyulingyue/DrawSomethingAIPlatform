@@ -1,0 +1,46 @@
+{
+  "challengeGuess": {
+    "loading": "正在生成AI绘画...",
+    "timeUp": "时间到！正确答案已显示",
+    "enterGuess": "请输入您的猜测",
+    "keywordNotFound": "未找到当前关键词",
+    "guessCorrect": "🎉 恭喜猜对！获得 {{score}} 积分！",
+    "guessWrong": "猜错了，再试一次吧！",
+    "levelCompleted": "🎉 恭喜完成【{{title}}】关卡所有挑战！获得 {{score}} 积分！",
+    "nextQuestion": "进入下一题 ({{current}}/{{total}})",
+    "skipQuestion": "跳过第 {{current}} 题 ({{current}}/{{total}})",
+    "levelNotFound": "关卡配置未找到",
+    "networkError": "网络连接失败，请检查网络连接",
+    "serverError": "服务器错误，请稍后重试",
+    "unknownError": "未知错误，请稍后重试",
+    "guessInput": {
+      "placeholder": "输入您猜的词语...",
+      "button": "提交猜测",
+      "skipButton": "跳过此题"
+    },
+    "modals": {
+      "levelComplete": {
+        "title": "🎉 恭喜通关！",
+        "congratulations": "恭喜完成【{{title}}】关卡所有挑战！",
+        "totalScore": "总积分：{{score}} 分",
+        "timeBonus": "时间奖励：{{bonus}} 分",
+        "accuracyBonus": "准确率奖励：{{bonus}} 分",
+        "perfectBonus": "完美通关奖励：{{bonus}} 分",
+        "backToLevels": "返回选关"
+      },
+      "timeUp": {
+        "title": "⏰ 时间到！",
+        "message": "时间已用完，正确答案是：",
+        "answer": "正确答案：{{answer}}",
+        "continue": "继续挑战"
+      }
+    },
+    "ui": {
+      "score": "积分：{{score}}",
+      "time": "时间：{{time}}秒",
+      "progress": "进度：{{current}}/{{total}}",
+      "currentWord": "当前词语",
+      "yourGuess": "您的猜测"
+    }
+  }
+}

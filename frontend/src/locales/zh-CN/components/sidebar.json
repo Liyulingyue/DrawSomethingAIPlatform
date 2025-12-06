@@ -1,0 +1,19 @@
+{
+  "sidebar": {
+    "title": "DrawSomething AI",
+    "home": "主页",
+    "login": "登录",
+    "level_draw": "绘画闯关",
+    "level_guess": "猜词闯关",
+    "my_custom_levels": "我的自定义关卡",
+    "free_draw": "自由绘画",
+    "gallery": "画廊",
+    "introduction": "使用说明",
+    "config_ai": "AI 配置",
+    "donate": "支持我们",
+    "version": "版本 {{version}}",
+    "copyright": "© {{year}} DrawSomething AI Platform",
+    "repository": "开源仓库",
+    "repository_title": "在 GitHub 上查看"
+  }
+}

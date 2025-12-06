@@ -15,7 +15,7 @@ function Introduction() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
   const isInTauriMode = isTauri()
-  const { t } = useTranslation()
+  const { t } = useTranslation('introduction')
 
   const handleDonate = () => {
     navigate('/app/donate')
