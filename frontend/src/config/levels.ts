@@ -72,16 +72,6 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
     difficulty: '简单',
     keywords: ['T恤', '裙子', '裤子', '毛衣', '背心', '围巾', '帽子', '鞋子', '袜子', '手套', '领带', '腰带', '眼镜'],
     clue: '一种服装或穿戴用品',
-  },
-  {
-    id: 'pokemon',
-    title: '宝可梦',
-    description: '神奇的宝可梦世界',
-    icon: '⚡',
-    status: 'available',
-    difficulty: '困难',
-    keywords: ['皮卡丘', '杰尼龟', '小火龙', '妙蛙种子', '喷火龙', '水箭龟', '妙蛙花', '雷丘', '风速狗', '尼多王'],
-    clue: '一种宝可梦',
   }
 ]
 

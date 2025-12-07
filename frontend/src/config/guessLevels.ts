@@ -73,16 +73,6 @@ export const GUESS_LEVEL_CONFIGS: GuessLevelConfig[] = [
     clue: '一种服装或穿戴用品',
   },
   {
-    id: 'guess_pokemon',
-    title: '宝可梦猜词',
-    description: '神奇的宝可梦世界，皮卡丘在等你',
-    icon: '⚡',
-    status: 'available',
-    difficulty: '困难',
-    keywords: ['皮卡丘', '杰尼龟', '小火龙', '妙蛙种子', '喷火龙', '水箭龟', '妙蛙花', '雷丘', '风速狗', '尼多王'],
-    clue: '一种宝可梦',
-  },
-  {
     id: 'guess_nature',
     title: '自然景观猜词',
     description: '美丽的自然风景，大自然的神奇',
