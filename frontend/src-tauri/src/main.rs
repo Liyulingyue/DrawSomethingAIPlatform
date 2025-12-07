@@ -94,6 +94,62 @@ fn get_backend_url(state: tauri::State<AppState>) -> String {
     }
 }
 
+// 清理 PyInstaller 临时文件
+fn cleanup_pyinstaller_temp() {
+    #[cfg(target_os = "windows")]
+    {
+        // 清理 PyInstaller --onefile 创建的 _MEI* 临时目录
+        // 由于后端被强制终止，它的 atexit 清理不会执行，所以我们需要在这里清理
+        
+        // 等待一下，确保后端进程完全终止
+        std::thread::sleep(std::time::Duration::from_millis(500));
+        
+        if let Ok(temp_dir) = std::env::var("TEMP") {
+            #[cfg(debug_assertions)]
+            println!("🔍 检查临时目录: {}", temp_dir);
+            
+            if let Ok(entries) = std::fs::read_dir(&temp_dir) {
+                let mut cleaned = 0;
+                for entry in entries.flatten() {
+                    if let Ok(metadata) = entry.metadata() {
+                        if metadata.is_dir() {
+                            if let Some(file_name) = entry.file_name().to_str() {
+                                // 只清理 _MEI 开头的目录
+                                if file_name.starts_with("_MEI") {
+                                    let path = entry.path();
+                                    
+                                    // 检查这个目录是否已经不被使用（没有进程占用）
+                                    // 通过尝试删除来判断
+                                    #[cfg(debug_assertions)]
+                                    println!("🗑️ 尝试删除 PyInstaller 临时目录: {}", file_name);
+                                    
+                                    match std::fs::remove_dir_all(&path) {
+                                        Ok(_) => {
+                                            cleaned += 1;
+                                            #[cfg(debug_assertions)]
+                                            println!("✅ 已删除: {}", file_name);
+                                        }
+                                        Err(e) => {
+                                            // 目录可能仍在使用中（有其他进程）或权限问题
+                                            #[cfg(debug_assertions)]
+                                            println!("⚠️ 无法删除 {} (可能仍在使用): {}", file_name, e);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                #[cfg(debug_assertions)]
+                if cleaned > 0 {
+                    println!("✅ 共清理了 {} 个 PyInstaller 临时目录", cleaned);
+                }
+            }
+        }
+    }
+}
+
 // 清理函数：清理后端状态并终止后端进程
 fn cleanup_backend(app_handle: &tauri::AppHandle) {
     #[cfg(debug_assertions)]
@@ -156,6 +212,13 @@ fn cleanup_backend(app_handle: &tauri::AppHandle) {
         #[cfg(debug_assertions)]
         println!("⚠️ 没有找到后端进程句柄");
     }
+    
+    // 清理 PyInstaller 临时文件
+    #[cfg(debug_assertions)]
+    println!("🗑️ 清理 PyInstaller 临时文件...");
+    cleanup_pyinstaller_temp();
+    #[cfg(debug_assertions)]
+    println!("✅ 临时文件清理完成");
 }
 
 fn main() {

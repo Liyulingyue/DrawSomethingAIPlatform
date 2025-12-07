@@ -248,6 +248,37 @@ def stop_postgres():
     except:
         # psutil 不可用，这没关系
         pass
+    
+    # 清理 PyInstaller 临时文件（_MEI* 目录）
+    cleanup_pyinstaller_temp()
+
+
+def cleanup_pyinstaller_temp():
+    """清理 PyInstaller --onefile 创建的临时目录（仅清理当前应用的）"""
+    try:
+        import shutil
+        
+        # 只清理当前应用的临时目录，不清理其他应用的
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            # PyInstaller --onefile 模式下
+            mei_path = sys._MEIPASS  # 例如: C:\Users\XXX\AppData\Local\Temp\_MEI123456
+            mei_parent = os.path.dirname(mei_path)  # 获取父目录
+            
+            # 验证这是一个 _MEI* 目录
+            mei_dir_name = os.path.basename(mei_parent)
+            if mei_dir_name.startswith('_MEI'):
+                try:
+                    print(f"[INFO] Cleaning up current application's PyInstaller temp directory: {mei_parent}")
+                    shutil.rmtree(mei_parent, ignore_errors=True)
+                    print(f"[OK] Cleaned up: {mei_parent}")
+                except Exception as e:
+                    print(f"[WARNING] Failed to cleanup PyInstaller temp: {e}")
+            else:
+                print(f"[DEBUG] Not running in PyInstaller --onefile mode (mei_parent={mei_parent})")
+        else:
+            print("[DEBUG] Not running in PyInstaller mode or _MEIPASS not available")
+    except Exception as e:
+        print(f"[WARNING] Error during PyInstaller cleanup: {e}")
 
 
 def apply_migrations():
