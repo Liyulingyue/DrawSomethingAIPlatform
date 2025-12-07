@@ -28,21 +28,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, mess
         {/* Logo */}
         <div className="splash-logo">
           <div className="logo-circle">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              {/* 绘图画板 */}
-              <rect x="30" y="40" width="140" height="120" fill="none" stroke="#1890ff" strokeWidth="3" />
-              
-              {/* 笔刷 */}
-              <path d="M 60 80 Q 80 70 90 90 Q 85 110 70 105" fill="none" stroke="#1890ff" strokeWidth="2.5" />
-              <path d="M 110 75 Q 130 65 145 85 Q 140 105 125 100" fill="none" stroke="#52c41a" strokeWidth="2.5" />
-              <path d="M 80 110 Q 100 105 110 120 Q 105 130 90 128" fill="none" stroke="#faad14" strokeWidth="2.5" />
-              
-              {/* AI 圆形标记 */}
-              <circle cx="160" cy="55" r="15" fill="#ff4d4f" opacity="0.8" />
-              <text x="160" y="62" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">
-                AI
-              </text>
-            </svg>
+            <img 
+              src="/logo.png" 
+              alt="DrawSomething AI Logo" 
+              style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+            />
           </div>
         </div>
 
