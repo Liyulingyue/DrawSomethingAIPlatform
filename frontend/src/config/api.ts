@@ -24,8 +24,9 @@ export const getApiBaseUrl = async (): Promise<string> => {
         
         // 检查是否获取到有效端口（不是默认的 localhost:8002）
         if (backendUrl && !backendUrl.includes('localhost:8002')) {
-          console.log(`🎯 Tauri 模式 - 后端地址获取成功 (等待了 ${attemptCount} 次):`, backendUrl);
-          return backendUrl;
+          const apiUrl = `${backendUrl}/api`;
+          console.log(`🎯 Tauri 模式 - 后端地址获取成功 (等待了 ${attemptCount} 次):`, apiUrl);
+          return apiUrl;
         }
         
         console.log(`⏳ 等待后端端口就绪... (尝试 ${attemptCount} 次)`);
@@ -33,7 +34,7 @@ export const getApiBaseUrl = async (): Promise<string> => {
       }
     } catch (error) {
       console.error('❌ 获取后端地址失败，使用默认值:', error);
-      return 'http://localhost:8002';
+      return 'http://localhost:8002/api';
     }
   } else {
     // Web 模式：使用相对路径，前缀为 /api

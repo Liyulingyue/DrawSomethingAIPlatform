@@ -8,6 +8,7 @@ from .routes import (
     ai_router,
     gallery_router,
     sketch_router,
+    health_router,
 )
 
 app = FastAPI()
@@ -41,12 +42,12 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(gallery_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(sketch_router, prefix="/api")
+app.include_router(health_router, prefix="/api")
 
 
 @app.get("/")
 async def root():
     return {"msg": "DrawSomethingAIPlatform backend running"}
-
 
 @app.get("/health")
 async def health():
