@@ -40,13 +40,13 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: node:20
-    working_dir: /app
+    build: ./frontend
     ports:
       - "5175:5175"
-    volumes:
-      - ./frontend:/app
-    command: sh -c "npm install && npm run dev"
+    networks:
+      - internal
+    depends_on:
+      - backend
     restart: unless-stopped
 
 networks:

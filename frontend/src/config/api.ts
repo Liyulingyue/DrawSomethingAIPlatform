@@ -36,8 +36,10 @@ export const getApiBaseUrl = async (): Promise<string> => {
       return 'http://localhost:8002';
     }
   } else {
-    // Web 模式：使用环境变量或默认值
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002';
+    // Web 模式：使用相对路径，前缀为 /api
+    // 开发环境：通过 vite.config.ts 的 proxy 转发
+    // 生产环境：通过 Nginx 反向代理转发
+    const baseUrl = '/api';
     console.log('🌐 Web 模式 - 后端地址:', baseUrl);
     return baseUrl;
   }

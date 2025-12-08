@@ -37,10 +37,10 @@ app.add_middleware(
 #         }
 #     )
 
-app.include_router(auth_router)
-app.include_router(gallery_router)
-app.include_router(ai_router)
-app.include_router(sketch_router)
+app.include_router(auth_router, prefix="/api")
+app.include_router(gallery_router, prefix="/api")
+app.include_router(ai_router, prefix="/api")
+app.include_router(sketch_router, prefix="/api")
 
 
 @app.get("/")
