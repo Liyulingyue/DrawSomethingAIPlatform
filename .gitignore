@@ -55,6 +55,14 @@ coverage.xml
 local_settings.py
 db.sqlite3
 
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+database.db
+database.db-shm
+database.db-wal
+
 # Flask stuff:
 instance/
 .webassets-cache

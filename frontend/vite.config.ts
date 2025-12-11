@@ -20,5 +20,21 @@ export default defineConfig({
         rewrite: (path) => path,
       },
     },
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 将大的第三方库分离出来
+          vendor: ['react', 'react-dom'],
+          antd: ['antd', '@ant-design/icons'],
+          router: ['react-router-dom'],
+          i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+          utils: ['axios'],
+        },
+      },
+    },
+    // 增加块大小警告限制到 1000KB
+    chunkSizeWarningLimit: 1000,
+  },
 })
