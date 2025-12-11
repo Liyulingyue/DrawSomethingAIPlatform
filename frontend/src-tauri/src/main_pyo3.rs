@@ -3,67 +3,70 @@
 
 use pyo3::prelude::*;
 use std::sync::{Arc, Mutex};
-use tauri::{Manager, Window};
 
 struct AppState {
     backend_port: Arc<Mutex<Option<u16>>>,
 }
 
-// 初始化 Python 解释器和后端
+// 使用 PyO3 初始化 Python 后端
 fn initialize_python_backend() -> PyResult<u16> {
-    pyo3::prepare_freethreaded_python();
-
+    // 初始化 Python
+    pyo3::Python::initialize();
+    
+    #[allow(deprecated)]
     Python::with_gil(|py| {
-        // 添加 Python 路径
+        // 获取 sys 模块并添加 backend 目录到路径
         let sys = py.import("sys")?;
         let path = sys.getattr("path")?;
+        
+        // 获取应用程序根目录
+        if let Ok(exe_path) = std::env::current_exe() {
+            if let Some(exe_dir) = exe_path.parent() {
+                println!("[PyO3] Executable directory: {}", exe_dir.display());
+                
+                // 尝试多个可能的 backend 位置
+                let backend_paths = vec![
+                    exe_dir.join("backend"),
+                    exe_dir.join("..\\backend"),
+                    exe_dir.join("resources\\backend"),
+                ];
 
-        // 获取当前可执行文件目录
-        let exe_path = std::env::current_exe()?;
-        let exe_dir = exe_path.parent().unwrap();
-
-        // 在开发和生产环境中查找 backend 目录
-        let backend_paths = vec![
-            // 生产环境：backend 目录在可执行文件同级
-            exe_dir.join("backend"),
-            // 开发环境：backend 目录在项目根目录
-            exe_dir.join("../../../backend"),
-            // 另一种开发环境路径
-            exe_dir.join("../../backend"),
-        ];
-
-        let mut backend_found = false;
-        for backend_path in backend_paths {
-            if backend_path.exists() {
-                let backend_path_str = backend_path.canonicalize()
-                    .unwrap_or(backend_path)
-                    .to_string_lossy()
-                    .to_string();
-                path.call_method1("insert", (0, backend_path_str.as_str()))?;
-                println!("[PyO3] Added backend path: {}", backend_path_str);
-                backend_found = true;
-                break;
+                for backend_path in backend_paths {
+                    if backend_path.exists() {
+                        println!("[PyO3] Found backend at: {}", backend_path.display());
+                        if let Ok(path_str) = backend_path.canonicalize() {
+                            let path_string = path_str.to_string_lossy().to_string();
+                            path.call_method1("insert", (0, path_string))?;
+                            println!("[PyO3] Added to sys.path: {}", path_string);
+                            break;
+                        }
+                    } else {
+                        println!("[PyO3] Backend not found at: {}", backend_path.display());
+                    }
+                }
+                
+                // 打印最终的 sys.path
+                println!("[PyO3] Final sys.path[0]: {:?}", path.get_item(0).ok());
             }
         }
 
-        if !backend_found {
-            println!("[PyO3] Warning: backend directory not found, trying current directory");
-            // 如果找不到，尝试当前目录
-            path.call_method1("insert", (0, "."))?;
+        // 设置编码环境变量
+        let os = py.import("os")?;
+        os.getattr("environ")?
+            .call_method1("setdefault", ("PYTHONIOENCODING", "utf-8"))?;
+
+        // 导入并初始化后端
+        match py.import("pyo3_backend") {
+            Ok(backend_module) => {
+                let port = backend_module.call_method0("initialize_backend")?.extract::<u16>()?;
+                println!("[PyO3] Backend initialized on port: {}", port);
+                Ok(port)
+            }
+            Err(e) => {
+                eprintln!("[PyO3] Failed to import pyo3_backend: {}", e);
+                Err(e)
+            }
         }
-
-        // 导入后端模块
-        let backend_module = py.import("pyo3_backend")?;
-        println!("[PyO3] Backend module imported successfully");
-
-        // 初始化后端
-        let port: u16 = backend_module
-            .getattr("initialize_backend")?
-            .call0()?
-            .extract()?;
-
-        println!("[PyO3] Backend initialized on port: {}", port);
-        Ok(port)
     })
 }
 
@@ -77,7 +80,7 @@ fn main() {
             port
         }
         Err(e) => {
-            eprintln!("[PyO3] Failed to initialize Python backend: {}", e);
+            eprintln!("[PyO3] FATAL: Failed to initialize Python backend: {}", e);
             std::process::exit(1);
         }
     };
