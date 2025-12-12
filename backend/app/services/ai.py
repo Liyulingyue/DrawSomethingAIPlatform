@@ -7,22 +7,20 @@ from typing import Any, Dict, List, Optional
 from openai import OpenAI
 from ..config import config
 
-MODEL_NAME = config.MODEL_NAME
-
 FORMAT_INSTRUCTIONS = (
     "请仅输出一个 JSON 代码块，严格按照如下格式返回：\n"
     "```json\n"
     "{\n"
-    '  "best_guess": "最可能的中文词语或短语",\n'
+    '  "best_guess": "最可能的词语或短语",\n'
     '  "alternatives": ["备选答案1", "备选答案2"],\n'
-    '  "reason": "简要的中文解释"\n'
+    '  "reason": "简要的解释"\n'
     "}\n"
     "```\n"
     "其中 alternatives 按可能性从高到低排列，如无可填空数组；不允许输出除上述 JSON 代码块之外的任何文字。"
 )
 
 DEFAULT_PROMPT = (
-    "你是一位能够理解绘画的中文助手，请根据提供的图像推测其所表达的中文词语或短语，并生成答案。\n"
+    "你是一位能够理解绘画的助手，请根据提供的图像推测其所表达的词语或短语，并生成答案。\n"
 )
 
 JSON_BLOCK_PATTERN = re.compile(r"```json\s*(.*?)\s*```", re.IGNORECASE | re.DOTALL)
@@ -95,7 +93,7 @@ def _call_openai_model(
         ]
 
         completion = client.chat.completions.create(
-            model=model_name or MODEL_NAME,
+            model=model_name or config.MODEL_NAME,
             messages=messages,
             stream=False,  # 不使用流式响应
         )
@@ -111,14 +109,21 @@ def _call_openai_model(
         raise Exception(f"调用OpenAI兼容模型失败: {str(e)}")
 
 
-def _build_instruction(clue: Optional[str], custom_prompt: Optional[str]) -> str:
+def _build_instruction(clue: Optional[str], custom_prompt: Optional[str], language: Optional[str] = None) -> str:
+    language = language or 'zh' # 默认中文
+    LANGUAGE_PROMPT = f"当前界面语言是{language}。返回的json中，key需要保持不变，但value需要使用{language}回答。\n"
+
     sections: List[str] = []
     sections.append(DEFAULT_PROMPT)
+
+    sections.append(LANGUAGE_PROMPT)
+
     if custom_prompt and custom_prompt.strip():
         sections.append(custom_prompt.strip())
     if clue:
         sections.append(f"猜词的参考线索：{clue}")
     sections.append(FORMAT_INSTRUCTIONS)
+
     return "\n\n".join(section for section in sections if section)
 
 
@@ -346,6 +351,7 @@ def guess_drawing(
     config: Optional[Dict[str, Optional[str]]] = None,
     target: Optional[str] = None,
     provider: str = "server",
+    language: Optional[str] = None,
 ) -> Dict[str, Any]:
     """AI model calling interface based on provided config and provider.
 
@@ -354,7 +360,7 @@ def guess_drawing(
     """
 
     sanitized_config = _sanitize_config(config)
-    prompt = _build_instruction(clue, sanitized_config.get("prompt"))
+    prompt = _build_instruction(clue, sanitized_config.get("prompt"), language)
 
     base_url = sanitized_config.get("url")
     api_key = sanitized_config.get("key")

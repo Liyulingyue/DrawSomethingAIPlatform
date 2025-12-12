@@ -51,7 +51,29 @@ function LevelSet() {
   const [selectedLevel, setSelectedLevel] = useState<LevelConfig | null>(null)
   const [customLevels] = useState<LevelConfig[]>(getCustomLevels())
   const navigate = useNavigate()
-  const { t } = useTranslation('levelSet')
+  const { t: tPage } = useTranslation('levelSet')
+  const { t: tLevels } = useTranslation('levels')
+
+  // 获取 level 的关键词（支持直接数组或翻译键）
+  const getKeywordsForLevel = (level: LevelConfig | null): string[] => {
+    if (!level || !level.keywords) return []
+    if (typeof level.keywords === 'string') {
+      const translated = tLevels(level.keywords as string, { returnObjects: true })
+      return Array.isArray(translated) ? translated.map(String) : []
+    }
+    return level.keywords
+  }
+
+  // 获取等级显示文本（支持 translation key 或 原文）
+  const getDisplayLevelText = (text?: string | undefined): string => {
+    if (!text) return ''
+    // 如果看起来像翻译键（包含点或者以 draw/guess 开头）则使用 tLevels
+    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+      return tLevels(text)
+    }
+    // 否则原样返回（自定义关卡的文本）
+    return text
+  }
 
   // 只获取绘画闯关类型的自定义关卡
   const drawCustomLevels = customLevels.filter(level => !level.type || level.type === 'draw')
@@ -68,20 +90,21 @@ function LevelSet() {
   const handleStartChallenge = (level: LevelConfig, e: React.MouseEvent) => {
     e.stopPropagation()
     if (level.status === 'coming-soon') {
-      message.info(t('levelSet.messages.comingSoon', { title: level.title }))
+      message.info(tPage('levelSet.messages.comingSoon', { title: getDisplayLevelText(level.title) }))
       return
     }
 
     // 检查是否有关键词
-    if (!level.keywords || level.keywords.length === 0) {
-      message.warning(t('levelSet.messages.noKeywords', { title: level.title }))
+    const keywords = getKeywordsForLevel(level)
+    if (keywords.length === 0) {
+      message.warning(tPage('levelSet.messages.noKeywords', { title: getDisplayLevelText(level.title) }))
       return
     }
 
     // 开始挑战：从第一个关键词开始
-    const firstKeyword = level.keywords[0]
-    console.log(`开始挑战: ${level.id} - ${level.title}, 第一个关键词: ${firstKeyword}`)
-    message.success(t('levelSet.messages.startChallenge', { title: level.title, keyword: firstKeyword }))
+    const firstKeyword = keywords[0]
+    console.log(`开始挑战: ${level.id} - ${getDisplayLevelText(level.title)}, 第一个关键词: ${firstKeyword}`)
+    message.success(tPage('levelSet.messages.startChallenge', { title: getDisplayLevelText(level.title), keyword: firstKeyword }))
     
     // 导航到关卡游戏页面，从第一个关键词开始
     navigate(`/app/challenge-draw?level=${level.id}&keyword=${encodeURIComponent(firstKeyword)}`)
@@ -90,7 +113,7 @@ function LevelSet() {
   const handleSelectChallenge = (level: LevelConfig, e: React.MouseEvent) => {
     e.stopPropagation()
     if (level.status === 'coming-soon') {
-      message.info(t('levelSet.messages.comingSoon', { title: level.title }))
+      message.info(tPage('levelSet.messages.comingSoon', { title: getDisplayLevelText(level.title) }))
       return
     }
     // 打开选关弹窗
@@ -101,8 +124,8 @@ function LevelSet() {
   const handleKeywordSelect = (keyword: string) => {
     if (!selectedLevel) return
     
-    console.log(`选择关键词: ${keyword} (${selectedLevel.title})`)
-    message.success(t('levelSet.messages.keywordSelected', { keyword }))
+    console.log(`选择关键词: ${keyword} (${getDisplayLevelText(selectedLevel?.title)})`)
+    message.success(tPage('levelSet.messages.keywordSelected', { keyword }))
     
     // 关闭弹窗
     setModalOpen(false)
@@ -122,7 +145,7 @@ function LevelSet() {
       <SidebarTrigger onClick={() => setSidebarOpen(true)} />
       <div className="level-set-container">
         <div className="level-set-content">
-        <h1 className="level-set-title">{t('levelSet.title')}</h1>
+        <h1 className="level-set-title">{tPage('levelSet.title')}</h1>
         
         <div className="level-cards-grid">
           {allLevels.map((level) => (
@@ -134,17 +157,17 @@ function LevelSet() {
               {level.status === 'coming-soon' && (
                 <div className="level-card-lock-overlay">
                   <LockOutlined className="level-card-lock-icon" />
-                  <span className="level-card-lock-text">{t('levelSet.comingSoon')}</span>
+                  <span className="level-card-lock-text">{tPage('levelSet.comingSoon')}</span>
                 </div>
               )}
               {level.difficulty && (
                 <div className="level-card-difficulty-badge">
-                  {level.difficulty}
+                  {tLevels(level.difficulty)}
                 </div>
               )}
               <div className="level-card-icon">{level.icon}</div>
-              <h3 className="level-card-title">{level.title}</h3>
-              <p className="level-card-description">{level.description}</p>
+              <h3 className="level-card-title">{getDisplayLevelText(level.title)}</h3>
+              <p className="level-card-description">{getDisplayLevelText(level.description)}</p>
               <div className="level-card-buttons">
                 <Button
                   type="primary"
@@ -153,7 +176,7 @@ function LevelSet() {
                   disabled={level.status === 'coming-soon'}
                   className="level-card-button"
                 >
-                  {t('levelSet.startChallenge')}
+                  {tPage('levelSet.startChallenge')}
                 </Button>
                 <Button
                   icon={<UnorderedListOutlined />}
@@ -161,7 +184,7 @@ function LevelSet() {
                   disabled={level.status === 'coming-soon'}
                   className="level-card-button"
                 >
-                  {t('levelSet.selectChallenge')}
+                  {tPage('levelSet.selectChallenge')}
                 </Button>
               </div>
             </Card>
@@ -175,9 +198,9 @@ function LevelSet() {
           >
             <div className="level-card-create-content">
               <PlusOutlined className="level-card-create-icon" />
-              <h3 className="level-card-create-title">{t('levelSet.customLevels.title')}</h3>
+              <h3 className="level-card-create-title">{tPage('levelSet.customLevels.title')}</h3>
               <p className="level-card-create-description">
-                {t('levelSet.customLevels.description')}
+                {tPage('levelSet.customLevels.description')}
               </p>
             </div>
           </Card>
@@ -191,7 +214,7 @@ function LevelSet() {
         title={
           <div className="level-modal-title">
             <span className="level-modal-icon">{selectedLevel?.icon}</span>
-            <span>{selectedLevel?.title} - {t('levelSet.modal.selectLevel')}</span>
+            <span>{getDisplayLevelText(selectedLevel?.title)} - {tPage('levelSet.modal.selectLevel')}</span>
           </div>
         }
         open={modalOpen}
@@ -202,11 +225,12 @@ function LevelSet() {
       >
         <div className="level-modal-content">
           <p className="level-modal-description">
-            {t('levelSet.modal.description')}
+            {tPage('levelSet.modal.description')}
           </p>
           <div className="level-keywords-grid">
-            {selectedLevel?.keywords?.map((keyword, index) => {
-              const completed = isKeywordCompleted(selectedLevel.id, keyword)
+            {getKeywordsForLevel(selectedLevel).map((keyword, index) => {
+              const selectedLevelId = selectedLevel ? selectedLevel.id : ''
+              const completed = selectedLevelId ? isKeywordCompleted(selectedLevelId, keyword) : false
               return (
                 <Tag
                   key={index}
@@ -225,9 +249,9 @@ function LevelSet() {
               )
             })}
           </div>
-          {(!selectedLevel?.keywords || selectedLevel.keywords.length === 0) && (
+          {getKeywordsForLevel(selectedLevel).length === 0 && (
             <div className="level-no-keywords">
-              {t('levelSet.modal.noKeywords')}
+              {tPage('levelSet.modal.noKeywords')}
             </div>
           )}
         </div>

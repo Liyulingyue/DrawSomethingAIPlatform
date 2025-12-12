@@ -7,7 +7,7 @@ import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getLevelById } from '../config/levels'
-import { api } from '../utils/api'
+import { api, type GuessRequest } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
 import { generatePoster, downloadPoster } from '../utils/posterGenerator'
 import { useUser } from '../context/UserContext'
@@ -33,7 +33,9 @@ const markKeywordCompleted = (levelId: string, keyword: string) => {
 function ChallengeDraw() {
   const { message, modal } = App.useApp()
   const { sessionId, username } = useUser()
-  const { t } = useTranslation('challengeDraw')
+  const { t: tPage } = useTranslation('challengeDraw')
+  const { t: tLevels } = useTranslation('levels')
+  const { i18n } = useTranslation()
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -46,7 +48,7 @@ function ChallengeDraw() {
   const share = async (targetKeyword: string, guessResult: string, aiModel?: string) => {
     const image = drawBoardRef.current?.getImage()
     if (!image) {
-      message.error(t('challengeDraw.messages.noDrawing'))
+      message.error(tPage('challengeDraw.messages.noDrawing'))
       return
     }
 
@@ -59,11 +61,30 @@ function ChallengeDraw() {
       })
       
       downloadPoster(posterDataUrl, `ai-drawing-poster-${targetKeyword}.png`)
-      message.success(t('challengeDraw.messages.posterGenerated'))
+      message.success(tPage('challengeDraw.messages.posterGenerated'))
     } catch (error) {
       console.error('生成海报失败:', error)
-      message.error(t('challengeDraw.messages.posterFailed'))
+      message.error(tPage('challengeDraw.messages.posterFailed'))
     }
+  }
+
+  // 获取等级显示文本（支持 translation key 或 原文）
+  const getDisplayLevelText = (text?: string | undefined): string => {
+    if (!text) return ''
+    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+      return tLevels(text)
+    }
+    return text
+  }
+
+  // 获取关卡的关键词数组（支持翻译键字符串或字面数组）
+  const getKeywordsForLevel = (level?: any): string[] => {
+    if (!level || !level.keywords) return []
+    if (typeof level.keywords === 'string') {
+      const translated = tLevels(level.keywords as string, { returnObjects: true })
+      return Array.isArray(translated) ? translated.map(String) : []
+    }
+    return level.keywords
   }
 
   // 从 URL 参数获取关卡信息
@@ -115,7 +136,7 @@ function ChallengeDraw() {
   // 如果没有关卡信息，跳转回选关页面
   useEffect(() => {
     if (!levelId || !keyword) {
-      message.warning(t('challengeDraw.messages.selectLevelFirst'))
+      message.warning(tPage('challengeDraw.messages.selectLevelFirst'))
       navigate('/app/level-set')
     }
   }, [levelId, keyword, navigate])
@@ -135,7 +156,7 @@ function ChallengeDraw() {
   const handleSubmitGuess = async () => {
     const image = drawBoardRef.current?.getImage()
     if (!image) {
-      message.warning(t('challengeDraw.messages.completeDrawing'))
+      message.warning(tPage('challengeDraw.messages.completeDrawing'))
       return
     }
 
@@ -148,19 +169,7 @@ function ChallengeDraw() {
       const aiConfig = getAIConfig()
       
       // 构造请求体
-      const requestBody: {
-        image: string
-        target: string
-        clue?: string
-        config?: {
-          url?: string
-          key?: string
-          model?: string
-          prompt?: string
-        }
-        call_preference?: 'custom' | 'server'
-        session_id?: string
-      } = {
+      const requestBody: GuessRequest = {
         image,
         target: keyword,
       }
@@ -193,6 +202,10 @@ function ChallengeDraw() {
         console.log('🔑 使用会话ID:', sessionId)
       }
 
+      // 添加语言参数
+      requestBody.language = i18n.language
+      console.log('🌐 使用语言:', i18n.language)
+
       // 调用后端 API
       const response = await api.post('/ai/guess', requestBody)
       const result = response.data
@@ -224,7 +237,7 @@ function ChallengeDraw() {
         if (isLastKeyword) {
           // 通关成功弹窗
           const modalInstance = modal.success({
-            title: t('challengeDraw.modals.levelComplete.title'),
+            title: tPage('challengeDraw.modals.levelComplete.title'),
             content: (
               <div style={{ 
                 maxHeight: '60vh', 
@@ -234,7 +247,7 @@ function ChallengeDraw() {
               }}>
                 <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                   <TrophyOutlined style={{ color: '#faad14', marginRight: '8px' }} />
-                  {t('challengeDraw.modals.levelComplete.congratulations', { title: levelConfig?.title })}
+                  {tPage('challengeDraw.modals.levelComplete.congratulations', { title: getDisplayLevelText(levelConfig?.title) })}
                 </p>
                 <div style={{ 
                   background: '#fffbe6', 
@@ -243,12 +256,12 @@ function ChallengeDraw() {
                   padding: '12px',
                   marginTop: '12px'
                 }}>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.levelComplete.level')}</strong>{levelConfig?.title}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.levelComplete.lastKeyword')}</strong>{keyword}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.levelComplete.aiRecognition')}</strong>{bestGuess}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.levelComplete.level')}</strong>{getDisplayLevelText(levelConfig?.title)}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.levelComplete.lastKeyword')}</strong>{keyword}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.levelComplete.aiRecognition')}</strong>{bestGuess}</p>
                   {alternatives.length > 0 && (
                     <p style={{ margin: '0 0 8px 0' }}>
-                      <strong>{t('challengeDraw.modals.levelComplete.alternatives')}</strong>{alternatives.join(', ')}
+                      <strong>{tPage('challengeDraw.modals.levelComplete.alternatives')}</strong>{alternatives.join(', ')}
                     </p>
                   )}
                   <div style={{ 
@@ -259,14 +272,14 @@ function ChallengeDraw() {
                     overflowY: 'auto',
                     wordBreak: 'break-word'
                   }}>
-                    <strong>{t('challengeDraw.modals.levelComplete.aiAnalysis')}</strong>
+                    <strong>{tPage('challengeDraw.modals.levelComplete.aiAnalysis')}</strong>
                     <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                      {result.reason || t('challengeDraw.modals.levelComplete.noAnalysis')}
+                      {result.reason || tPage('challengeDraw.modals.levelComplete.noAnalysis')}
                     </p>
                   </div>
                 </div>
                 <p style={{ margin: '12px 0 0 0', color: '#faad14', fontSize: '14px', fontWeight: 500 }}>
-                  {t('challengeDraw.modals.levelComplete.completed')}
+                  {tPage('challengeDraw.modals.levelComplete.completed')}
                 </p>
               </div>
             ),
@@ -279,17 +292,17 @@ function ChallengeDraw() {
                     setShowGalleryModal(true)
                   }}
                 >
-                  {t('challengeDraw.modals.levelComplete.publishToGallery')}
+                  {tPage('challengeDraw.modals.levelComplete.publishToGallery')}
                 </Button>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <Button onClick={() => {
                     share(keyword, bestGuess, aiModel)
-                  }}>{t('challengeDraw.modals.levelComplete.shareDrawing')}</Button>
+                  }}>{tPage('challengeDraw.modals.levelComplete.shareDrawing')}</Button>
                   <Button type="primary" onClick={() => {
                     markKeywordCompleted(levelId, keyword)
                     modalInstance.destroy()
                     navigate('/app/level-set')
-                  }}>{t('challengeDraw.modals.levelComplete.backToLevelSelect')}</Button>
+                  }}>{tPage('challengeDraw.modals.levelComplete.backToLevelSelect')}</Button>
                 </div>
               </div>
             ),
@@ -297,7 +310,7 @@ function ChallengeDraw() {
         } else {
           // 单关成功弹窗
           const modalInstance = modal.success({
-            title: t('challengeDraw.modals.challengeSuccess.title'),
+            title: tPage('challengeDraw.modals.challengeSuccess.title'),
             content: (
               <div style={{ 
                 maxHeight: '60vh', 
@@ -307,7 +320,7 @@ function ChallengeDraw() {
               }}>
                 <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                   <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                  {t('challengeDraw.modals.challengeSuccess.congratulations')}
+                  {tPage('challengeDraw.modals.challengeSuccess.congratulations')}
                 </p>
                 <div style={{ 
                   background: '#f6ffed', 
@@ -316,12 +329,12 @@ function ChallengeDraw() {
                   padding: '12px',
                   marginTop: '12px'
                 }}>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.challengeSuccess.progress')}</strong>{progress}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.challengeSuccess.currentKeyword')}</strong>{keyword}</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('challengeDraw.modals.challengeSuccess.aiRecognition')}</strong>{bestGuess}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.challengeSuccess.progress')}</strong>{progress}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.challengeSuccess.currentKeyword')}</strong>{keyword}</p>
+                  <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.challengeSuccess.aiRecognition')}</strong>{bestGuess}</p>
                   {alternatives.length > 0 && (
                     <p style={{ margin: '0 0 8px 0' }}>
-                      <strong>{t('challengeDraw.modals.challengeSuccess.alternatives')}</strong>{alternatives.join(', ')}
+                      <strong>{tPage('challengeDraw.modals.challengeSuccess.alternatives')}</strong>{alternatives.join(', ')}
                     </p>
                   )}
                   <div style={{ 
@@ -332,9 +345,9 @@ function ChallengeDraw() {
                     overflowY: 'auto',
                     wordBreak: 'break-word'
                   }}>
-                    <strong>{t('challengeDraw.modals.challengeSuccess.aiAnalysis')}</strong>
+                    <strong>{tPage('challengeDraw.modals.challengeSuccess.aiAnalysis')}</strong>
                     <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                      {result.reason || t('challengeDraw.modals.challengeSuccess.noAnalysis')}
+                      {result.reason || tPage('challengeDraw.modals.challengeSuccess.noAnalysis')}
                     </p>
                   </div>
                 </div>
@@ -515,14 +528,15 @@ function ChallengeDraw() {
   }
 
   const handleNextKeyword = () => {
-    if (!levelConfig || !levelConfig.keywords || levelConfig.keywords.length === 0) {
+    const keywords = getKeywordsForLevel(levelConfig)
+    if (!levelConfig || !keywords || keywords.length === 0) {
       message.warning('该关卡暂无更多关键词')
       navigate('/app/level-set')
       return
     }
 
     // 获取当前关键词的索引
-    const currentIndex = levelConfig.keywords.indexOf(keyword)
+    const currentIndex = keywords.indexOf(keyword)
     
     if (currentIndex === -1) {
       message.error('当前关键词不在关卡列表中')
@@ -533,32 +547,31 @@ function ChallengeDraw() {
     // 获取下一个关键词
     const nextIndex = currentIndex + 1
     
-    if (nextIndex >= levelConfig.keywords.length) {
+    if (nextIndex >= keywords.length) {
       // 已经是最后一个关键词，恭喜完成该关卡
-      message.success(`🎉 恭喜完成【${levelConfig.title}】关卡所有挑战！`)
-      navigate('/app/level-set')
-      return
+      message.success(tPage('challengeDraw.messages.levelCompleted', { title: getDisplayLevelText(levelConfig?.title) }))
     }
 
-    const nextKeyword = levelConfig.keywords[nextIndex]
+    const nextKeyword = keywords[nextIndex]
     
     // 清空画板
     drawBoardRef.current?.clearCanvas()
     
     // 跳转到下一个关键词
     navigate(`/app/challenge-draw?level=${levelId}&keyword=${encodeURIComponent(nextKeyword)}`)
-    message.info(`进入下一关：${nextKeyword}`)
+    message.info(tPage('challengeDraw.messages.nextLevel', { keyword: nextKeyword }))
   }
 
   const handleSkipChallenge = () => {
-    if (!levelConfig || !levelConfig.keywords || levelConfig.keywords.length === 0) {
+    const keywordsForSkip = getKeywordsForLevel(levelConfig)
+    if (!levelConfig || !keywordsForSkip || keywordsForSkip.length === 0) {
       message.warning('该关卡暂无更多关键词')
       navigate('/app/level-set')
       return
     }
 
-    const currentIndex = levelConfig.keywords.indexOf(keyword)
-    const totalKeywords = levelConfig.keywords.length
+    const currentIndex = keywordsForSkip.indexOf(keyword)
+    const totalKeywords = keywordsForSkip.length
     
     message.info(`跳过关键词：${keyword} (${currentIndex + 1}/${totalKeywords})`)
     
@@ -579,7 +592,7 @@ function ChallengeDraw() {
             <div className="challenge-draw-title-section">
               <div className="challenge-draw-level-info">
                 <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-                <h1 className="challenge-draw-page-title">{levelConfig?.title || '绘画闯关'}</h1>
+                <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || '绘画闯关'}</h1>
               </div>
             </div>
 
@@ -634,7 +647,7 @@ function ChallengeDraw() {
           <div className="challenge-draw-title-section">
             <div className="challenge-draw-level-info">
               <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-              <h1 className="challenge-draw-page-title">{levelConfig?.title || '绘画闯关'}</h1>
+              <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || '绘画闯关'}</h1>
             </div>
           </div>
 

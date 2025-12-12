@@ -25,6 +25,7 @@ class GuessRequest(BaseModel):
     config: ModelConfig | None = None
     call_preference: str | None = None  # 调用偏好: 'custom' 或 'server'
     session_id: str | None = None  # 用户会话ID
+    language: str | None = None  # 用户界面语言，用于AI猜词提示
 
 class TestConnectionRequest(BaseModel):
     url: str
@@ -80,7 +81,7 @@ async def guess(req: GuessRequest):
         print(f"🔍 使用自定义AI配置 (原因: {reason_str})")
 
     # 统一调用AI服务
-    result = guess_drawing(req.image, clue, config_to_use, req.target, provider)
+    result = guess_drawing(req.image, clue, config_to_use, req.target, provider, req.language)
     
     # 如果是服务器端调用且成功，扣除点数
     if is_server_call and result.get("success") and result.get("provider") == "server":

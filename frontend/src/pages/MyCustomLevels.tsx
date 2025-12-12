@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Tag, App } from 'antd'
 import { DeleteOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons'
@@ -40,6 +41,16 @@ function MyCustomLevels() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [customLevels, setCustomLevels] = useState<LevelConfig[]>(getCustomLevels())
   const navigate = useNavigate()
+  const { t: tLevels } = useTranslation('levels')
+
+  const resolveKeywords = (level: LevelConfig): string[] => {
+    if (!level.keywords) return []
+    if (typeof level.keywords === 'string') {
+      const translated = tLevels(level.keywords, { returnObjects: true })
+      return Array.isArray(translated) ? translated.map(String) : []
+    }
+    return level.keywords
+  }
 
   // 编辑关卡
   const handleEdit = (level: LevelConfig) => {
@@ -163,7 +174,7 @@ function MyCustomLevels() {
                   </div>
                   <p className="my-custom-level-card-description">{level.description}</p>
                   <div className="my-custom-level-card-keywords">
-                    {level.keywords?.map((keyword, idx) => (
+                    {(resolveKeywords(level) || []).map((keyword: string, idx: number) => (
                       <Tag key={idx} color="blue">{keyword}</Tag>
                     ))}
                   </div>

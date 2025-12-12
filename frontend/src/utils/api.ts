@@ -4,6 +4,23 @@ import { getApiBaseUrlSync, initApiConfig, isTauri } from '../config/api'
 // 重新导出 getApiBaseUrlSync 供其他模块使用
 export { getApiBaseUrlSync, initApiConfig, isTauri }
 
+// AI猜词请求接口
+export interface GuessRequest {
+  image: string
+  clue?: string
+  hint?: string
+  target?: string
+  config?: {
+    url?: string
+    key?: string
+    model?: string
+    prompt?: string
+  }
+  call_preference?: 'custom' | 'server'
+  session_id?: string
+  language?: string
+}
+
 // 初始化 API 配置（应用启动时会调用）
 let isInitialized = false
 export const ensureApiInitialized = async () => {

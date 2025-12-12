@@ -1,0 +1,111 @@
+{
+  "draw": {
+    "beginner": {
+      "title": "Beginner Level",
+      "description": "Simple items suitable for beginners",
+      "difficulty": "easy",
+      "clue": "",
+      "keywords": ["apple", "banana", "sun", "moon", "star", "house", "tree", "flower", "cat", "dog"]
+    },
+    "animals": {
+      "title": "Animals",
+      "description": "Various cute animals",
+      "difficulty": "medium",
+      "clue": "An animal",
+      "keywords": ["elephant", "giraffe", "lion", "tiger", "panda", "rabbit", "monkey", "penguin", "dolphin", "butterfly"]
+    },
+    "vehicles": {
+      "title": "Vehicles",
+      "description": "Various vehicles and transportation",
+      "difficulty": "medium",
+      "clue": "A vehicle or means of transport",
+      "keywords": ["car", "bicycle", "train", "airplane", "ship", "motorcycle", "bus", "subway", "helicopter", "sailboat"]
+    },
+    "sports": {
+      "title": "Sports",
+      "description": "Various sports and activities",
+      "difficulty": "medium",
+      "clue": "A sport or athletic activity",
+      "keywords": ["soccer", "basketball", "table tennis", "badminton", "tennis", "swimming", "running", "jump rope", "ice skating", "high jump"]
+    },
+    "food": {
+      "title": "Chinese Cuisine",
+      "description": "Traditional Chinese food and snacks",
+      "difficulty": "easy",
+      "clue": "A traditional Chinese food",
+      "keywords": ["dumpling", "bun", "mantou", "mooncake", "zongzi", "tangyuan", "spring roll", "pancake", "noodle", "rice"]
+    },
+    "clothing": {
+      "title": "Clothing",
+      "description": "Various clothing and accessories",
+      "difficulty": "easy",
+      "clue": "A piece of clothing or accessory",
+      "keywords": ["T-shirt", "skirt", "pants", "sweater", "vest", "scarf", "hat", "shoes", "socks", "gloves", "tie", "belt", "glasses"]
+    }
+  },
+  "guess": {
+    "beginner": {
+      "title": "Beginner Guessing",
+      "description": "Simple items for beginner guessing practice",
+      "difficulty": "easy",
+      "clue": "A simple item or object",
+      "keywords": ["apple", "banana", "sun", "moon", "star", "house", "tree", "flower", "cat", "dog"]
+    },
+    "animals": {
+      "title": "Animal Guessing",
+      "description": "Various cute animals to test your observation skills",
+      "difficulty": "medium",
+      "clue": "An animal",
+      "keywords": ["elephant", "giraffe", "lion", "tiger", "panda", "rabbit", "monkey", "penguin", "dolphin", "butterfly"]
+    },
+    "vehicles": {
+      "title": "Vehicle Guessing",
+      "description": "Various vehicles to challenge your imagination",
+      "difficulty": "medium",
+      "clue": "A vehicle or means of transport",
+      "keywords": ["car", "bicycle", "train", "airplane", "ship", "motorcycle", "bus", "subway", "helicopter", "sailboat"]
+    },
+    "sports": {
+      "title": "Sports Guessing",
+      "description": "Various sports activities, more fun when you move",
+      "difficulty": "medium",
+      "clue": "A sport or athletic activity",
+      "keywords": ["soccer", "basketball", "table tennis", "badminton", "tennis", "swimming", "running", "jump rope", "ice skating", "high jump"]
+    },
+    "food": {
+      "title": "Chinese Food Guessing",
+      "description": "Traditional Chinese cuisine, guess by the aroma",
+      "difficulty": "easy",
+      "clue": "A traditional Chinese food",
+      "keywords": ["dumpling", "bun", "mantou", "mooncake", "zongzi", "tangyuan", "spring roll", "pancake", "noodle"]
+    },
+    "clothing": {
+      "title": "Clothing Guessing",
+      "description": "Various clothing and accessories, fashion guessing challenge",
+      "difficulty": "easy",
+      "clue": "A piece of clothing or accessory",
+      "keywords": ["T-shirt", "skirt", "pants", "sweater", "vest", "scarf", "hat", "shoes", "socks", "gloves"]
+    },
+    "nature": {
+      "title": "Nature Scenery Guessing",
+      "description": "Beautiful natural landscapes, the wonders of nature",
+      "difficulty": "medium",
+      "clue": "A natural landscape",
+      "keywords": ["mountain", "river", "lake", "waterfall", "forest", "desert", "ocean", "grassland", "snow mountain", "canyon"]
+    },
+    "professions": {
+      "title": "Profession Guessing",
+      "description": "Various professions and roles, career guessing challenge",
+      "difficulty": "medium",
+      "clue": "A profession or job role",
+      "keywords": ["doctor", "teacher", "police", "chef", "driver", "nurse", "firefighter", "journalist", "lawyer", "engineer"]
+    },
+    "emotions": {
+      "title": "Emotion Guessing",
+      "description": "Various expressions and emotions, mind-reading guessing game",
+      "difficulty": "hard",
+      "clue": "An expression or emotional state",
+      "keywords": ["happy", "sad", "angry", "surprised", "scared", "shy", "proud", "disappointed", "excited", "calm"]
+    }
+  }
+}

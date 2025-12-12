@@ -6,101 +6,101 @@ export interface GuessLevelConfig {
   icon: string
   status: 'available' | 'coming-soon'
   difficulty?: string
-  keywords: string[]  // 该关卡的关键词列表（固定10个）
-  clue?: string       // 提示信息
+  keywords: string | string[]  // 翻译键字符串或关键词数组
+  clue?: string
 }
 
 // 猜词闯关配置数据
 export const GUESS_LEVEL_CONFIGS: GuessLevelConfig[] = [
   {
     id: 'guess_beginner',
-    title: '新手猜词',
-    description: '简单的物品，适合新手练习猜词',
+    title: 'guess.beginner.title',
+    description: 'guess.beginner.description',
     icon: '🌱',
     status: 'available',
-    difficulty: '简单',
-    keywords: ['苹果', '香蕉', '太阳', '月亮', '星星', '房子', '树', '花', '猫', '狗'],
-    clue: '一个简单的物品或事物',
+    difficulty: 'guess.beginner.difficulty',
+    keywords: 'guess.beginner.keywords',
+    clue: 'guess.beginner.clue',
   },
   {
     id: 'guess_animals',
-    title: '动物猜词',
-    description: '各种可爱的动物，考验你的观察力',
+    title: 'guess.animals.title',
+    description: 'guess.animals.description',
     icon: '🐾',
     status: 'available',
-    difficulty: '中等',
-    keywords: ['大象', '长颈鹿', '狮子', '老虎', '熊猫', '兔子', '猴子', '企鹅', '海豚', '蝴蝶'],
-    clue: '一种动物',
+    difficulty: 'guess.animals.difficulty',
+    keywords: 'guess.animals.keywords',
+    clue: 'guess.animals.clue',
   },
   {
     id: 'guess_vehicles',
-    title: '交通工具猜词',
-    description: '各种交通工具，挑战你的想象力',
+    title: 'guess.vehicles.title',
+    description: 'guess.vehicles.description',
     icon: '🚗',
     status: 'available',
-    difficulty: '中等',
-    keywords: ['汽车', '自行车', '火车', '飞机', '轮船', '摩托车', '公交车', '地铁', '直升机', '帆船'],
-    clue: '一种交通工具或载具',
+    difficulty: 'guess.vehicles.difficulty',
+    keywords: 'guess.vehicles.keywords',
+    clue: 'guess.vehicles.clue',
   },
   {
     id: 'guess_sports',
-    title: '体育运动猜词',
-    description: '各种运动项目，动起来猜词更有趣',
+    title: 'guess.sports.title',
+    description: 'guess.sports.description',
     icon: '⚽',
     status: 'available',
-    difficulty: '中等',
-    keywords: ['足球', '篮球', '乒乓球', '羽毛球', '网球', '游泳', '跑步', '跳绳', '滑冰', '跳高'],
-    clue: '一种体育运动或运动项目',
+    difficulty: 'guess.sports.difficulty',
+    keywords: 'guess.sports.keywords',
+    clue: 'guess.sports.clue',
   },
   {
     id: 'guess_food',
-    title: '中华美食猜词',
-    description: '各种传统美食，闻着味儿来猜词',
+    title: 'guess.food.title',
+    description: 'guess.food.description',
     icon: '🥟',
     status: 'available',
-    difficulty: '简单',
-    keywords: ['饺子', '包子', '馒头', '烧饼', '月饼', '粽子', '汤圆', '春卷', '煎饼', '面条'],
-    clue: '一种中华传统美食',
+    difficulty: 'guess.food.difficulty',
+    keywords: 'guess.food.keywords',
+    clue: 'guess.food.clue',
   },
   {
     id: 'guess_clothing',
-    title: '服装衣物猜词',
-    description: '各种服装和配饰，穿搭猜词挑战',
+    title: 'guess.clothing.title',
+    description: 'guess.clothing.description',
     icon: '👕',
     status: 'available',
-    difficulty: '简单',
-    keywords: ['T恤', '裙子', '裤子', '毛衣', '背心', '围巾', '帽子', '鞋子', '袜子', '手套'],
-    clue: '一种服装或穿戴用品',
+    difficulty: 'guess.clothing.difficulty',
+    keywords: 'guess.clothing.keywords',
+    clue: 'guess.clothing.clue',
   },
   {
     id: 'guess_nature',
-    title: '自然景观猜词',
-    description: '美丽的自然风景，大自然的神奇',
+    title: 'guess.nature.title',
+    description: 'guess.nature.description',
     icon: '🌄',
     status: 'available',
-    difficulty: '中等',
-    keywords: ['山脉', '河流', '湖泊', '瀑布', '森林', '沙漠', '海洋', '草原', '雪山', '峡谷'],
-    clue: '一种自然景观',
+    difficulty: 'guess.nature.difficulty',
+    keywords: 'guess.nature.keywords',
+    clue: 'guess.nature.clue',
   },
   {
     id: 'guess_professions',
-    title: '职业角色猜词',
-    description: '各种职业和角色，职业猜词挑战',
+    title: 'guess.professions.title',
+    description: 'guess.professions.description',
     icon: '👨‍⚕️',
     status: 'available',
-    difficulty: '中等',
-    keywords: ['医生', '老师', '警察', '厨师', '司机', '护士', '消防员', '记者', '律师', '工程师'],
-    clue: '一种职业或工作角色',
+    difficulty: 'guess.professions.difficulty',
+    keywords: 'guess.professions.keywords',
+    clue: 'guess.professions.clue',
   },
   {
     id: 'guess_emotions',
-    title: '表情情感猜词',
-    description: '各种表情和情感，读心猜词游戏',
+    title: 'guess.emotions.title',
+    description: 'guess.emotions.description',
     icon: '😊',
     status: 'available',
-    difficulty: '困难',
-    keywords: ['开心', '悲伤', '生气', '惊讶', '害怕', '害羞', '骄傲', '失望', '兴奋', '平静'],
-    clue: '一种表情或情感状态',
+    difficulty: 'guess.emotions.difficulty',
+    keywords: 'guess.emotions.keywords',
+    clue: 'guess.emotions.clue',
   }
 ]
 
@@ -113,9 +113,9 @@ const getCustomLevels = (): GuessLevelConfig[] => {
     const stored = localStorage.getItem(CUSTOM_LEVELS_KEY)
     if (stored) {
       const allCustomLevels = JSON.parse(stored)
-      // 只返回猜词类型的自定义关卡，并确保有 keywords
+      // 只返回猜词类型的自定义关卡，并确保有 keywords（支持 string 或 array）
       return allCustomLevels
-        .filter((level: any) => level.type === 'guess' && level.keywords && level.keywords.length > 0)
+        .filter((level: any) => level.type === 'guess' && level.keywords && (typeof level.keywords === 'string' || Array.isArray(level.keywords)))
         .map((level: any) => ({
           ...level,
           keywords: level.keywords,
@@ -148,9 +148,24 @@ export const getGuessLevelById = (id: string): GuessLevelConfig | undefined => {
 }
 
 // 获取关卡的随机顺序关键词列表
-export const getShuffledKeywords = (levelId: string): string[] => {
+export const getShuffledKeywords = (levelId: string, t: (key: string, options?: any) => any): string[] => {
   const level = getGuessLevelById(levelId)
-  if (!level || !level.keywords || level.keywords.length === 0) {
+  if (!level || !level.keywords) {
+    return []
+  }
+
+  let keywords: string[]
+
+  // 如果 keywords 是字符串（翻译键），从翻译系统中获取
+  if (typeof level.keywords === 'string') {
+    const translatedKeywords = t(level.keywords, { returnObjects: true })
+    keywords = Array.isArray(translatedKeywords) ? translatedKeywords.map(String) : []
+  } else {
+    // 如果 keywords 是数组，直接使用
+    keywords = level.keywords
+  }
+
+  if (keywords.length === 0) {
     return []
   }
 
@@ -162,8 +177,8 @@ export const getShuffledKeywords = (levelId: string): string[] => {
     try {
       const parsed = JSON.parse(cached)
       // 验证缓存是否有效（关键词数量和内容一致）
-      if (parsed.length === level.keywords.length &&
-          parsed.every((k: string) => level.keywords.includes(k))) {
+      if (parsed.length === keywords.length &&
+          parsed.every((k: string) => keywords.includes(k))) {
         return parsed
       }
     } catch (e) {
@@ -172,7 +187,7 @@ export const getShuffledKeywords = (levelId: string): string[] => {
   }
 
   // 创建关键词的副本并打乱顺序
-  const shuffled = [...level.keywords]
+  const shuffled = [...keywords]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
@@ -185,13 +200,13 @@ export const getShuffledKeywords = (levelId: string): string[] => {
 }
 
 // 获取关卡的下一个关键词（基于当前进度）
-export const getNextKeyword = (levelId: string, currentIndex: number): string | null => {
+export const getNextKeyword = (levelId: string, currentIndex: number, t: (key: string, options?: any) => any): string | null => {
   const level = getGuessLevelById(levelId)
-  if (!level || !level.keywords || currentIndex >= level.keywords.length) {
+  if (!level || !level.keywords) {
     return null
   }
 
   // 如果是第一次进入关卡，获取随机顺序
-  const shuffledKeywords = getShuffledKeywords(levelId)
+  const shuffledKeywords = getShuffledKeywords(levelId, t)
   return shuffledKeywords[currentIndex] || null
 }

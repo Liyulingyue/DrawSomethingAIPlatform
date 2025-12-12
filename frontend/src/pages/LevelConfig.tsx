@@ -78,7 +78,7 @@ function CustomLevelConfiguration() {
           description: levelToEdit.description,
           icon: levelToEdit.icon,
           difficulty: levelToEdit.difficulty || '休闲',
-          keywords: levelToEdit.keywords?.join(', ') || '',
+          keywords: (typeof levelToEdit.keywords === 'string' ? levelToEdit.keywords : levelToEdit.keywords?.join(', ')) || '',
           clue: levelToEdit.clue || ''
         })
       } else {
@@ -95,14 +95,26 @@ function CustomLevelConfiguration() {
   // 保存关卡
   const handleSave = () => {
     form.validateFields().then(values => {
-      const keywordsArray = values.keywords
-        .split(',')
-        .map((k: string) => k.trim())
-        .filter((k: string) => k.length > 0)
+      const rawKeywordsInput = (values.keywords || '').trim()
+      let keywordsToSave: string | string[] = []
 
-      if (keywordsArray.length === 0) {
-        message.warning('请至少添加一个关键词')
+      if (!rawKeywordsInput) {
+        message.warning('请至少添加一个关键词或翻译键')
         return
+      }
+
+      if (rawKeywordsInput.includes(',')) {
+        const keywordsArray = rawKeywordsInput
+          .split(',')
+          .map((k: string) => k.trim())
+          .filter((k: string) => k.length > 0)
+        keywordsToSave = keywordsArray
+      } else if (rawKeywordsInput.includes('.') && (rawKeywordsInput.startsWith('draw.') || rawKeywordsInput.startsWith('guess.'))) {
+        // Treat as a translation key
+        keywordsToSave = rawKeywordsInput
+      } else {
+        // Single literal keyword
+        keywordsToSave = [rawKeywordsInput]
       }
 
       const newLevel: LevelConfig = {
@@ -110,7 +122,7 @@ function CustomLevelConfiguration() {
         title: values.title,
         description: values.description,
         icon: values.icon,
-        keywords: keywordsArray,
+        keywords: keywordsToSave,
         clue: values.clue?.trim() || undefined,
         status: 'available',
         difficulty: values.difficulty || '休闲',

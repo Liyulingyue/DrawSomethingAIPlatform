@@ -6,7 +6,7 @@ import MobileDrawBoard, { type MobileDrawBoardRef } from '../components/MobileDr
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
-import { api } from '../utils/api'
+import { api, type GuessRequest } from '../utils/api'
 import { getAIConfig } from '../utils/aiConfig'
 import { useUser } from '../context/UserContext'
 import './AppDraw.css'
@@ -14,6 +14,7 @@ import './AppDraw.css'
 function AppDraw() {
   const { message, modal } = App.useApp()
   const { t } = useTranslation('appDraw')
+  const { i18n } = useTranslation()
   const drawBoardRef = useRef<MobileDrawBoardRef>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [targetWord, setTargetWord] = useState('')
@@ -97,19 +98,7 @@ function AppDraw() {
       const aiConfig = getAIConfig()
       
       // 构造请求体
-      const requestBody: {
-        image: string
-        target: string
-        clue?: string
-        config?: {
-          url?: string
-          key?: string
-          model?: string
-          prompt?: string
-        }
-        call_preference?: 'custom' | 'server'
-        session_id?: string
-      } = {
+      const requestBody: GuessRequest = {
         image,
         target: targetWord.trim(),
       }
@@ -141,6 +130,10 @@ function AppDraw() {
         requestBody.session_id = sessionId
         console.log('🔑 使用会话ID:', sessionId)
       }
+
+      // 添加语言参数
+      requestBody.language = i18n.language
+      console.log('🌐 使用语言:', i18n.language)
 
       // 调用后端 API
       const response = await api.post('/ai/guess', requestBody)

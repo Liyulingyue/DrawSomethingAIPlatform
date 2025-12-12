@@ -72,7 +72,17 @@ function ChallengeGuess() {
   const navigate = useNavigate()
   const location = useLocation()
   const { sessionId } = useUser() // 获取真实的 sessionId（如果已登录）
-  const { t } = useTranslation('challengeGuess')
+  const { t: tPage } = useTranslation('challengeGuess')
+  const { t: tLevels } = useTranslation('levels')
+
+  // 获取等级显示文本（支持 translation key 或 原文）
+  const getDisplayLevelText = (text?: string | undefined): string => {
+    if (!text) return ''
+    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+      return tLevels(text)
+    }
+    return text
+  }
 
   // 无需登录 - 用户可以使用自定义配置调用绘画API
 
@@ -86,7 +96,7 @@ function ChallengeGuess() {
   const levelConfig = getGuessLevelById(levelId)
 
   // 获取当前关键词
-  const shuffledKeywords = getShuffledKeywords(levelId)
+  const shuffledKeywords = getShuffledKeywords(levelId, tLevels)
   const currentKeyword = shuffledKeywords[keywordIndex] || ''
 
   // 关卡变化时重置积分
@@ -276,12 +286,12 @@ function ChallengeGuess() {
   useEffect(() => {
     if (timeLeft >= 300 && currentKeyword && !loading) {
       modal.confirm({
-        title: t('challengeGuess.modals.timeUp.title'),
+        title: tPage('challengeGuess.modals.timeUp.title'),
         content: (
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
             <p style={{ fontSize: '16px', marginBottom: '16px' }}>
-              {t('challengeGuess.modals.timeUp.message')}
+              {tPage('challengeGuess.modals.timeUp.message')}
               <strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
             </p>
             <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
@@ -293,7 +303,7 @@ function ChallengeGuess() {
           </div>
         ),
         width: 480,
-        okText: t('challengeGuess.modals.timeUp.continue'),
+        okText: tPage('challengeGuess.modals.timeUp.continue'),
         onOk: handleNextKeyword,
         cancelText: '重新开始',
         onCancel: () => {
@@ -306,19 +316,19 @@ function ChallengeGuess() {
           loadedKeywordRef.current = '' // 重置加载标记
         }
       })
-      message.warning(t('challengeGuess.timeUp'))
+      message.warning(tPage('challengeGuess.timeUp'))
     }
   }, [timeLeft, currentKeyword, loading, modal, message])
 
   // 提交猜测
   const handleSubmitGuess = async () => {
     if (!guessInput.trim()) {
-      message.warning(t('challengeGuess.enterGuess'))
+      message.warning(tPage('challengeGuess.enterGuess'))
       return
     }
 
     if (!currentKeyword) {
-      message.error(t('challengeGuess.keywordNotFound'))
+      message.error(tPage('challengeGuess.keywordNotFound'))
       return
     }
 
@@ -361,7 +371,7 @@ function ChallengeGuess() {
           onOk: handleNextKeyword
         })
 
-        message.success(t('challengeGuess.guessCorrect', { score }))
+        message.success(tPage('challengeGuess.guessCorrect', { score }))
       } else {
         // 猜测错误 - 检查是否时间结束
         const timeUp = timeLeft >= 300 // 5分钟 = 300秒
@@ -437,7 +447,7 @@ function ChallengeGuess() {
             cancelText: '跳过此题',
             onCancel: handleNextKeyword
           })
-          message.warning(t('challengeGuess.guessWrong'))
+          message.warning(tPage('challengeGuess.guessWrong'))
         }
       }
 
@@ -493,7 +503,7 @@ function ChallengeGuess() {
   }  // 下一题
   const handleNextKeyword = () => {
     if (!levelConfig) {
-      message.warning(t('challengeGuess.levelNotFound'))
+      message.warning(tPage('challengeGuess.levelNotFound'))
       navigate('/app/level-set-guess')
       return
     }
@@ -519,12 +529,12 @@ function ChallengeGuess() {
       console.log(`📊 保存后的总得分: ${newTotalScore}`)
       
       modal.success({
-        title: t('challengeGuess.modals.levelComplete.title'),
+        title: tPage('challengeGuess.modals.levelComplete.title'),
         content: (
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <CheckCircleOutlined style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }} />
             <p style={{ fontSize: '18px', marginBottom: '12px' }}>
-              {t('challengeGuess.modals.levelComplete.congratulations', { title: levelConfig.title })}
+              {tPage('challengeGuess.modals.levelComplete.congratulations', { title: getDisplayLevelText(levelConfig?.title) })}
             </p>
             <div style={{ 
               background: '#f6ffed', 
@@ -549,13 +559,13 @@ function ChallengeGuess() {
           </div>
         ),
         width: 500,
-        okText: t('challengeGuess.modals.levelComplete.backToLevels'),
+        okText: tPage('challengeGuess.modals.levelComplete.backToLevels'),
         onOk: () => {
           navigate('/app/level-set-guess')
         }
       })
       
-      message.success(t('challengeGuess.levelCompleted', { title: levelConfig.title, score: levelScore }))
+      message.success(tPage('challengeGuess.levelCompleted', { title: getDisplayLevelText(levelConfig?.title), score: levelScore }))
       return
     }
 
@@ -571,12 +581,12 @@ function ChallengeGuess() {
 
     // 跳转到下一个关键词
     navigate(`/app/challenge-guess?level=${levelId}&keywordIndex=${nextIndex}`)
-    message.info(t('challengeGuess.nextQuestion', { current: nextIndex + 1, total: shuffledKeywords.length }))
+    message.info(tPage('challengeGuess.nextQuestion', { current: nextIndex + 1, total: shuffledKeywords.length }))
   }
 
   // 跳过游戏
   const handleSkipChallenge = () => {
-    message.info(t('challengeGuess.skipQuestion', { current: keywordIndex + 1, total: shuffledKeywords.length }))
+    message.info(tPage('challengeGuess.skipQuestion', { current: keywordIndex + 1, total: shuffledKeywords.length }))
 
     // 显示正确答案
     modal.info({
@@ -641,7 +651,7 @@ function ChallengeGuess() {
             <div className="challenge-guess-title-section">
               <div className="challenge-guess-level-info">
                 <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-                <h1 className="challenge-guess-page-title">{levelConfig?.title || '猜词闯关'}</h1>
+                <h1 className="challenge-guess-page-title">{getDisplayLevelText(levelConfig?.title) || '猜词闯关'}</h1>
               </div>
             </div>
 
@@ -731,7 +741,7 @@ function ChallengeGuess() {
                   fontWeight: 500,
                   textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
                 }}>
-                  {t('challengeGuess.loading')}
+                  {tPage('challengeGuess.loading')}
                 </div>
               </div>
             ) : (
@@ -752,7 +762,7 @@ function ChallengeGuess() {
           <div className="challenge-guess-title-section">
             <div className="challenge-guess-level-info">
               <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-              <h1 className="challenge-guess-page-title">{levelConfig?.title || '猜词闯关'}</h1>
+              <h1 className="challenge-guess-page-title">{getDisplayLevelText(levelConfig?.title) || '猜词闯关'}</h1>
             </div>
           </div>
 
@@ -762,17 +772,17 @@ function ChallengeGuess() {
               <div className="timer-left">
                 <ClockCircleOutlined style={{ marginRight: '8px' }} />
                 <span className={`timer-text ${timeLeft >= 240 ? 'timer-warning' : ''}`}>
-                  {t('challengeGuess.ui.time', { time: formatTime(timeLeft) })}
+                  {tPage('challengeGuess.ui.time', { time: formatTime(timeLeft) })}
                 </span>
               </div>
               <div className="timer-center">
                 <span className="challenge-progress-text">
-                  {t('challengeGuess.ui.progress', { current: keywordIndex + 1, total: shuffledKeywords.length })}
+                  {tPage('challengeGuess.ui.progress', { current: keywordIndex + 1, total: shuffledKeywords.length })}
                 </span>
               </div>
               <div className="timer-right">
                 <span className="challenge-score-text">
-                  {t('challengeGuess.ui.score', { score: levelScore })}
+                  {tPage('challengeGuess.ui.score', { score: levelScore })}
                 </span>
                 {!loading && (
                   <span className="challenge-drawing-progress">
@@ -801,7 +811,7 @@ function ChallengeGuess() {
                   fontWeight: 500,
                   textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
                 }}>
-                  {t('challengeGuess.loading')}
+                  {tPage('challengeGuess.loading')}
                 </div>
               </div>
             ) : (
@@ -821,7 +831,7 @@ function ChallengeGuess() {
               <Input
                 value={guessInput}
                 onChange={(e) => setGuessInput(e.target.value)}
-                placeholder={t('challengeGuess.guessInput.placeholder')}
+                placeholder={tPage('challengeGuess.guessInput.placeholder')}
                 size="large"
                 onPressEnter={handleSubmitGuess}
                 disabled={submitting}
@@ -835,7 +845,7 @@ function ChallengeGuess() {
                 disabled={submitting || !guessInput.trim()}
                 className="submit-guess-button"
               >
-                {submitting ? '提交中...' : t('challengeGuess.guessInput.button')}
+                {submitting ? '提交中...' : tPage('challengeGuess.guessInput.button')}
               </Button>
             </div>
             <Button
@@ -844,7 +854,7 @@ function ChallengeGuess() {
               disabled={submitting}
               className="skip-challenge-button"
             >
-              {t('challengeGuess.guessInput.skipButton')}
+              {tPage('challengeGuess.guessInput.skipButton')}
             </Button>
           </div>
 

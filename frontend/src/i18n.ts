@@ -4,6 +4,7 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 
 // Import translation files
 import enCommon from './locales/en/common.json'
+import enLevels from './locales/en/levels.json'
 import enSidebar from './locales/en/components/sidebar.json'
 import enIntroduction from './locales/en/pages/introduction.json'
 import enAiConfigModal from './locales/en/components/aiConfigModal.json'
@@ -19,6 +20,7 @@ import enChallengeGuess from './locales/en/pages/challengeGuess.json'
 // Add more imports as needed...
 
 import zhCommon from './locales/zh-CN/common.json'
+import zhLevels from './locales/zh-CN/levels.json'
 import zhSidebar from './locales/zh-CN/components/sidebar.json'
 import zhIntroduction from './locales/zh-CN/pages/introduction.json'
 import zhAiConfigModal from './locales/zh-CN/components/aiConfigModal.json'
@@ -40,6 +42,7 @@ i18n
     resources: {
       en: {
         common: enCommon,
+        levels: enLevels,
         sidebar: enSidebar,
         introduction: enIntroduction,
         aiConfigModal: enAiConfigModal,
@@ -56,6 +59,7 @@ i18n
       },
       'zh-CN': {
         common: zhCommon,
+        levels: zhLevels,
         sidebar: zhSidebar,
         introduction: zhIntroduction,
         aiConfigModal: zhAiConfigModal,
@@ -76,6 +80,10 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    returnObjects: true, // Allow returning objects/arrays from t()
+    returnNull: false, // don't return null for missing keys
+    returnEmptyString: false, // don't return empty string for missing keys
+
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
