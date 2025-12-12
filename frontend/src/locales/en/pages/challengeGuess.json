@@ -16,7 +16,8 @@
     "guessInput": {
       "placeholder": "Enter the word you guess...",
       "button": "Submit Guess",
-      "skipButton": "Skip This Question"
+      "skipButton": "Skip This Question",
+      "submitting": "Submitting..."
     },
     "modals": {
       "levelComplete": {
@@ -40,7 +41,19 @@
       "time": "Time: {{time}}s",
       "progress": "Progress: {{current}}/{{total}}",
       "currentWord": "Current Word",
-      "yourGuess": "Your Guess"
-    }
+      "yourGuess": "Your Guess",
+      "challengeEnd": "💡 Challenge End:",
+      "continueChallenge": "💡 Continue Challenge:",
+      "timeSpent": "Time spent: {{time}} | Score earned: {{score}} points",
+      "levelScore": "Level Score: {{score}} points",
+      "totalScore": "Total Score: {{score}} points",
+      "tips": {
+        "observe": "Carefully observe the details of the drawing",
+        "differentAngles": "Try thinking from different angles",
+        "associations": "Consider common associations"
+      },
+      "errorInfo": "Error Info:"
+    },
+    "pageTitle": "Word Guessing Challenge"
   }
 }

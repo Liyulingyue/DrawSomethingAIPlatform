@@ -53,6 +53,7 @@
         "alternatives": "备选答案:",
         "aiAnalysis": "AI 分析:",
         "noAnalysis": "无额外分析",
+        "unableToRecognize": "无法识别",
         "improvementTips": "💡 改进建议:",
         "tip1": "尝试画得更清晰一些",
         "tip2": "添加更多细节特征",

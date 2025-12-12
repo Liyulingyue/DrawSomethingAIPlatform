@@ -1,0 +1,27 @@
+{
+  "title": "My Custom Levels",
+  "backToDrawing": "← Back to Drawing Challenge",
+  "backToGuessing": "← Back to Guessing Challenge",
+  "createDrawingLevel": "Create Drawing Level",
+  "createGuessingLevel": "Create Guessing Level",
+  "createLevel": "Create Level",
+  "noCustomLevels": "No custom levels yet",
+  "createFirstLevel": "Click the button above to create your first level!",
+  "levelCard": {
+    "keywords": "Keywords: {{count}}",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "modals": {
+    "deleteConfirm": {
+      "title": "Delete Level",
+      "content": "Are you sure you want to delete the level \"{{title}}\"? This action cannot be undone.",
+      "okText": "Delete",
+      "cancelText": "Cancel"
+    }
+  },
+  "messages": {
+    "deleteSuccess": "Level deleted successfully",
+    "deleteFailed": "Failed to delete level"
+  }
+}

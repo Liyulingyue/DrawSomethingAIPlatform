@@ -1,0 +1,6 @@
+{
+  "tauriCloseHandler": {
+    "closingTitle": "正在关闭应用",
+    "cleaningMessage": "正在清理后台进程，请稍候..."
+  }
+}

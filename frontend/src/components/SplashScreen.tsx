@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Spin, Progress } from 'antd'
+import { useTranslation } from 'react-i18next'
 import './SplashScreen.css'
 
 interface SplashScreenProps {
@@ -10,6 +11,7 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, message = '正在启动应用...' }) => {
   const [displayProgress, setDisplayProgress] = useState(0)
+  const { t } = useTranslation('splashScreen')
 
   useEffect(() => {
     if (progress > displayProgress) {
@@ -37,8 +39,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, mess
         </div>
 
         {/* 应用名称 */}
-        <h1 className="splash-title">DrawSomething AI</h1>
-        <p className="splash-subtitle">智能绘图识别平台</p>
+        <h1 className="splash-title">{t('title')}</h1>
+        <p className="splash-subtitle">{t('subtitle')}</p>
 
         {/* 加载指示器 */}
         <div className="splash-loading">
@@ -62,7 +64,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, mess
 
         {/* 提示信息 */}
         <div className="splash-tips">
-          <p>💡 首次启动可能需要较长时间，请耐心等待</p>
+          <p>{t('firstTimeTip')}</p>
         </div>
       </div>
     </div>

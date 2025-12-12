@@ -62,11 +62,13 @@
         "tip2": "Add more detailed features",
         "tip3": "Use more obvious shapes",
         "continueDrawing": "🎨 Continue modifying or redrawing on the canvas!",
-        "continueButton": "Continue Creating"
+        "continueButton": "Continue Creating",
+        "unableToRecognize": "Unable to recognize"
       },
       "submitFailed": {
         "title": "⚠️ Submission Failed",
         "description": "Error occurred while submitting guess",
+        "errorInfo": "Error Info:",
         "okText": "Got it"
       }
     },
@@ -80,10 +82,13 @@
     },
     "buttons": {
       "submitGuess": "Submit Guess",
+      "submitting": "Recognizing...",
       "nextLevel": "Next Level",
       "skipLevel": "Skip",
       "backToLevels": "Back to Levels",
       "share": "Share"
-    }
+    },
+    "pageTitle": "Drawing Challenge",
+    "targetWordLabel": "Target Word:"
   }
 }

@@ -29,7 +29,7 @@
         "tip": "Tip: If you want to use the platform's AI services, please log in first. The system will allocate points for AI usage after login."
       },
       "ai_setup": {
-        "header": "2️⃣ Configure AI Service (first use)",
+        "header": "1️⃣ Configure AI Service (first use)",
         "desc": "You need to configure an AI service before first use:",
         "steps": {
           "enter_config_page": "Open the 'AI Configuration' page",
@@ -42,14 +42,14 @@
         "tip": "Tip: Without AI configuration the system won't use AI recognition."
       },
       "choose_mode": {
-        "header": "3️⃣ Choose game mode",
+        "header": "2️⃣ Choose game mode",
         "mode": {
           "level_draw": {"title": "Drawing Levels", "step": {"choose_level": "Choose a level", "start_challenge": "Click 'Start Challenge'", "select_level": "Or click 'Select Level' to choose specific keywords", "next_level": "Automatically proceed to next level on success"}},
           "free_draw": {"title": "Free Draw", "step": {"input_target": "Enter a target word (e.g. 'apple', 'house')", "draw": "Draw on the canvas", "submit": "Submit and check AI recognition results"}}
         }
       },
-      "start_draw": {"header": "4️⃣ Start Drawing", "step": {"brush": "Use the brush tool to draw on the canvas", "color_brush": "Choose colors and brush sizes", "erase": "Use eraser or clear canvas if needed", "submit_guess": "Click 'Submit Guess' when done"}},
-      "view_result": {"header": "5️⃣ View Results", "desc": "After submitting, AI will analyze your drawing and provide:", "items": {"success_fail": "Success/Failure judgement", "recognition": "Recognition result", "alternatives": "Alternative answers", "analysis": "Detailed AI analysis and suggestions"}}
+      "start_draw": {"header": "3️⃣ Start Drawing", "step": {"brush": "Use the brush tool to draw on the canvas", "color_brush": "Choose colors and brush sizes", "erase": "Use eraser or clear canvas if needed", "submit_guess": "Click 'Submit Guess' when done"}},
+      "view_result": {"header": "4️⃣ View Results", "desc": "After submitting, AI will analyze your drawing and provide:", "items": {"success_fail": "Success/Failure judgement", "recognition": "Recognition result", "alternatives": "Alternative answers", "analysis": "Detailed AI analysis and suggestions"}}
     },
     "tips": {"title": "💡 Drawing Tips", "items": {"featured": "Focus on key features and draw the most recognizable elements", "clear_lines": "Keep lines clear and avoid fuzzy doodles", "add_detail": "Add details appropriately for easier AI recognition", "dont_give_up": "Don't give up on failure; improve based on AI feedback"}},
     "feedback": {"title": "Found an issue? Got a suggestion?", "description": "Welcome to report bugs, propose improvements, or contribute on the GitHub project page!", "button": "Open GitHub"},

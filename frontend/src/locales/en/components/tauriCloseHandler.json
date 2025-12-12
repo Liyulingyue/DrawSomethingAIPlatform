@@ -1,0 +1,6 @@
+{
+  "tauriCloseHandler": {
+    "closingTitle": "Closing Application",
+    "cleaningMessage": "Cleaning up background processes, please wait..."
+  }
+}

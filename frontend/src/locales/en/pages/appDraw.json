@@ -53,6 +53,7 @@
         "alternatives": "Alternative Answers:",
         "aiAnalysis": "AI Analysis:",
         "noAnalysis": "No additional analysis",
+        "unableToRecognize": "Unable to recognize",
         "improvementTips": "💡 Improvement Suggestions:",
         "tip1": "Try to draw more clearly",
         "tip2": "Add more detailed features",

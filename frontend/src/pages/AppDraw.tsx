@@ -187,7 +187,7 @@ function AppDraw() {
                 marginTop: '12px'
               }}>
                 <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.failure.targetWord')}</strong> {targetWord}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.failure.aiRecognition')}</strong> {bestGuess || '无法识别'}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{t('appDraw.modals.failure.aiRecognition')}</strong> {bestGuess || t('appDraw.modals.failure.unableToRecognize')}</p>
                 {alternatives.length > 0 && (
                   <p style={{ margin: '0 0 8px 0' }}>
                     <strong>{t('appDraw.modals.failure.alternatives')}</strong> {alternatives.join(', ')}

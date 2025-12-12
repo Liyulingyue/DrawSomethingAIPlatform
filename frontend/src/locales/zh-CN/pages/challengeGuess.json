@@ -16,7 +16,8 @@
     "guessInput": {
       "placeholder": "输入您猜的词语...",
       "button": "提交猜测",
-      "skipButton": "跳过此题"
+      "skipButton": "跳过此题",
+      "submitting": "提交中..."
     },
     "modals": {
       "levelComplete": {
@@ -40,7 +41,19 @@
       "time": "时间：{{time}}秒",
       "progress": "进度：{{current}}/{{total}}",
       "currentWord": "当前词语",
-      "yourGuess": "您的猜测"
-    }
+      "yourGuess": "您的猜测",
+      "challengeEnd": "💡 挑战结束：",
+      "continueChallenge": "💡 继续挑战：",
+      "timeSpent": "用时：{{time}} | 获得积分：{{score}}分",
+      "levelScore": "本关得分：{{score}} 分",
+      "totalScore": "历史总得分：{{score}} 分",
+      "tips": {
+        "observe": "仔细观察画作的细节",
+        "differentAngles": "尝试不同的角度思考",
+        "associations": "考虑常见的联想"
+      },
+      "errorInfo": "错误信息："
+    },
+    "pageTitle": "猜词闯关"
   }
 }

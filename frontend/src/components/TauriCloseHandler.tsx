@@ -1,12 +1,15 @@
 import { useEffect } from 'react'
 import { Modal } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Tauri 窗口关闭处理组件
  * 在窗口关闭时显示loading提示
  */
 export function TauriCloseHandler() {
+  const { t } = useTranslation('tauriCloseHandler')
+
   useEffect(() => {
     // 只在 Tauri 环境中执行
     if (typeof window === 'undefined' || !('__TAURI__' in window)) {
@@ -26,11 +29,11 @@ export function TauriCloseHandler() {
         
         // 显示关闭中的Modal
         modalInstance = Modal.info({
-          title: '正在关闭应用',
+          title: t('closingTitle'),
           content: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <LoadingOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
-              <span>正在清理后台进程，请稍候...</span>
+              <span>{t('cleaningMessage')}</span>
             </div>
           ),
           icon: null,

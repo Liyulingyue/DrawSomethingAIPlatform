@@ -295,7 +295,7 @@ function ChallengeGuess() {
               <strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
             </p>
             <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-              <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 挑战结束：</p>
+              <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.challengeEnd')}</p>
               <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
                 🎨 准备好迎接下一题挑战了吗？
               </p>
@@ -356,10 +356,10 @@ function ChallengeGuess() {
                 正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
               </p>
               <p style={{ color: '#666', marginBottom: '16px' }}>
-                用时：{formatTime(timeLeft)} | 获得积分：<strong style={{ color: '#faad14' }}>{score}分</strong>
+                {tPage('ui.timeSpent', { time: formatTime(timeLeft), score })}
               </p>
               <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 继续挑战：</p>
+                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.continueChallenge')}</p>
                 <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
                   🎨 准备好迎接下一题挑战了吗？
                 </p>
@@ -390,7 +390,7 @@ function ChallengeGuess() {
                   正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
                 </p>
                 <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 挑战结束：</p>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.challengeEnd')}</p>
                   <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
                     🎨 准备好迎接下一题挑战了吗？
                   </p>
@@ -426,11 +426,11 @@ function ChallengeGuess() {
                   剩余时间：<strong style={{ color: '#faad14' }}>{formatTime(300 - timeLeft)}</strong>
                 </p>
                 <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 继续挑战：</p>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.continueChallenge')}</p>
                   <ul style={{ margin: '0 0 0 16px', paddingLeft: '8px', textAlign: 'left' }}>
-                    <li>仔细观察画作的细节</li>
-                    <li>尝试不同的角度思考</li>
-                    <li>考虑常见的联想</li>
+                    <li>{tPage('ui.tips.observe')}</li>
+                    <li>{tPage('ui.tips.differentAngles')}</li>
+                    <li>{tPage('ui.tips.associations')}</li>
                   </ul>
                   <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
                     🎨 继续在画板上观察或重新猜测！
@@ -444,7 +444,7 @@ function ChallengeGuess() {
               setGuessInput('')
               // 不需要清空画板，让用户继续观察简笔画
             },
-            cancelText: '跳过此题',
+            cancelText: tPage('challengeGuess.guessInput.skipButton'),
             onCancel: handleNextKeyword
           })
           message.warning(tPage('challengeGuess.guessWrong'))
@@ -482,7 +482,7 @@ function ChallengeGuess() {
               padding: '12px',
               wordBreak: 'break-word'
             }}>
-              <strong>错误信息：</strong>
+              <strong>{tPage('ui.errorInfo')}</strong>
               <p style={{ margin: '4px 0 0 0', color: '#ff4d4f', whiteSpace: 'pre-wrap' }}>
                 {errorMessage}
               </p>
@@ -547,10 +547,10 @@ function ChallengeGuess() {
                 📊 挑战统计：
               </p>
               <p style={{ fontSize: '14px', margin: '0 0 4px 0', color: '#666' }}>
-                💰 本关得分：<strong style={{ color: '#faad14' }}>{levelScore} 分</strong>
+                💰 {tPage('ui.levelScore', { score: levelScore })}
               </p>
               <p style={{ fontSize: '14px', margin: '0', color: '#666' }}>
-                🏆 历史总得分：<strong style={{ color: '#52c41a' }}>{newTotalScore} 分</strong>
+                🏆 {tPage('ui.totalScore', { score: newTotalScore })}
               </p>
             </div>
             <p style={{ color: '#666', fontSize: '14px' }}>
@@ -651,7 +651,7 @@ function ChallengeGuess() {
             <div className="challenge-guess-title-section">
               <div className="challenge-guess-level-info">
                 <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-                <h1 className="challenge-guess-page-title">{getDisplayLevelText(levelConfig?.title) || '猜词闯关'}</h1>
+                <h1 className="challenge-guess-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('pageTitle')}</h1>
               </div>
             </div>
 
@@ -692,7 +692,7 @@ function ChallengeGuess() {
                 <Input
                   value={guessInput}
                   onChange={(e) => setGuessInput(e.target.value)}
-                  placeholder="输入您对画作的猜测..."
+                  placeholder={tPage('challengeGuess.guessInput.placeholder')}
                   size="large"
                   onPressEnter={handleSubmitGuess}
                   disabled={submitting}
@@ -706,7 +706,7 @@ function ChallengeGuess() {
                   disabled={submitting || !guessInput.trim()}
                   className="submit-guess-button"
                 >
-                  {submitting ? '提交中...' : '发送'}
+                  {submitting ? tPage('challengeGuess.guessInput.submitting') : tPage('challengeGuess.guessInput.button')}
                 </Button>
               </div>
               <Button
@@ -715,7 +715,7 @@ function ChallengeGuess() {
                 disabled={submitting}
                 className="skip-challenge-button"
               >
-                跳过此题
+                {tPage('challengeGuess.guessInput.skipButton')}
               </Button>
             </div>
 
@@ -762,7 +762,7 @@ function ChallengeGuess() {
           <div className="challenge-guess-title-section">
             <div className="challenge-guess-level-info">
               <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-              <h1 className="challenge-guess-page-title">{getDisplayLevelText(levelConfig?.title) || '猜词闯关'}</h1>
+              <h1 className="challenge-guess-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('pageTitle')}</h1>
             </div>
           </div>
 
@@ -845,7 +845,7 @@ function ChallengeGuess() {
                 disabled={submitting || !guessInput.trim()}
                 className="submit-guess-button"
               >
-                {submitting ? '提交中...' : tPage('challengeGuess.guessInput.button')}
+                {submitting ? tPage('challengeGuess.guessInput.submitting') : tPage('challengeGuess.guessInput.button')}
               </Button>
             </div>
             <Button

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useImperativeHandle, forwardRef, type PointerEvent as ReactPointerEvent } from 'react'
 import { Slider, Space, Button } from 'antd'
 import { ClearOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import './MobileDrawBoard.css'
 
 interface MobileDrawBoardProps {
@@ -20,6 +21,7 @@ const DEFAULT_SIZE = 6
 const COLOR_PRESETS = ['#1f1f1f', '#f5222d', '#faad14', '#52c41a', '#13c2c2', '#1677ff', '#722ed1', '#ffffff']
 
 function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, displayImage = null }: MobileDrawBoardProps, ref: React.Ref<MobileDrawBoardRef>) {
+  const { t } = useTranslation('mobileDrawBoard')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const contextRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -229,7 +231,7 @@ function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, di
         <div className="mobile-draw-board-toolbar">
           <Space className="mobile-draw-board-controls" wrap>
             <Space size="small">
-              <span className="mobile-draw-board-label">颜色</span>
+              <span className="mobile-draw-board-label">{t('color')}</span>
               <Space size={4} className="mobile-draw-board-colors" wrap>
                 {COLOR_PRESETS.map((color) => (
                   <button
@@ -238,15 +240,15 @@ function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, di
                     style={{ background: color, color: color === '#ffffff' ? '#ccc' : undefined }}
                     type="button"
                     onClick={() => setBrushColor(color)}
-                    aria-label={`选择颜色 ${color}`}
+                    aria-label={t('selectColor', { color })}
                   >
-                    {color === '#ffffff' ? '擦' : ''}
+                    {color === '#ffffff' ? t('eraser') : ''}
                   </button>
                 ))}
               </Space>
             </Space>
             <Space size="small" align="center" className="mobile-draw-board-size-control">
-              <span className="mobile-draw-board-label">粗细</span>
+              <span className="mobile-draw-board-label">{t('thickness')}</span>
               <div className="mobile-draw-board-slider">
                 <Slider
                   min={2}
@@ -264,7 +266,7 @@ function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, di
             onClick={clearCanvas}
             size="small"
           >
-            清空
+            {t('clear')}
           </Button>
         </div>
       )}

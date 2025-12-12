@@ -370,12 +370,12 @@ function ChallengeDraw() {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <Button onClick={() => {
                     share(keyword, bestGuess, aiModel)
-                  }}>分享画作</Button>
+                  }}>{tPage('buttons.share')}</Button>
                   <Button type="primary" onClick={() => {
                     markKeywordCompleted(levelId, keyword)
                     modalInstance.destroy()
                     handleNextKeyword()
-                  }}>下一关</Button>
+                  }}>{tPage('buttons.nextLevel')}</Button>
                 </div>
               </div>
             ),
@@ -404,12 +404,12 @@ function ChallengeDraw() {
                 padding: '12px',
                 marginTop: '12px'
               }}>
-                <p style={{ margin: '0 0 8px 0' }}><strong>进度：</strong>{progress}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>目标词：</strong>{keyword}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>AI 识别：</strong>{bestGuess || '无法识别'}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('modals.tryAgain.progress')}</strong>{progress}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('modals.tryAgain.currentKeyword')}</strong>{keyword}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('modals.tryAgain.aiRecognition')}</strong>{bestGuess || tPage('modals.tryAgain.unableToRecognize')}</p>
                 {alternatives.length > 0 && (
                   <p style={{ margin: '0 0 8px 0' }}>
-                    <strong>备选答案：</strong>{alternatives.join(', ')}
+                    <strong>{tPage('modals.tryAgain.alternatives')}</strong>{alternatives.join(', ')}
                   </p>
                 )}
                 <div style={{ 
@@ -420,21 +420,21 @@ function ChallengeDraw() {
                   overflowY: 'auto',
                   wordBreak: 'break-word'
                 }}>
-                  <strong>AI 分析：</strong>
+                  <strong>{tPage('modals.tryAgain.aiAnalysis')}</strong>
                   <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
                     {result.reason || '无额外分析'}
                   </p>
                 </div>
               </div>
               <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>💡 改进建议：</p>
+                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('challengeDraw.modals.guessFailed.improvementTips')}</p>
                 <ul style={{ margin: '0 0 0 16px', paddingLeft: '8px' }}>
-                  <li>尝试画得更清晰一些</li>
-                  <li>添加更多细节特征</li>
-                  <li>使用更明显的形状</li>
+                  <li>{tPage('challengeDraw.modals.guessFailed.tip1')}</li>
+                  <li>{tPage('challengeDraw.modals.guessFailed.tip2')}</li>
+                  <li>{tPage('challengeDraw.modals.guessFailed.tip3')}</li>
                 </ul>
                 <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
-                  🎨 继续在画板上修改或重新绘制！
+                  {tPage('challengeDraw.modals.guessFailed.continueDrawing')}
                 </p>
               </div>
             </div>
@@ -476,7 +476,7 @@ function ChallengeDraw() {
               padding: '12px',
               wordBreak: 'break-word'
             }}>
-              <strong>错误信息：</strong>
+              <strong>{tPage('modals.submitFailed.errorInfo')}</strong>
               <p style={{ margin: '4px 0 0 0', color: '#ff4d4f', whiteSpace: 'pre-wrap' }}>
                 {errorMessage}
               </p>
@@ -592,14 +592,14 @@ function ChallengeDraw() {
             <div className="challenge-draw-title-section">
               <div className="challenge-draw-level-info">
                 <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-                <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || '绘画闯关'}</h1>
+                <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('pageTitle')}</h1>
               </div>
             </div>
 
             {/* 目标词区域 */}
             <div className="challenge-draw-header">
               <div className="challenge-draw-target-word">
-                <label className="challenge-target-word-label">目标词：</label>
+                <label className="challenge-target-word-label">{tPage('targetWordLabel')}</label>
                 <div className="challenge-target-word-display">
                   {keyword || '未选择'}
                 </div>
@@ -616,7 +616,7 @@ function ChallengeDraw() {
                 disabled={submitting}
                 className="submit-guess-button"
               >
-                {submitting ? '正在识别...' : '提交猜词'}
+                {submitting ? tPage('challengeDraw.buttons.submitting') : tPage('challengeDraw.buttons.submitGuess')}
               </Button>
               <Button
                 size="large"
@@ -624,7 +624,7 @@ function ChallengeDraw() {
                 disabled={submitting}
                 className="skip-challenge-button"
               >
-                跳过关卡
+                {tPage('challengeDraw.buttons.skipLevel')}
               </Button>
             </div>
 
@@ -647,14 +647,14 @@ function ChallengeDraw() {
           <div className="challenge-draw-title-section">
             <div className="challenge-draw-level-info">
               <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-              <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || '绘画闯关'}</h1>
+              <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('pageTitle')}</h1>
             </div>
           </div>
 
           {/* 目标词区域 - 只读显示 */}
           <div className="challenge-draw-header">
             <div className="challenge-draw-target-word">
-              <label className="challenge-target-word-label">目标词：</label>
+              <label className="challenge-target-word-label">{tPage('targetWordLabel')}</label>
               <div className="challenge-target-word-display">
                 {keyword || '未选择'}
               </div>
@@ -679,7 +679,7 @@ function ChallengeDraw() {
               disabled={submitting}
               className="submit-guess-button"
             >
-              {submitting ? '正在识别...' : '提交猜词'}
+              {submitting ? tPage('challengeDraw.buttons.submitting') : tPage('challengeDraw.buttons.submitGuess')}
             </Button>
             <Button
               size="large"
@@ -687,7 +687,7 @@ function ChallengeDraw() {
               disabled={submitting}
               className="skip-challenge-button"
             >
-              跳过关卡
+              {tPage('challengeDraw.buttons.skipLevel')}
             </Button>
           </div>
 

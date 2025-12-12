@@ -42,6 +42,7 @@ function MyCustomLevels() {
   const [customLevels, setCustomLevels] = useState<LevelConfig[]>(getCustomLevels())
   const navigate = useNavigate()
   const { t: tLevels } = useTranslation('levels')
+  const { t: tPage } = useTranslation('myCustomLevels')
 
   const resolveKeywords = (level: LevelConfig): string[] => {
     if (!level.keywords) return []
@@ -106,7 +107,7 @@ function MyCustomLevels() {
       <div className="my-custom-levels-container">
         <div className="my-custom-levels-content">
           {/* 页面标题 */}
-          <h1 className="my-custom-levels-title">我的自定义关卡</h1>
+          <h1 className="my-custom-levels-title">{tPage('title')}</h1>
           
           <div className="my-custom-levels-nav-buttons">
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -115,7 +116,7 @@ function MyCustomLevels() {
                 ghost
                 onClick={() => navigate('/app/level-set')}
               >
-                ← 返回绘画闯关
+                {tPage('backToDrawing')}
               </Button>
               <Button
                 type="primary"
@@ -126,7 +127,7 @@ function MyCustomLevels() {
                   color: '#667eea'
                 }}
               >
-                ← 返回猜词闯关
+                {tPage('backToGuessing')}
               </Button>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -135,7 +136,7 @@ function MyCustomLevels() {
                 icon={<PlusOutlined />}
                 onClick={() => navigate('/app/level-config?type=draw')}
               >
-                创建绘画新关卡
+                {tPage('createDrawingLevel')}
               </Button>
               <Button
                 type="primary"
@@ -146,7 +147,7 @@ function MyCustomLevels() {
                   border: 'none'
                 }}
               >
-                创建猜词新关卡
+                {tPage('createGuessingLevel')}
               </Button>
             </div>
           </div>
@@ -214,8 +215,8 @@ function MyCustomLevels() {
           ) : (
             <div className="my-custom-levels-empty">
               <div className="my-custom-levels-empty-icon">📝</div>
-              <h3>还没有自定义关卡</h3>
-              <p>点击上方按钮开始创建你的第一个关卡吧！</p>
+              <h3>{tPage('noCustomLevels')}</h3>
+              <p>{tPage('createFirstLevel')}</p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                 <Button
                   type="primary"

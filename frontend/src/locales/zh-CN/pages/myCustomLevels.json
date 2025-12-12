@@ -1,0 +1,27 @@
+{
+  "title": "我的自定义关卡",
+  "backToDrawing": "← 返回绘画闯关",
+  "backToGuessing": "← 返回猜词闯关",
+  "createDrawingLevel": "创建绘画新关卡",
+  "createGuessingLevel": "创建猜词新关卡",
+  "createLevel": "创建关卡",
+  "noCustomLevels": "还没有自定义关卡",
+  "createFirstLevel": "点击上方按钮开始创建你的第一个关卡吧！",
+  "levelCard": {
+    "keywords": "关键词数量：{{count}}",
+    "edit": "编辑",
+    "delete": "删除"
+  },
+  "modals": {
+    "deleteConfirm": {
+      "title": "删除关卡",
+      "content": "确定要删除关卡\"{{title}}\"吗？此操作无法撤销。",
+      "okText": "删除",
+      "cancelText": "取消"
+    }
+  },
+  "messages": {
+    "deleteSuccess": "关卡删除成功",
+    "deleteFailed": "删除关卡失败"
+  }
+}
