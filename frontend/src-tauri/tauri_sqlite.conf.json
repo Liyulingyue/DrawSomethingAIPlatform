@@ -18,7 +18,7 @@
         "open": true,
         "sidecar": true,
         "scope": [
-          { "name": "backend", "sidecar": true }
+          { "name": "DrawSomethingBackend", "sidecar": true }
         ]
       },
       "http": {
@@ -39,7 +39,7 @@
         "depends": []
       },
       "externalBin": [
-        "binaries/backend"
+        "binaries/DrawSomethingBackend"
       ],
       "icon": [
         "icons/32x32.png",

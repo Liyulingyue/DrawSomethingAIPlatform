@@ -117,7 +117,7 @@ if (-Not $SkipBackend) {
     }
 
     # SQLite version - no PostgreSQL to include
-    $pyinstallerCmd = "pyinstaller --onefile --name backend --hidden-import uvicorn.logging --hidden-import uvicorn.loops --hidden-import uvicorn.loops.auto --hidden-import uvicorn.protocols --hidden-import uvicorn.protocols.http --hidden-import uvicorn.protocols.http.auto --hidden-import uvicorn.protocols.websockets --hidden-import uvicorn.protocols.websockets.auto --hidden-import uvicorn.lifespan --hidden-import uvicorn.lifespan.on --hidden-import sqlalchemy.ext.declarative --add-data `"alembic.ini;.`" --add-data `"alembic;alembic`" run_tauri_sqlite.py"
+    $pyinstallerCmd = "pyinstaller --onefile --icon icon.ico --name DrawSomethingBackend --hidden-import uvicorn.logging --hidden-import uvicorn.loops --hidden-import uvicorn.loops.auto --hidden-import uvicorn.protocols --hidden-import uvicorn.protocols.http --hidden-import uvicorn.protocols.http.auto --hidden-import uvicorn.protocols.websockets --hidden-import uvicorn.protocols.websockets.auto --hidden-import uvicorn.lifespan --hidden-import uvicorn.lifespan.on --hidden-import sqlalchemy.ext.declarative --add-data `"alembic.ini;.`" --add-data `"alembic;alembic`" run_tauri_sqlite.py"
 
     Invoke-Expression $pyinstallerCmd
 
@@ -134,7 +134,7 @@ if (-Not $SkipBackend) {
 
 # Copy backend to Tauri
 Write-Host "Copying backend to Tauri..." -ForegroundColor Yellow
-$backendExe = Join-Path $ProjectRoot "backend\dist\backend.exe"
+$backendExe = Join-Path $ProjectRoot "backend\dist\DrawSomethingBackend.exe"
 $tauriSidecarDir = Join-Path $ProjectRoot "frontend\src-tauri\binaries"
 
 if (-Not (Test-Path $backendExe)) {
@@ -147,8 +147,8 @@ if (-Not (Test-Path $tauriSidecarDir)) {
 }
 
 # Copy backend with both naming conventions
-Copy-Item $backendExe (Join-Path $tauriSidecarDir "backend.exe") -Force
-Copy-Item $backendExe (Join-Path $tauriSidecarDir "backend-x86_64-pc-windows-msvc.exe") -Force
+Copy-Item $backendExe (Join-Path $tauriSidecarDir "DrawSomethingBackend.exe") -Force
+Copy-Item $backendExe (Join-Path $tauriSidecarDir "DrawSomethingBackend-x86_64-pc-windows-msvc.exe") -Force
 Write-Host "Backend copied to Tauri" -ForegroundColor Green
 Write-Host ""
 

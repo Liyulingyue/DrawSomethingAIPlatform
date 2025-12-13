@@ -252,7 +252,7 @@ fn main() {
             #[cfg(debug_assertions)]
             println!("[调试] 准备启动 backend sidecar");
             
-            match Command::new_sidecar("backend") {
+            match Command::new_sidecar("DrawSomethingBackend") {
                 Ok(command) => {
                     #[cfg(debug_assertions)]
                     println!("[调试] Sidecar 命令创建成功");
