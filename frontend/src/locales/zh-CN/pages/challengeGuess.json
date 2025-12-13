@@ -16,6 +16,8 @@
     "guessInput": {
       "placeholder": "输入您猜的词语...",
       "button": "提交猜测",
+      "fastForwardButton": "快进时间",
+      "fastForwardSuccess": "⏩ 时间已快进 {seconds} 秒，画面加速显示！",
       "skipButton": "跳过此题",
       "submitting": "提交中..."
     },
@@ -68,6 +70,7 @@
       "timeSpent": "用时：{{time}} | 获得积分：{{score}}分",
       "levelScore": "本关得分：{{score}} 分",
       "totalScore": "历史总得分：{{score}} 分",
+      "candidateWords": "候选词列表：",
       "tips": {
         "observe": "仔细观察画作的细节",
         "differentAngles": "尝试不同的角度思考",

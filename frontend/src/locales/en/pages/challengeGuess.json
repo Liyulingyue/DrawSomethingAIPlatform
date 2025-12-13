@@ -16,6 +16,8 @@
     "guessInput": {
       "placeholder": "Enter the word you guess...",
       "button": "Submit Guess",
+      "fastForwardButton": "Fast Forward Time",
+      "fastForwardSuccess": "⏩ Time fast-forwarded by {seconds} seconds, display accelerated!",
       "skipButton": "Skip This Question",
       "submitting": "Submitting..."
     },
@@ -68,6 +70,7 @@
       "timeSpent": "Time spent: {{time}} | Score earned: {{score}} points",
       "levelScore": "Level Score: {{score}} points",
       "totalScore": "Total Score: {{score}} points",
+      "candidateWords": "Candidate Words:",
       "tips": {
         "observe": "Carefully observe the details of the drawing",
         "differentAngles": "Try thinking from different angles",

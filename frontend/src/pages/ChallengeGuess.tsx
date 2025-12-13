@@ -1,7 +1,7 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Button, App, Input, Spin } from 'antd'
-import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
+import { Button, App, Input, Spin, Tooltip } from 'antd'
+import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import MobileDrawBoard, { type MobileDrawBoardRef } from '../components/MobileDrawBoard'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -69,6 +69,37 @@ function ChallengeGuess() {
   const [loading, setLoading] = useState(true)
   const [levelScore, setLevelScore] = useState(0) // 当前关卡累计积分
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024) // 桌面端检测
+  const [candidateWords, setCandidateWords] = useState<string[]>([])
+
+  // 简单稳定的字符串 hash，用作伪随机种子
+  const stableHash = (str: string) => {
+    let h = 2166136261
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i)
+      h = Math.imul(h, 16777619)
+    }
+    return h >>> 0
+  }
+
+  // 基于种子的伪随机数生成器
+  const seededRandomGenerator = (seed: number) => {
+    let s = seed >>> 0
+    return () => {
+      s = Math.imul(s, 1664525) + 1013904223
+      return (s >>> 0) / 4294967296
+    }
+  }
+
+  // 基于种子的 Fisher-Yates 洗牌
+  const seededShuffle = (arr: string[], seed: number) => {
+    const a = [...arr]
+    const rand = seededRandomGenerator(seed)
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1))
+      ;[a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  }
   const navigate = useNavigate()
   const location = useLocation()
   const { sessionId } = useUser() // 获取真实的 sessionId（如果已登录）
@@ -95,8 +126,9 @@ function ChallengeGuess() {
   // 获取关卡配置
   const levelConfig = getGuessLevelById(levelId)
 
-  // 获取当前关键词
-  const shuffledKeywords = getShuffledKeywords(levelId, tLevels)
+  // 获取当前关键词（使用 useMemo 缓存，避免每次渲染重新计算）
+  const shuffledKeywords = useMemo(() => getShuffledKeywords(levelId, tLevels), [levelId, tLevels])
+
   const currentKeyword = shuffledKeywords[keywordIndex] || ''
 
   // 关卡变化时重置积分
@@ -576,12 +608,24 @@ function ChallengeGuess() {
     setSketchSteps([])
     setCurrentStepIndex(0)
     setLoading(true)
+    setCandidateWords([]) // 重置候选词列表
     loadedKeywordRef.current = '' // 重置加载标记
     // 注意：不重置levelScore，保持关卡内积分累计
 
     // 跳转到下一个关键词
     navigate(`/app/challenge-guess?level=${levelId}&keywordIndex=${nextIndex}`)
     message.info(tPage('challengeGuess.nextQuestion', { current: nextIndex + 1, total: shuffledKeywords.length }))
+  }
+
+  // 快进时间
+  const handleFastForward = () => {
+    const fastForwardAmount = 5 // 快进5秒
+    setTimeLeft(prev => Math.min(prev + fastForwardAmount, 300)) // 最多到300秒
+    
+    // 同时快进画面显示（每5秒对应1步）
+    setCurrentStepIndex(prev => Math.min(prev + 1, sketchSteps.length - 1))
+    
+    message.success(tPage('challengeGuess.guessInput.fastForwardSuccess', { seconds: fastForwardAmount }))
   }
 
   // 跳过游戏
@@ -611,6 +655,24 @@ function ChallengeGuess() {
     // 可以在这里添加实时识别等功能
   }
 
+  // 根据 levelId 和 keywordIndex 生成候选词顺序（稳定且不会与原序列一致）
+  useEffect(() => {
+    if (!shuffledKeywords || shuffledKeywords.length === 0) {
+      setCandidateWords([])
+      return
+    }
+
+    const seed = stableHash(`${levelId}:${keywordIndex}`)
+    let newCandidates = seededShuffle(shuffledKeywords, seed)
+
+    // 如果意外与原序列完全一致，旋转一次保证不同
+    if (newCandidates.length > 1 && newCandidates.every((v, i) => v === shuffledKeywords[i])) {
+      newCandidates = [...newCandidates.slice(1), newCandidates[0]]
+    }
+
+    setCandidateWords(newCandidates)
+  }, [levelId, keywordIndex, shuffledKeywords])
+
   // 格式化时间显示
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -636,6 +698,24 @@ function ChallengeGuess() {
       current: Math.min(currentStepIndex + 1, sketchSteps.length),
       total: sketchSteps.length
     }
+  }
+
+  // 获取候选词提示内容
+  const getCandidateWordsHint = () => {
+    return (
+      <div className="candidate-list-wrapper">
+        <div className="candidate-list-inner">
+          <div className="candidate-list-title">📝 {tPage('challengeGuess.ui.candidateWords')}</div>
+          <div className="candidate-list-grid">
+            {candidateWords.map((word, index) => (
+              <div key={index} className="candidate-list-item">
+                {index + 1}. {word}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -679,6 +759,11 @@ function ChallengeGuess() {
                     <div className="timer-item">
                       <span className="challenge-drawing-progress">
                         🎨 {getDrawingProgress().current}/{getDrawingProgress().total}
+                        <Tooltip classNames={{ root: "candidate-tooltip" }} title={getCandidateWordsHint()}>
+                          <QuestionCircleOutlined 
+                            style={{ marginLeft: '8px', cursor: 'help', color: '#1890ff' }}
+                          />
+                        </Tooltip>
                       </span>
                     </div>
                   )}
@@ -709,6 +794,15 @@ function ChallengeGuess() {
                   {submitting ? tPage('challengeGuess.guessInput.submitting') : tPage('challengeGuess.guessInput.button')}
                 </Button>
               </div>
+              <Button
+                size="large"
+                onClick={handleFastForward}
+                disabled={submitting || timeLeft >= 300}
+                className="fast-forward-button"
+                style={{ marginBottom: '8px' }}
+              >
+                {tPage('challengeGuess.guessInput.fastForwardButton')}
+              </Button>
               <Button
                 size="large"
                 onClick={handleSkipChallenge}
@@ -787,6 +881,11 @@ function ChallengeGuess() {
                 {!loading && (
                   <span className="challenge-drawing-progress">
                     🎨 {getDrawingProgress().current}/{getDrawingProgress().total}
+                    <Tooltip classNames={{ root: "candidate-tooltip" }} title={getCandidateWordsHint()}>
+                      <QuestionCircleOutlined 
+                        style={{ marginLeft: '4px', cursor: 'help', color: '#1890ff', fontSize: '14px' }}
+                      />
+                    </Tooltip>
                   </span>
                 )}
               </div>
@@ -848,14 +947,24 @@ function ChallengeGuess() {
                 {submitting ? tPage('challengeGuess.guessInput.submitting') : tPage('challengeGuess.guessInput.button')}
               </Button>
             </div>
-            <Button
-              size="large"
-              onClick={handleSkipChallenge}
-              disabled={submitting}
-              className="skip-challenge-button"
-            >
-              {tPage('challengeGuess.guessInput.skipButton')}
-            </Button>
+            <div className="mobile-action-buttons">
+              <Button
+                size="large"
+                onClick={handleFastForward}
+                disabled={submitting || timeLeft >= 300}
+                className="fast-forward-button"
+              >
+                {tPage('challengeGuess.guessInput.fastForwardButton')}
+              </Button>
+              <Button
+                size="large"
+                onClick={handleSkipChallenge}
+                disabled={submitting}
+                className="skip-challenge-button"
+              >
+                {tPage('challengeGuess.guessInput.skipButton')}
+              </Button>
+            </div>
           </div>
 
           <AppFooter className="app-footer-light" />
