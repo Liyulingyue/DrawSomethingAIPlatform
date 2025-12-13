@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Input, Button, Form, Card, App, Radio, Tabs } from 'antd'
-import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined } from '@ant-design/icons'
+import { Input, Button, Form, Card, App, Radio, Tabs, Dropdown } from 'antd'
+import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined, DownOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -11,8 +11,10 @@ import {
   getAIConfig, 
   saveAIConfigWithNotification, 
   resetAIConfig, 
+  resetAIConfigToPlatform,
   isAIConfigValid,
   DEFAULT_AI_CONFIG,
+  PLATFORM_PRESETS,
   type AIConfig 
 } from '../utils/aiConfig'
 import './ConfigAI.css'
@@ -34,26 +36,17 @@ function ConfigAI() {
     return currentConfig.callPreference
   })
 
-  // 动态验证规则：服务器调用点时，API相关字段非必填
-  const getValidationRules = (fieldName: string, modelType: 'vision' | 'image' = 'vision') => {
-    const isServerMode = currentCallPreference === 'server'
-    
+  // 动态验证规则：所有字段都为可选，仅验证URL格式
+  const getValidationRules = (fieldName: string) => {
     switch (fieldName) {
       case 'url':
-        return isServerMode ? [
-          { type: 'url' as const, message: t('configAI.validation.enterValidUrl') },
-        ] : [
-          { required: true, message: t(modelType === 'vision' ? 'configAI.validation.enterVisionUrl' : 'configAI.validation.enterImageUrl') },
+        return [
           { type: 'url' as const, message: t('configAI.validation.enterValidUrl') },
         ]
       case 'key':
-        return isServerMode ? [] : [
-          { required: true, message: t(modelType === 'vision' ? 'configAI.validation.enterVisionKey' : 'configAI.validation.enterImageKey') }
-        ]
+        return []
       case 'modelName':
-        return isServerMode ? [] : [
-          { required: true, message: t(modelType === 'vision' ? 'configAI.validation.enterVisionModelName' : 'configAI.validation.enterImageModelName') }
-        ]
+        return []
       default:
         return []
     }
@@ -62,10 +55,8 @@ function ConfigAI() {
   // 处理调用偏好变化
   const handleCallPreferenceChange = (value: 'custom' | 'server') => {
     setCurrentCallPreference(value)
-    // 当切换到服务器模式时，清除相关字段的验证错误
+    // 当切换到服务器模式时，显示登录提示
     if (value === 'server') {
-      form.validateFields(['url', 'key', 'modelName']).catch(() => {})
-      // 显示登录提示
       message.info({
         content: t('configAI.messages.serverLoginRequired'),
         duration: 5,
@@ -132,6 +123,23 @@ function ConfigAI() {
     }
   }
 
+  const handleResetToPlatform = (platform: keyof typeof PLATFORM_PRESETS) => {
+    try {
+      const success = resetAIConfigToPlatform(platform)
+      if (success) {
+        const platformConfig = { ...PLATFORM_PRESETS[platform] }
+        form.setFieldsValue(platformConfig)
+        setConfig(platformConfig)
+        message.info(t('configAI.messages.resetToPlatformSuccess', { platform: PLATFORM_PRESETS[platform].name }))
+      } else {
+        message.error(t('configAI.messages.resetFailed'))
+      }
+    } catch (error) {
+      message.error(t('configAI.messages.resetFailed'))
+      console.error('重置平台配置失败:', error)
+    }
+  }
+
   const handleTestConnection = async (modelType: 'vision' | 'image' = 'vision') => {
     console.log(`🎯 用户点击了测试连接按钮 (${modelType === 'vision' ? '视觉模型' : '文生图模型'})`)
     
@@ -139,16 +147,14 @@ function ConfigAI() {
     const currentValues = form.getFieldsValue()
     console.log('📋 当前表单值:', currentValues)
     
-    // 检查表单值是否完整（仅在自定义模式下检查）
-    if (currentValues.callPreference === 'custom') {
-      const url = modelType === 'vision' ? currentValues.visionUrl : currentValues.imageUrl
-      const key = modelType === 'vision' ? currentValues.visionKey : currentValues.imageKey
-      const modelName = modelType === 'vision' ? currentValues.visionModelName : currentValues.imageModelName
-      
-      if (!url || !key || !modelName) {
-        message.error(t('configAI.messages.fillComplete', { modelType: modelType === 'vision' ? t('configAI.tabs.vision').replace('👁️ ', '') : t('configAI.tabs.image').replace('🎨 ', '') }))
-        return
-      }
+    // 检查对应模型的表单值是否完整（测试时必须填写完整）
+    const url = modelType === 'vision' ? currentValues.visionUrl : currentValues.imageUrl
+    const key = modelType === 'vision' ? currentValues.visionKey : currentValues.imageKey
+    const modelName = modelType === 'vision' ? currentValues.visionModelName : currentValues.imageModelName
+    
+    if (!url || !key || !modelName) {
+      message.error(t('configAI.messages.fillComplete', { modelType: modelType === 'vision' ? t('configAI.tabs.vision').replace('👁️ ', '') : t('configAI.tabs.image').replace('🎨 ', '') }))
+      return
     }
     
     // 立即显示测试开始消息
@@ -416,117 +422,169 @@ function ConfigAI() {
               form={form}
               layout="vertical"
               initialValues={config}
-              onFinish={handleSave}
               autoComplete="off"
               className="config-ai-form"
             >
-              <Tabs defaultActiveKey="vision" className="config-ai-tabs">
-                <Tabs.TabPane tab={t('configAI.tabs.vision')} key="vision">
-                  <div className="config-tab-content">
-                    <Form.Item
-                      label={t('configAI.form.visionUrl')}
-                      name="visionUrl"
-                      rules={getValidationRules('url', 'vision')}
-                    >
-                      <Input
-                        prefix={<ApiOutlined />}
-                        placeholder={t('configAI.placeholders.visionUrl')}
-                        size="large"
-                        className="config-input"
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      label={t('configAI.form.visionKey')}
-                      name="visionKey"
-                      rules={getValidationRules('key', 'vision')}
-                      extra={
-                        <a 
-                          href="https://aistudio.baidu.com/account/accessToken" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          style={{ color: '#1890ff', fontSize: '14px' }}
+              <Tabs 
+                defaultActiveKey="vision" 
+                className="config-ai-tabs"
+                items={[
+                  {
+                    key: 'vision',
+                    label: t('configAI.tabs.vision'),
+                    children: (
+                      <div className="config-tab-content">
+                        <Form.Item
+                          label={t('configAI.form.visionUrl')}
+                          name="visionUrl"
+                          rules={getValidationRules('url')}
                         >
-                          {t('configAI.links.getToken')}
-                        </a>
-                      }
-                    >
-                      <Input.Password
-                        prefix={<KeyOutlined />}
-                        placeholder={t('configAI.placeholders.visionKey')}
-                        size="large"
-                        className="config-input"
-                      />
-                    </Form.Item>
+                          <Input
+                            prefix={<ApiOutlined />}
+                            placeholder={t('configAI.placeholders.visionUrl')}
+                            size="large"
+                            className="config-input"
+                          />
+                        </Form.Item>
 
-                    <Form.Item
-                      label={t('configAI.form.visionModelName')}
-                      name="visionModelName"
-                      rules={getValidationRules('modelName', 'vision')}
-                    >
-                      <Input
-                        prefix={<RobotOutlined />}
-                        placeholder={t('configAI.placeholders.visionModelName')}
-                        size="large"
-                        className="config-input"
-                      />
-                    </Form.Item>
-                  </div>
-                </Tabs.TabPane>
-
-                <Tabs.TabPane tab={t('configAI.tabs.image')} key="image">
-                  <div className="config-tab-content">
-                    <Form.Item
-                      label={t('configAI.form.imageUrl')}
-                      name="imageUrl"
-                      rules={getValidationRules('url', 'image')}
-                    >
-                      <Input
-                        prefix={<ApiOutlined />}
-                        placeholder={t('configAI.placeholders.imageUrl')}
-                        size="large"
-                        className="config-input"
-                      />
-                    </Form.Item>
-
-                    <Form.Item
-                      label={t('configAI.form.imageKey')}
-                      name="imageKey"
-                      rules={getValidationRules('key', 'image')}
-                      extra={
-                        <a 
-                          href="https://aistudio.baidu.com/account/accessToken" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          style={{ color: '#1890ff', fontSize: '14px' }}
+                        <Form.Item
+                          label={t('configAI.form.visionKey')}
+                          name="visionKey"
+                          rules={getValidationRules('key')}
+                          extra={
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                              <span style={{ color: '#666', fontSize: '14px' }}>🔗 {t('configAI.links.getTokenPrefix')}</span>
+                              <a 
+                                href="https://aistudio.baidu.com/account/accessToken" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ color: '#1890ff', fontSize: '14px' }}
+                              >
+                                {PLATFORM_PRESETS.baidu.name}
+                              </a>
+                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                              <a 
+                                href="https://modelscope.cn/my/myaccesstoken" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ color: '#1890ff', fontSize: '14px' }}
+                              >
+                                {PLATFORM_PRESETS.modelscope.name}
+                              </a>
+                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                              <a 
+                                href="https://huggingface.co/settings/tokens" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ color: '#1890ff', fontSize: '14px' }}
+                              >
+                                {PLATFORM_PRESETS.huggingface.name}
+                              </a>
+                            </div>
+                          }
                         >
-                          {t('configAI.links.getToken')}
-                        </a>
-                      }
-                    >
-                      <Input.Password
-                        prefix={<KeyOutlined />}
-                        placeholder={t('configAI.placeholders.imageKey')}
-                        size="large"
-                        className="config-input"
-                      />
-                    </Form.Item>
+                          <Input.Password
+                            prefix={<KeyOutlined />}
+                            placeholder={t('configAI.placeholders.visionKey')}
+                            size="large"
+                            className="config-input"
+                          />
+                        </Form.Item>
 
-                    <Form.Item
-                      label={t('configAI.form.imageModelName')}
-                      name="imageModelName"
-                      rules={getValidationRules('modelName', 'image')}
-                    >
-                      <Input
-                        prefix={<RobotOutlined />}
-                        placeholder={t('configAI.placeholders.imageModelName')}
-                        size="large"
-                        className="config-input"
-                      />
-                    </Form.Item>
-                  </div>
-                </Tabs.TabPane>
-              </Tabs>
+                        <Form.Item
+                          label={t('configAI.form.visionModelName')}
+                          name="visionModelName"
+                          rules={getValidationRules('modelName')}
+                        >
+                          <Input
+                            prefix={<RobotOutlined />}
+                            placeholder={t('configAI.placeholders.visionModelName')}
+                            size="large"
+                            className="config-input"
+                          />
+                        </Form.Item>
+                      </div>
+                    )
+                  },
+                  {
+                    key: 'image',
+                    label: t('configAI.tabs.image'),
+                    children: (
+                      <div className="config-tab-content">
+                        <Form.Item
+                          label={t('configAI.form.imageUrl')}
+                          name="imageUrl"
+                          rules={getValidationRules('url')}
+                        >
+                          <Input
+                            prefix={<ApiOutlined />}
+                            placeholder={t('configAI.placeholders.imageUrl')}
+                            size="large"
+                            className="config-input"
+                          />
+                        </Form.Item>
+
+                        <Form.Item
+                          label={t('configAI.form.imageKey')}
+                          name="imageKey"
+                          rules={getValidationRules('key')}
+                          extra={
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                              <span style={{ color: '#666', fontSize: '14px' }}>🔗 {t('configAI.links.getTokenPrefix')}</span>
+                              <a 
+                                href="https://aistudio.baidu.com/account/accessToken" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ color: '#1890ff', fontSize: '14px' }}
+                              >
+                                {PLATFORM_PRESETS.baidu.name}
+                              </a>
+                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                              <a 
+                                href="https://modelscope.cn/my/myaccesstoken" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ color: '#1890ff', fontSize: '14px' }}
+                              >
+                                {PLATFORM_PRESETS.modelscope.name}
+                              </a>
+                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                              <a 
+                                href="https://huggingface.co/settings/tokens" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ color: '#1890ff', fontSize: '14px' }}
+                              >
+                                {PLATFORM_PRESETS.huggingface.name}
+                              </a>
+                            </div>
+                          }
+                        >
+                          <Input.Password
+                            prefix={<KeyOutlined />}
+                            placeholder={t('configAI.placeholders.imageKey')}
+                            size="large"
+                            className="config-input"
+                          />
+                        </Form.Item>
+
+                        <Form.Item
+                          label={t('configAI.form.imageModelName')}
+                          name="imageModelName"
+                          rules={getValidationRules('modelName')}
+                        >
+                          <Input
+                            prefix={<RobotOutlined />}
+                            placeholder={t('configAI.placeholders.imageModelName')}
+                            size="large"
+                            className="config-input"
+                          />
+                        </Form.Item>
+                      </div>
+                    )
+                  }
+                ]}
+              />
 
               <Form.Item
                 label={t('configAI.form.callPreference')}
@@ -581,20 +639,56 @@ function ConfigAI() {
                   >
                     {t('configAI.buttons.testImage')}
                   </Button>
-                  <Button
-                    type="default"
-                    size="large"
-                    onClick={handleReset}
-                    className="config-reset-button"
+                  <Dropdown
+                    menu={{
+                      items: [
+                        {
+                          key: 'reset-default',
+                          label: t('configAI.buttons.reset'),
+                          icon: <SyncOutlined />,
+                          onClick: handleReset,
+                        },
+                        { type: 'divider' },
+                        {
+                          key: 'reset-baidu',
+                          label: t('configAI.buttons.resetToPlatform', { platform: PLATFORM_PRESETS.baidu.name }),
+                          icon: <SettingOutlined />,
+                          onClick: () => handleResetToPlatform('baidu'),
+                        },
+                        {
+                          key: 'reset-modelscope',
+                          label: t('configAI.buttons.resetToPlatform', { platform: PLATFORM_PRESETS.modelscope.name }),
+                          icon: <SettingOutlined />,
+                          onClick: () => handleResetToPlatform('modelscope'),
+                        },
+                        {
+                          key: 'reset-huggingface',
+                          label: t('configAI.buttons.resetToPlatform', { platform: PLATFORM_PRESETS.huggingface.name }),
+                          icon: <SettingOutlined />,
+                          onClick: () => handleResetToPlatform('huggingface'),
+                        },
+                      ],
+                    }}
+                    trigger={['click']}
+                    placement="topRight"
                   >
-                    {t('configAI.buttons.reset')}
-                  </Button>
+                    <Button
+                      type="default"
+                      size="large"
+                      className="config-reset-button"
+                    >
+                      {t('configAI.buttons.reset')} <DownOutlined />
+                    </Button>
+                  </Dropdown>
                   <Button
                     type="primary"
-                    htmlType="submit"
                     size="large"
                     icon={<SaveOutlined />}
                     className="config-save-button"
+                    onClick={() => {
+                      const values = form.getFieldsValue();
+                      handleSave(values);
+                    }}
                   >
                     {t('configAI.buttons.save')}
                   </Button>
@@ -605,15 +699,7 @@ function ConfigAI() {
 
           <div className="config-ai-footer">
             <p className="config-ai-note">
-              {t('configAI.footer.hint')}{' '}
-              <a
-                href="https://aistudio.baidu.com/account/accessToken"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#fff', textDecoration: 'underline' }}
-              >
-                {t('configAI.footer.baiduLink')}
-              </a>
+              {t('configAI.footer.hint')}
             </p>
             {!isInTauriMode && (
               <p className="config-ai-note config-ai-help">

@@ -12,6 +12,8 @@
     "edit": "Edit",
     "delete": "Delete"
   },
+  "guessLevelTag": "Guessing Challenge",
+  "drawLevelTag": "Drawing Challenge",
   "modals": {
     "deleteConfirm": {
       "title": "Delete Level",
@@ -22,6 +24,7 @@
   },
   "messages": {
     "deleteSuccess": "Level deleted successfully",
-    "deleteFailed": "Failed to delete level"
+    "deleteFailed": "Failed to delete level",
+    "levelNotFound": "Level not found"
   }
 }

@@ -66,6 +66,7 @@
         "tip1": "尝试画得更清晰一些",
         "tip2": "添加更多细节特征",
         "tip3": "使用更明显的形状",
+        "configTip": "请确保正确配置AI服务",
         "continueDrawing": "🎨 继续在画板上修改或重新绘制！",
         "continueButton": "继续创作",
         "unableToRecognize": "无法识别"
@@ -77,6 +78,7 @@
         "tip1": "仔细观察画作细节",
         "tip2": "想想常见物体",
         "tip3": "考虑不同视角",
+        "configTip": "请确保正确配置AI服务",
         "continueDrawing": "🎨 继续尝试！"
       },
       "submitFailed": {

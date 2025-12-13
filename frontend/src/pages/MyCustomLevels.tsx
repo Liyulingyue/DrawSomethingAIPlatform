@@ -65,27 +65,27 @@ function MyCustomLevels() {
     const level = customLevels[index]
     if (!level) {
       console.error('Level not found at index:', index)
-      message.error('未找到要删除的关卡')
+      message.error(tPage('messages.levelNotFound'))
       return
     }
     
     console.log('Showing modal.confirm for level:', level.title)
     try {
       modal.confirm({
-        title: '确认删除',
-        content: `确定要删除关卡"${level.title}"吗？此操作不可恢复。`,
-        okText: '确认删除',
+        title: tPage('modals.deleteConfirm.title'),
+        content: tPage('modals.deleteConfirm.content', { title: level.title }),
+        okText: tPage('modals.deleteConfirm.okText'),
         okType: 'danger',
-        cancelText: '取消',
+        cancelText: tPage('modals.deleteConfirm.cancelText'),
         onOk: () => {
           console.log('User confirmed deletion, deleting level:', level.id)
           const updatedCustomLevels = customLevels.filter((_, i) => i !== index)
           const saved = saveCustomLevels(updatedCustomLevels)
           if (saved) {
             setCustomLevels(updatedCustomLevels)
-            message.success('关卡已删除')
+            message.success(tPage('messages.deleteSuccess'))
           } else {
-            message.error('删除失败，请重试')
+            message.error(tPage('messages.deleteFailed'))
           }
         },
         onCancel: () => {
@@ -95,7 +95,7 @@ function MyCustomLevels() {
       console.log('modal.confirm called successfully')
     } catch (error) {
       console.error('Error showing modal.confirm:', error)
-      message.error('删除失败,请重试')
+      message.error(tPage('messages.deleteFailed'))
     }
   }
 
@@ -142,10 +142,6 @@ function MyCustomLevels() {
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => navigate('/app/level-config?type=guess')}
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none'
-                }}
               >
                 {tPage('createGuessingLevel')}
               </Button>
@@ -167,7 +163,7 @@ function MyCustomLevels() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <h3 className="my-custom-level-card-title">{level.title}</h3>
                         <Tag color={level.type === 'guess' ? 'purple' : 'blue'}>
-                          {level.type === 'guess' ? '猜词闯关' : '绘画闯关'}
+                          {level.type === 'guess' ? tPage('guessLevelTag') : tPage('drawLevelTag')}
                         </Tag>
                       </div>
                       <p className="my-custom-level-card-id">ID: {level.id}</p>
@@ -194,7 +190,7 @@ function MyCustomLevels() {
                         handleEdit(level)
                       }}
                     >
-                      编辑
+                      {tPage('levelCard.edit')}
                     </Button>
                     <Button
                       danger
@@ -206,7 +202,7 @@ function MyCustomLevels() {
                         handleDelete(index)
                       }}
                     >
-                      删除
+                      {tPage('levelCard.delete')}
                     </Button>
                   </div>
                 </Card>
@@ -223,8 +219,12 @@ function MyCustomLevels() {
                   size="large"
                   icon={<PlusOutlined />}
                   onClick={() => navigate('/app/level-config?type=draw')}
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none'
+                  }}
                 >
-                  创建绘画关卡
+                  {tPage('createDrawingLevel')}
                 </Button>
                 <Button
                   type="primary"
@@ -236,7 +236,7 @@ function MyCustomLevels() {
                     border: 'none'
                   }}
                 >
-                  创建猜词关卡
+                  {tPage('createGuessingLevel')}
                 </Button>
               </div>
             </div>

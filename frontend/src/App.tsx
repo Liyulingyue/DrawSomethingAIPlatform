@@ -2,7 +2,8 @@ import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { UserProvider } from './context/UserContext'
-import { isTauri } from './utils/api'
+import { isTauri, ensureApiInitialized } from './utils/api'
+import { getApiBaseUrlSync } from './config/api'
 import SplashScreen from './components/SplashScreen'
 import { TauriCloseHandler } from './components/TauriCloseHandler'
 import AppHome from './pages/AppHome'
@@ -65,14 +66,12 @@ function App() {
           // 步骤 2: 初始化 API 配置
           setMessage('⚙️ 初始化 API 配置...')
           setProgress(30)
-          const { ensureApiInitialized } = await import('./utils/api')
           await ensureApiInitialized()
           await new Promise(resolve => setTimeout(resolve, 600))
 
           // 步骤 3: 连接后端
           setMessage('🔗 连接后端服务...')
           setProgress(60)
-          const { getApiBaseUrlSync } = await import('./config/api')
           const baseUrl = getApiBaseUrlSync()
           
           // 验证后端连接（带超时）
@@ -101,7 +100,6 @@ function App() {
           await new Promise(resolve => setTimeout(resolve, 800))
         } else {
           // 开发环境：直接初始化，不显示启动屏幕
-          const { ensureApiInitialized } = await import('./utils/api')
           await ensureApiInitialized()
         }
 

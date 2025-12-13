@@ -1,0 +1,137 @@
+{
+    "levelConfig": {
+        "title": {
+            "edit": "Edit Custom Level",
+            "createDraw": "Create Drawing Custom Level",
+            "createGuess": "Create Guessing Custom Level"
+        },
+        "navButtons": {
+            "backToDraw": "← Back to Drawing Challenge",
+            "backToGuess": "← Back to Guessing Challenge",
+            "myCustomLevels": "📝 My Custom Levels"
+        },
+        "form": {
+            "id": {
+                "label": "Level ID",
+                "required": "Please enter level ID",
+                "pattern": "ID can only contain lowercase letters, numbers, and hyphens",
+                "extra": "ID cannot be modified in edit mode",
+                "placeholder": "e.g.: custom-animals",
+                "suggestion": "Suggested format: custom-xxx, e.g.: custom-animals"
+            },
+            "title": {
+                "label": "Level Title",
+                "required": "Please enter level title",
+                "placeholder": "e.g.: Animal World"
+            },
+            "description": {
+                "label": "Level Description",
+                "required": "Please enter level description",
+                "placeholder": "e.g.: Challenge drawing various animals"
+            },
+            "icon": {
+                "label": "Level Icon",
+                "required": "Please select level icon",
+                "placeholder": "Select an icon"
+            },
+            "difficulty": {
+                "label": "Level Difficulty",
+                "required": "Please select level difficulty",
+                "placeholder": "Select difficulty level",
+                "options": {
+                    "easy": "Easy",
+                    "medium": "Medium",
+                    "hard": "Hard",
+                    "expert": "Expert",
+                    "casual": "Casual"
+                }
+            },
+            "keywords": {
+                "label": "Keywords List",
+                "required": "Please enter at least one keyword",
+                "extra": "Separate multiple keywords with commas, e.g.: cat, dog, rabbit",
+                "placeholder": "cat, dog, rabbit, elephant, giraffe"
+            },
+            "clue": {
+                "label": "Hint Information (Optional)",
+                "extra": "This hint will be passed to AI for recognition assistance, but won't be shown to players on the drawing page",
+                "placeholder": "e.g.: These are all common pet animals"
+            },
+            "save": {
+                "edit": "Save Changes",
+                "create": "Create Level"
+            }
+        },
+        "iconOptions": [
+            {
+                "label": "🎨 Paintbrush",
+                "value": "🎨"
+            },
+            {
+                "label": "🌟 Star",
+                "value": "🌟"
+            },
+            {
+                "label": "🎯 Target",
+                "value": "🎯"
+            },
+            {
+                "label": "🏆 Trophy",
+                "value": "🏆"
+            },
+            {
+                "label": "🎭 Mask",
+                "value": "🎭"
+            },
+            {
+                "label": "🎪 Circus",
+                "value": "🎪"
+            },
+            {
+                "label": "🎡 Ferris Wheel",
+                "value": "🎡"
+            },
+            {
+                "label": "🎢 Roller Coaster",
+                "value": "🎢"
+            },
+            {
+                "label": "🎠 Carousel",
+                "value": "🎠"
+            },
+            {
+                "label": "🎮 Game",
+                "value": "🎮"
+            },
+            {
+                "label": "🚀 Rocket",
+                "value": "🚀"
+            },
+            {
+                "label": "⭐ Star",
+                "value": "⭐"
+            },
+            {
+                "label": "💎 Gem",
+                "value": "💎"
+            },
+            {
+                "label": "🔥 Fire",
+                "value": "🔥"
+            },
+            {
+                "label": "⚡ Lightning",
+                "value": "⚡"
+            }
+        ],
+        "messages": {
+            "keywordsRequired": "Please add at least one keyword or translation key",
+            "updateSuccess": "Level updated successfully!",
+            "levelNotFound": "Level to update not found",
+            "idExists": "Level ID already exists, please use a different ID",
+            "createSuccess": "Level created successfully!",
+            "saveFailed": "Save failed, please try again",
+            "levelNotFoundEdit": "Level to edit not found"
+        }
+    }
+}

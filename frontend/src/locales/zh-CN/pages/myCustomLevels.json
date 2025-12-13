@@ -12,6 +12,8 @@
     "edit": "编辑",
     "delete": "删除"
   },
+  "guessLevelTag": "猜词闯关",
+  "drawLevelTag": "绘画闯关",
   "modals": {
     "deleteConfirm": {
       "title": "删除关卡",
@@ -22,6 +24,7 @@
   },
   "messages": {
     "deleteSuccess": "关卡删除成功",
-    "deleteFailed": "删除关卡失败"
+    "deleteFailed": "删除关卡失败",
+    "levelNotFound": "未找到要删除的关卡"
   }
 }

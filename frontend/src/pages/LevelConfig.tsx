@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Input, Select, Button, message, Card } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
@@ -10,25 +11,6 @@ import './LevelConfig.css'
 
 // 本地存储 key
 const CUSTOM_LEVELS_KEY = 'custom_levels'
-
-// 图标选项
-const ICON_OPTIONS = [
-  { label: '🎨 画笔', value: '🎨' },
-  { label: '🌟 星星', value: '🌟' },
-  { label: '🎯 靶心', value: '🎯' },
-  { label: '🏆 奖杯', value: '🏆' },
-  { label: '🎭 面具', value: '🎭' },
-  { label: '🎪 马戏团', value: '🎪' },
-  { label: '🎡 摩天轮', value: '🎡' },
-  { label: '🎢 过山车', value: '🎢' },
-  { label: '🎠 旋转木马', value: '🎠' },
-  { label: '🎮 游戏', value: '🎮' },
-  { label: '🚀 火箭', value: '🚀' },
-  { label: '⭐ 五角星', value: '⭐' },
-  { label: '💎 宝石', value: '💎' },
-  { label: '🔥 火焰', value: '🔥' },
-  { label: '⚡ 闪电', value: '⚡' },
-]
 
 // 获取自定义关卡列表
 const getCustomLevels = (): LevelConfig[] => {
@@ -60,6 +42,10 @@ function CustomLevelConfiguration() {
   const [form] = Form.useForm()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { t } = useTranslation('levelConfig')
+
+  // 图标选项
+  const ICON_OPTIONS = t('levelConfig.iconOptions', { returnObjects: true }) as Array<{label: string, value: string}>
 
   // 获取关卡类型
   const levelType = searchParams.get('type') || 'draw'
@@ -82,7 +68,7 @@ function CustomLevelConfiguration() {
           clue: levelToEdit.clue || ''
         })
       } else {
-        message.warning('未找到要编辑的关卡')
+        message.warning(t('levelConfig.messages.levelNotFoundEdit'))
         navigate('/app/my-custom-levels')
       }
     } else {
@@ -99,7 +85,7 @@ function CustomLevelConfiguration() {
       let keywordsToSave: string | string[] = []
 
       if (!rawKeywordsInput) {
-        message.warning('请至少添加一个关键词或翻译键')
+        message.warning(t('levelConfig.messages.keywordsRequired'))
         return
       }
 
@@ -137,20 +123,20 @@ function CustomLevelConfiguration() {
         if (existingIndex !== -1) {
           updatedCustomLevels = [...customLevels]
           updatedCustomLevels[existingIndex] = newLevel
-          message.success('关卡更新成功！')
+          message.success(t('levelConfig.messages.updateSuccess'))
         } else {
-          message.error('未找到要更新的关卡')
+          message.error(t('levelConfig.messages.levelNotFound'))
           return
         }
       } else {
         // 新建模式：检查ID是否已存在
         const idExists = customLevels.some(level => level.id === newLevel.id)
         if (idExists) {
-          message.error('关卡ID已存在，请使用其他ID')
+          message.error(t('levelConfig.messages.idExists'))
           return
         }
         updatedCustomLevels = [...customLevels, newLevel]
-        message.success('关卡创建成功！')
+        message.success(t('levelConfig.messages.createSuccess'))
       }
       
       saveCustomLevels(updatedCustomLevels)
@@ -172,7 +158,7 @@ function CustomLevelConfiguration() {
         <div className="level-config-content">
           {/* 页面标题 */}
           <h1 className="level-config-title">
-            {editingLevelId ? '编辑自定义关卡' : (levelType === 'guess' ? '创建猜词自定义关卡' : '创建绘画自定义关卡')}
+            {editingLevelId ? t('levelConfig.title.edit') : (levelType === 'guess' ? t('levelConfig.title.createGuess') : t('levelConfig.title.createDraw'))}
           </h1>
           
           <div className="level-config-nav-buttons">
@@ -185,14 +171,14 @@ function CustomLevelConfiguration() {
                 color: '#667eea'
               } : undefined}
             >
-              ← {levelType === 'guess' ? '返回猜词闯关' : '返回绘画闯关'}
+              {levelType === 'guess' ? t('levelConfig.navButtons.backToGuess') : t('levelConfig.navButtons.backToDraw')}
             </Button>
             <Button
               type="primary"
               ghost
               onClick={() => navigate('/app/my-custom-levels')}
             >
-              📝 我的自定义关卡
+              {t('levelConfig.navButtons.myCustomLevels')}
             </Button>
           </div>
 
@@ -205,15 +191,15 @@ function CustomLevelConfiguration() {
             >
               <Form.Item
                 name="id"
-                label="关卡ID"
+                label={t('levelConfig.form.id.label')}
                 rules={[
-                  { required: true, message: '请输入关卡ID' },
-                  { pattern: /^[a-z0-9-]+$/, message: 'ID只能包含小写字母、数字和连字符' }
+                  { required: true, message: t('levelConfig.form.id.required') },
+                  { pattern: /^[a-z0-9-]+$/, message: t('levelConfig.form.id.pattern') }
                 ]}
-                extra={editingLevelId ? '编辑模式下ID不可修改' : '建议格式: custom-xxx，例如: custom-animals'}
+                extra={editingLevelId ? t('levelConfig.form.id.extra') : t('levelConfig.form.id.suggestion')}
               >
                 <Input 
-                  placeholder="例如: custom-animals" 
+                  placeholder={t('levelConfig.form.id.placeholder')} 
                   size="large"
                   disabled={!!editingLevelId}
                 />
@@ -221,19 +207,19 @@ function CustomLevelConfiguration() {
 
               <Form.Item
                 name="title"
-                label="关卡标题"
-                rules={[{ required: true, message: '请输入关卡标题' }]}
+                label={t('levelConfig.form.title.label')}
+                rules={[{ required: true, message: t('levelConfig.form.title.required') }]}
               >
-                <Input placeholder="例如: 动物世界" size="large" />
+                <Input placeholder={t('levelConfig.form.title.placeholder')} size="large" />
               </Form.Item>
 
               <Form.Item
                 name="description"
-                label="关卡描述"
-                rules={[{ required: true, message: '请输入关卡描述' }]}
+                label={t('levelConfig.form.description.label')}
+                rules={[{ required: true, message: t('levelConfig.form.description.required') }]}
               >
                 <Input.TextArea 
-                  placeholder="例如: 挑战各种动物的绘画" 
+                  placeholder={t('levelConfig.form.description.placeholder')} 
                   rows={3}
                   size="large"
                 />
@@ -241,11 +227,11 @@ function CustomLevelConfiguration() {
 
               <Form.Item
                 name="icon"
-                label="关卡图标"
-                rules={[{ required: true, message: '请选择关卡图标' }]}
+                label={t('levelConfig.form.icon.label')}
+                rules={[{ required: true, message: t('levelConfig.form.icon.required') }]}
               >
                 <Select
-                  placeholder="选择一个图标"
+                  placeholder={t('levelConfig.form.icon.placeholder')}
                   options={ICON_OPTIONS}
                   size="large"
                 />
@@ -253,30 +239,30 @@ function CustomLevelConfiguration() {
 
               <Form.Item
                 name="difficulty"
-                label="关卡难度"
-                rules={[{ required: true, message: '请选择关卡难度' }]}
+                label={t('levelConfig.form.difficulty.label')}
+                rules={[{ required: true, message: t('levelConfig.form.difficulty.required') }]}
               >
                 <Select
-                  placeholder="选择难度等级"
+                  placeholder={t('levelConfig.form.difficulty.placeholder')}
                   size="large"
                   options={[
-                    { label: '简单', value: '简单' },
-                    { label: '中等', value: '中等' },
-                    { label: '困难', value: '困难' },
-                    { label: '专家', value: '专家' },
-                    { label: '休闲', value: '休闲' },
+                    { label: t('levelConfig.form.difficulty.options.easy'), value: '简单' },
+                    { label: t('levelConfig.form.difficulty.options.medium'), value: '中等' },
+                    { label: t('levelConfig.form.difficulty.options.hard'), value: '困难' },
+                    { label: t('levelConfig.form.difficulty.options.expert'), value: '专家' },
+                    { label: t('levelConfig.form.difficulty.options.casual'), value: '休闲' },
                   ]}
                 />
               </Form.Item>
 
               <Form.Item
                 name="keywords"
-                label="关键词列表"
-                rules={[{ required: true, message: '请输入至少一个关键词' }]}
-                extra="多个关键词用英文逗号分隔，例如: 猫, 狗, 兔子"
+                label={t('levelConfig.form.keywords.label')}
+                rules={[{ required: true, message: t('levelConfig.form.keywords.required') }]}
+                extra={t('levelConfig.form.keywords.extra')}
               >
                 <Input.TextArea 
-                  placeholder="猫, 狗, 兔子, 大象, 长颈鹿" 
+                  placeholder={t('levelConfig.form.keywords.placeholder')} 
                   rows={5}
                   size="large"
                 />
@@ -284,11 +270,11 @@ function CustomLevelConfiguration() {
 
               <Form.Item
                 name="clue"
-                label="提示信息（可选）"
-                extra="该提示会传递给 AI 辅助识别，但不会在绘画页面显示给玩家"
+                label={t('levelConfig.form.clue.label')}
+                extra={t('levelConfig.form.clue.extra')}
               >
                 <Input.TextArea 
-                  placeholder="例如: 这些都是常见的宠物动物" 
+                  placeholder={t('levelConfig.form.clue.placeholder')} 
                   rows={3}
                   size="large"
                 />
@@ -302,7 +288,7 @@ function CustomLevelConfiguration() {
                   size="large"
                   block
                 >
-                  {editingLevelId ? '保存修改' : '创建关卡'}
+                  {editingLevelId ? t('levelConfig.form.save.edit') : t('levelConfig.form.save.create')}
                 </Button>
               </Form.Item>
             </Form>

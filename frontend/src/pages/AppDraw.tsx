@@ -213,6 +213,7 @@ function AppDraw() {
                   <li>{t('appDraw.modals.failure.tip1')}</li>
                   <li>{t('appDraw.modals.failure.tip2')}</li>
                   <li>{t('appDraw.modals.failure.tip3')}</li>
+                  <li>{t('appDraw.modals.failure.configTip')}</li>
                 </ul>
                 <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
                   {t('appDraw.modals.failure.continueDrawing')}

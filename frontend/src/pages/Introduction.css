@@ -387,4 +387,29 @@
   .feedback-content {
     gap: 1rem;
   }
+
+  .disclaimer-card {
+    margin-bottom: 2rem;
+  }
+
+  .disclaimer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .disclaimer-text {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0;
+    line-height: 1.6;
+    color: #595959;
+    font-size: 0.95rem;
+  }
+
+  .disclaimer-bullet {
+    font-size: 0.9em;
+    flex-shrink: 0;
+    margin-top: 0.08rem;
+  }
 }

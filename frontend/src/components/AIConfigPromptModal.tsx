@@ -92,7 +92,9 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
                 lineHeight: '1.5'
               }}>
                 • {t('aiConfigModal.recommended.bullet1')}<br />
-                • {t('aiConfigModal.recommended.bullet2')}
+                • {t('aiConfigModal.recommended.bullet2')}<br />
+                • {t('aiConfigModal.recommended.bullet3')}<br />
+                • {t('aiConfigModal.recommended.bullet4')}
               </p>
             </div>
           </div>
@@ -129,10 +131,65 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
                 e.currentTarget.style.borderBottom = '1px dashed #1890ff'
               }}
             >
-              {t('aiConfigModal.baidu_ai_studio')}
+              Baidu AI Studio
             </a>
-            {' '}{t('aiConfigModal.get_access_token')}
+            {' '}·{' '}
+            <a 
+              href="https://modelscope.cn/my/myaccesstoken" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ 
+                color: '#1890ff',
+                textDecoration: 'none',
+                fontWeight: 500,
+                borderBottom: '1px dashed #1890ff'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderBottom = '1px solid #1890ff'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderBottom = '1px dashed #1890ff'
+              }}
+            >
+              ModelScope
+            </a>
+            {' '}·{' '}
+            <a 
+              href="https://huggingface.co/settings/tokens" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ 
+                color: '#1890ff',
+                textDecoration: 'none',
+                fontWeight: 500,
+                borderBottom: '1px dashed #1890ff'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderBottom = '1px solid #1890ff'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderBottom = '1px dashed #1890ff'
+              }}
+            >
+              HuggingFace
+            </a>
           </p>
+        </div>
+
+        {/* 免责声明提示 */}
+        <div style={{
+          background: '#fef3c7',
+          border: '1px solid #fcd34d',
+          borderRadius: '6px',
+          padding: '12px',
+          marginTop: '16px',
+          fontSize: '13px',
+          color: '#92400e',
+          lineHeight: '1.5'
+        }}>
+          <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+            ⚠️ {t('aiConfigModal.disclaimer')}
+          </div>
         </div>
       </div>
     </Modal>

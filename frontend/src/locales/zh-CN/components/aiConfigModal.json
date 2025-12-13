@@ -3,19 +3,20 @@
     "title": "AI 服务未配置",
     "ok": "去配置",
     "cancel": "稍后再说",
-    "detecting": "检测到您还未配置 AI 服务。",
+    "detecting": "检测到您还未配置 AI 服务。你只需要简单配置 AI 服务的连接参数，就可以进行游戏！",
     "drawing_guess": "绘画猜词",
     "ai_draw": "AI 画你猜",
     "needs_config": "需要配置",
     "vision_model": "视觉模型",
     "generation_model": "文生图模型",
     "recommended": {
-      "title": "推荐方案：百度飞桨 AI Studio",
+      "title": "推荐方案：百度飞桨 AI Studio / ModelScope / HuggingFace 免费 AI 服务",
       "bullet1": "零成本使用，注册即可获得",
-      "bullet2": "支持视觉识别和图像生成"
+      "bullet2": "支持视觉识别和图像生成",
+      "bullet3": "点击 去配置 按钮，填写 Access Token 即可开始游戏",
+      "bullet4": "中国大陆用户推荐使用百度飞桨 AI Studio 或 ModelScope，海外用户推荐使用 HuggingFace"
     },
-    "how_to_get": "获取方式：访问",
-    "baidu_ai_studio": "百度 AI Studio",
-    "get_access_token": "注册并获取 Access Token"
+    "how_to_get": "Access Token 获取方式：",
+    "disclaimer": "免责声明：当您配置自定义 AI 服务时，本游戏仅提供游戏平台和玩法，游戏仅作为调用您自行配置的 AI 服务的接口通道，不进行任何二次转售或传播。"
   }
 }

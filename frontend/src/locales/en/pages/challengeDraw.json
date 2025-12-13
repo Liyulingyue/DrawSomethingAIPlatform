@@ -66,6 +66,7 @@
         "tip1": "Try to draw more clearly",
         "tip2": "Add more detailed features",
         "tip3": "Use more obvious shapes",
+        "configTip": "Please ensure AI service is properly configured",
         "continueDrawing": "🎨 Continue modifying or redrawing on the canvas!",
         "continueButton": "Continue Creating",
         "unableToRecognize": "Unable to recognize"
@@ -77,6 +78,7 @@
         "tip1": "Look closely at the drawing details",
         "tip2": "Think about common objects",
         "tip3": "Consider different perspectives",
+        "configTip": "Please ensure AI service is properly configured",
         "continueDrawing": "🎨 Keep trying!"
       },
       "submitFailed": {

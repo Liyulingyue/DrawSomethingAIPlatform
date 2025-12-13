@@ -432,6 +432,7 @@ function ChallengeDraw() {
                   <li>{tPage('challengeDraw.modals.guessFailed.tip1')}</li>
                   <li>{tPage('challengeDraw.modals.guessFailed.tip2')}</li>
                   <li>{tPage('challengeDraw.modals.guessFailed.tip3')}</li>
+                  <li>{tPage('challengeDraw.modals.guessFailed.configTip')}</li>
                 </ul>
                 <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
                   {tPage('challengeDraw.modals.guessFailed.continueDrawing')}

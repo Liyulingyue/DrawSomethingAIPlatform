@@ -3,19 +3,20 @@
     "title": "AI Service Not Configured",
     "ok": "Configure Now",
     "cancel": "Remind me later",
-    "detecting": "We detected you have not configured AI services yet.",
+    "detecting": "We detected you have not configured AI services yet. You just need to simply configure the AI service connection parameters to start playing!",
     "drawing_guess": "Drawing Guesses",
     "ai_draw": "AI Draw",
     "needs_config": "requires a",
     "vision_model": "vision model",
     "generation_model": "text-to-image model",
     "recommended": {
-      "title": "Recommended: Baidu PaddlePaddle AI Studio",
+      "title": "Recommended: Baidu PaddlePaddle AI Studio / ModelScope / HuggingFace Free AI Services",
       "bullet1": "Free to use; register to obtain",
-      "bullet2": "Supports vision recognition and image generation"
+      "bullet2": "Supports vision recognition and image generation",
+      "bullet3": "Click the Configure Now button, fill in Access Token to start playing",
+      "bullet4": "Users in mainland China are recommended to use Baidu PaddlePaddle AI Studio or ModelScope, overseas users are recommended to use HuggingFace"
     },
-    "how_to_get": "How to get:",
-    "baidu_ai_studio": "Baidu AI Studio",
-    "get_access_token": "register and obtain an Access Token"
+    "how_to_get": "Access Token acquisition methods:",
+    "disclaimer": "Disclaimer: When you configure custom AI services, this game only provides a gaming platform and gameplay. The game serves solely as an interface channel for calling AI services you configure yourself, and does not engage in any secondary resale or distribution."
   }
 }

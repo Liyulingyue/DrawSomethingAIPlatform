@@ -27,6 +27,7 @@
       "testVision": "测试视觉模型",
       "testImage": "测试文生图模型",
       "reset": "重置",
+      "resetToPlatform": "重置到 {{platform}}",
       "save": "保存配置"
     },
     "messages": {
@@ -36,8 +37,10 @@
       "configIncomplete": "⚠️ 配置信息不完整，自定义服务可能无法使用",
       "saveFailed": "保存失败，请重试",
       "resetSuccess": "已重置为默认配置",
+      "resetToPlatformSuccess": "已重置到 {{platform}} 配置",
       "resetFailed": "重置失败，请重试",
       "fillComplete": "请先填写完整的 {{modelType}} URL、API Key 和模型名称",
+      "fillCompleteForTest": "请先填写完整的 {{modelType}} URL、API Key 和模型名称才能进行连接测试",
       "testingConnection": "开始测试 {{modelType}} 连接...",
       "testSuccess": "🎉 {{modelType}} 连接测试成功",
       "serviceConnected": "{{modelType}} 服务连接正常！",
@@ -85,11 +88,12 @@
       "serverTip": "💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务"
     },
     "footer": {
-      "hint": "💡 提示：配置信息将保存在浏览器本地存储中，获取 API Key：访问",
+      "hint": "💡 提示：配置信息将保存在浏览器本地存储中。",
       "baiduLink": "🔗 百度 AI Studio Access Token",
       "help": "💡 视觉模型用于\"你画AI猜\"游戏，文生图模型用于\"AI画你猜\"游戏。选择服务器调用点时优先使用平台服务，点数不足时自动回退到自定义服务。请配置自定义服务参数作为备用方案。"
     },
     "links": {
+      "getTokenPrefix": "获取 Access Token：",
       "getToken": "🔗 获取百度 AI Studio Access Token"
     }
   }

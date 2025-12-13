@@ -5,18 +5,48 @@
     "description": "A fun drawing challenge platform powered by AI vision recognition",
     "what_is": {
       "title": "What is \"Draw, AI Guesses\"?",
-      "p1": "\"Draw, AI Guesses\" is an innovative drawing challenge platform that combines AI image recognition with fun game mechanics.",
-      "p2": "Whether you are a beginner or an experienced artist, you can enjoy the platform and improve your skills through AI feedback."
+      "content": [
+        "\"Draw, AI Guesses\" is an innovative drawing challenge platform that combines AI image recognition with fun game mechanics.",
+        "Whether you are a beginner or an experienced artist, you can enjoy the platform and improve your skills through AI feedback and challenging levels!",
+        "The game features two types of challenges: Drawing Levels (drawing based on system-provided keywords) and Guessing Levels (free creation for AI recognition).",
+        "🎯 Drawing Levels: The system provides carefully designed keywords, progressing from simple to complex. Create images on the canvas using your brush, and let AI verify your drawing skills. Successfully complete each level to unlock the next challenge!",
+        "🎨 Guessing Levels: Unleash your creativity! Input any word or phrase you want to draw, create freely, and let AI guess your artwork. There are no standard answers here - AI will provide multiple possible recognition results, sparking your artistic inspiration."
+      ]
     },
     "features": {
       "title": "Core Features",
-      "level_draw": {
-        "title": "Drawing Levels",
-        "desc": "Progress from beginner to advanced with carefully designed keywords for each level."
-      },
-      "free_draw": {"title": "Free Draw", "desc": "Create freely and let AI recognize your drawing based on any target word."},
-      "ai": {"title": "AI Recognition", "desc": "Advanced vision-language models accurately recognize and analyze drawings."},
-      "config": {"title": "Custom Configuration", "desc": "Support configuring your own AI service such as Baidu AI Studio."}
+      "items": [
+        {
+          "icon": "🏆",
+          "title": "Drawing Levels",
+          "desc": "Progress from beginner to advanced with carefully designed keywords for each level."
+        },
+        {
+          "icon": "🖼️",
+          "title": "Guessing Levels",
+          "desc": "AI gives clues, you draw to guess! Based on AI hints and clues, complete drawing challenges step by step, improving observation and creativity."
+        },
+        {
+          "icon": "🎨",
+          "title": "Free Draw",
+          "desc": "Create freely and let AI recognize your drawing based on any target word."
+        },
+        {
+          "icon": "🤖",
+          "title": "AI Intelligence",
+          "desc": "Advanced vision-language models accurately recognize and analyze drawings."
+        },
+        {
+          "icon": "⚙️",
+          "title": "Custom Configuration",
+          "desc": "Support configuring your own AI service using any AI model service compatible with OpenAI API format."
+        },
+        {
+          "icon": "🎯",
+          "title": "Custom Levels",
+          "desc": "Create exclusive challenge levels with personalized keyword combinations, and let friends take on your creative challenges."
+        }
+      ]
     },
     "quick_start": {"title": "Quick Start"},
     "panels": {
@@ -30,7 +60,7 @@
       },
       "ai_setup": {
         "header": "1️⃣ Configure AI Service (first use)",
-        "desc": "You need to configure an AI service before first use:",
+        "desc": "You need to configure an AI service before first use (vision models and text-to-image models correspond to different game modes):",
         "steps": {
           "enter_config_page": "Open the 'AI Configuration' page",
           "input_api_url": "Input API URL",
@@ -39,19 +69,31 @@
           "test_connection": "Click 'Test Connection'",
           "save_config": "Click 'Save Configuration'"
         },
-        "tip": "Tip: Without AI configuration the system won't use AI recognition."
+        "examples": {
+          "title": "Configuration Examples",
+          "baidu": {"name": "Baidu AI Studio", "api_url": "https://aistudio.baidu.com/llm/lmapi/v3", "api_key": "Get from https://aistudio.baidu.com/account/accessToken", "model_name": "Vision model: ernie-4.5-vl-28b-a3b, Text-to-image model: Stable-Diffusion-XL"},
+          "modelscope": {"name": "ModelScope", "api_url": "https://api-inference.modelscope.cn/v1", "api_key": "Get from https://modelscope.cn/my/myaccesstoken", "model_name": "Vision model: Qwen/Qwen3-VL-235B-A22B-Instruct"},
+          "huggingface": {"name": "HuggingFace", "api_url": "https://router.huggingface.co/v1", "api_key": "Get from https://huggingface.co/settings/tokens", "model_name": "Vision model: baidu/ERNIE-4.5-VL-28B-A3B-PT:fastest"}
+        },
+        "tip": "Tip: Without AI configuration the system won't use AI services."
       },
       "choose_mode": {
         "header": "2️⃣ Choose game mode",
-        "mode": {
-          "level_draw": {"title": "Drawing Levels", "step": {"choose_level": "Choose a level", "start_challenge": "Click 'Start Challenge'", "select_level": "Or click 'Select Level' to choose specific keywords", "next_level": "Automatically proceed to next level on success"}},
-          "free_draw": {"title": "Free Draw", "step": {"input_target": "Enter a target word (e.g. 'apple', 'house')", "draw": "Draw on the canvas", "submit": "Submit and check AI recognition results"}}
-        }
+        "drawing_mode": {"title": "Drawing Mode", "desc": "Free Draw: Enter any target word, create freely, and let AI recognize your drawing (requires vision model)", "step": {"input_target": "Enter any target word (e.g. 'apple', 'house')", "draw": "Create freely on the canvas", "submit": "Submit and check AI recognition results"}},
+        "guessing_mode": {"title": "Guessing Mode", "desc": "Drawing Levels: Drawing challenges based on system-provided keywords (requires vision model)", "step": {"choose_level": "Choose a level (e.g. 'Beginner')", "start_challenge": "Click 'Start Challenge' to begin from level 1", "select_level": "Or click 'Select Level' to choose specific keywords", "next_level": "Automatically proceed to next level on success"}}
       },
-      "start_draw": {"header": "3️⃣ Start Drawing", "step": {"brush": "Use the brush tool to draw on the canvas", "color_brush": "Choose colors and brush sizes", "erase": "Use eraser or clear canvas if needed", "submit_guess": "Click 'Submit Guess' when done"}},
-      "view_result": {"header": "4️⃣ View Results", "desc": "After submitting, AI will analyze your drawing and provide:", "items": {"success_fail": "Success/Failure judgement", "recognition": "Recognition result", "alternatives": "Alternative answers", "analysis": "Detailed AI analysis and suggestions"}}
+      "start_draw": {"header": "3️⃣ Drawing Mode Gameplay", "step": {"input_target": "Enter any target word (e.g. 'apple', 'house')", "draw": "Create freely on the canvas", "submit": "Submit and check AI recognition results"}},
+      "view_result": {"header": "4️⃣ Guessing Mode Gameplay", "desc": "Drawing Levels: Drawing challenges based on system-provided keywords", "step": {"choose_level": "Choose a level (e.g. 'Beginner')", "start_challenge": "Click 'Start Challenge' to begin from level 1", "select_level": "Or click 'Select Level' to choose specific keywords", "next_level": "Automatically proceed to next level on success"}, "result_desc": "After submitting, AI will analyze your drawing and provide:", "items": {"success_fail": "Success/Failure judgement", "recognition": "Recognition result", "alternatives": "Alternative answers", "analysis": "Detailed AI analysis and suggestions"}}
     },
-    "tips": {"title": "💡 Drawing Tips", "items": {"featured": "Focus on key features and draw the most recognizable elements", "clear_lines": "Keep lines clear and avoid fuzzy doodles", "add_detail": "Add details appropriately for easier AI recognition", "dont_give_up": "Don't give up on failure; improve based on AI feedback"}},
+    "tips": {"title": "💡 Frequently Asked Questions", "items": {"featured": "What to do if model recognition fails? Check your AI configuration or try redrawing.", "clear_lines": "Why can't AI recognize my drawing? It might be because the drawing is not clear enough or features are not prominent.", "add_detail": "How to improve recognition accuracy? Focus on key features, keep lines clear, add appropriate details.", "dont_give_up": "Other common issues: If problems persist, check AI service status or contact support."}},
+    "disclaimer": {
+      "title": "⚠️ Disclaimer",
+      "content": [
+        "When you configure custom third-party AI services (such as Baidu AI Studio, ModelScope, HuggingFace, etc.), this game only provides the gaming platform and gameplay design.",
+        "At this time, you need to obtain Access Tokens from the respective service platforms yourself and fill in and manage them on the game configuration page. The game serves solely as an interface channel for calling third-party APIs you have custom configured, and does not engage in any secondary resale or proxy of your configured AI services.",
+        "Therefore, the game does not involve any transfer of rights and obligations with third-party service providers, nor does it create any commercial relationships or infringement issues from linking their services."
+      ]
+    },
     "feedback": {"title": "Found an issue? Got a suggestion?", "description": "Welcome to report bugs, propose improvements, or contribute on the GitHub project page!", "button": "Open GitHub"},
     "actions": {"start": "Get Started", "config": "Configure AI", "donate": "Support Us", "back_home": "Back to Home"}
   }

@@ -17,16 +17,17 @@
     },
     "placeholders": {
       "visionUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
-      "visionKey": "Enter your Baidu AI Studio Access Token",
+      "visionKey": "Enter your Access Token",
       "visionModelName": "ernie-4.5-vl-28b-a3b",
       "imageUrl": "https://aistudio.baidu.com/llm/lmapi/v3",
-      "imageKey": "Enter your Baidu AI Studio Access Token",
+      "imageKey": "Enter your Access Token",
       "imageModelName": "ernie-4.5-vl-28b-a3b"
     },
     "buttons": {
       "testVision": "Test Vision Model",
       "testImage": "Test Text-to-Image Model",
       "reset": "Reset",
+      "resetToPlatform": "Reset to {{platform}}",
       "save": "Save Configuration"
     },
     "messages": {
@@ -36,8 +37,10 @@
       "configIncomplete": "⚠️ Configuration information is incomplete, custom services may not work",
       "saveFailed": "Save failed, please try again",
       "resetSuccess": "Reset to default configuration",
+      "resetToPlatformSuccess": "Reset to {{platform}} configuration",
       "resetFailed": "Reset failed, please try again",
       "fillComplete": "Please fill in the complete {{modelType}} URL, API Key and model name first",
+      "fillCompleteForTest": "Please fill in the complete {{modelType}} URL, API Key and model name first to perform connection test",
       "testingConnection": "Starting to test {{modelType}} connection...",
       "testSuccess": "🎉 {{modelType}} connection test successful",
       "serviceConnected": "{{modelType}} service connected successfully!",
@@ -85,11 +88,12 @@
       "serverTip": "💡 Server endpoint requires login to use, prioritizes platform services, automatically switches to custom services when points are insufficient"
     },
     "footer": {
-      "hint": "💡 Hint: Configuration information will be saved in browser local storage, get API Key: visit",
+      "hint": "💡 Hint: Configuration information will be saved in browser local storage.",
       "baiduLink": "🔗 Baidu AI Studio Access Token",
       "help": "💡 Vision model is used for \"Draw & AI Guesses\" game, text-to-image model is used for \"AI Draw\" game. When selecting server endpoint, platform services are prioritized, automatically fallback to custom services when points are insufficient. Please configure custom service parameters as backup."
     },
     "links": {
+      "getTokenPrefix": "Get Access Token:",
       "getToken": "🔗 Get Baidu AI Studio Access Token"
     }
   }

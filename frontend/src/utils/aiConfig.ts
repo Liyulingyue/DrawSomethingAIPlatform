@@ -28,6 +28,40 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
   callPreference: 'server',  // 默认使用服务器调用点
 }
 
+// 不同平台的预设配置
+export const PLATFORM_PRESETS = {
+  baidu: {
+    name: 'Baidu AI Studio',
+    visionUrl: 'https://aistudio.baidu.com/llm/lmapi/v3',
+    visionKey: '',
+    visionModelName: 'ernie-4.5-vl-28b-a3b',
+    imageUrl: 'https://aistudio.baidu.com/llm/lmapi/v3',
+    imageKey: '',
+    imageModelName: 'Stable-Diffusion-XL',
+    callPreference: 'server' as const,
+  },
+  modelscope: {
+    name: 'ModelScope',
+    visionUrl: 'https://api-inference.modelscope.cn/v1',
+    visionKey: '',
+    visionModelName: 'Qwen/Qwen3-VL-235B-A22B-Instruct',
+    imageUrl: 'https://api-inference.modelscope.cn/v1',
+    imageKey: '',
+    imageModelName: '',
+    callPreference: 'custom' as const,
+  },
+  huggingface: {
+    name: 'Hugging Face',
+    visionUrl: 'https://router.huggingface.co/v1',
+    visionKey: '',
+    visionModelName: 'baidu/ERNIE-4.5-VL-28B-A3B-PT:fastest',
+    imageUrl: 'https://router.huggingface.co/v1',
+    imageKey: '',
+    imageModelName: '',
+    callPreference: 'custom' as const,
+  },
+}
+
 // 本地存储键名
 const AI_CONFIG_KEYS = {
   // 视觉模型
@@ -132,6 +166,34 @@ export const isAIConfigValid = (config?: AIConfig, modelType: 'vision' | 'image'
  */
 export const resetAIConfig = (): boolean => {
   return saveAIConfig({ ...DEFAULT_AI_CONFIG })
+}
+
+/**
+ * 重置为指定平台的预设配置
+ */
+export const resetAIConfigToPlatform = (platform: keyof typeof PLATFORM_PRESETS): boolean => {
+  try {
+    const preset = PLATFORM_PRESETS[platform]
+    if (!preset) {
+      console.error(`未知平台: ${platform}`)
+      return false
+    }
+
+    const config: AIConfig = {
+      visionUrl: preset.visionUrl,
+      visionKey: preset.visionKey,
+      visionModelName: preset.visionModelName,
+      imageUrl: preset.imageUrl,
+      imageKey: preset.imageKey,
+      imageModelName: preset.imageModelName,
+      callPreference: preset.callPreference,
+    }
+
+    return saveAIConfig(config)
+  } catch (error) {
+    console.error('重置平台配置失败:', error)
+    return false
+  }
 }
 
 /**

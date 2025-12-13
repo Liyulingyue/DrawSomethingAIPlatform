@@ -21,6 +21,7 @@ import enChallengeGuess from './locales/en/pages/challengeGuess.json'
 import enMyCustomLevels from './locales/en/pages/myCustomLevels.json'
 import enSplashScreen from './locales/en/components/splashScreen.json'
 import enTauriCloseHandler from './locales/en/components/tauriCloseHandler.json'
+import enLevelConfig from './locales/en/pages/levelConfig.json'
 // Add more imports as needed...
 
 import zhCommon from './locales/zh-CN/common.json'
@@ -41,6 +42,7 @@ import zhChallengeGuess from './locales/zh-CN/pages/challengeGuess.json'
 import zhMyCustomLevels from './locales/zh-CN/pages/myCustomLevels.json'
 import zhSplashScreen from './locales/zh-CN/components/splashScreen.json'
 import zhTauriCloseHandler from './locales/zh-CN/components/tauriCloseHandler.json'
+import zhLevelConfig from './locales/zh-CN/pages/levelConfig.json'
 // Add more imports as needed...
 
 i18n
@@ -67,6 +69,7 @@ i18n
         myCustomLevels: enMyCustomLevels,
         splashScreen: enSplashScreen,
         tauriCloseHandler: enTauriCloseHandler,
+        levelConfig: enLevelConfig,
         // Add more namespaces as needed...
       },
       'zh-CN': {
@@ -88,6 +91,7 @@ i18n
         myCustomLevels: zhMyCustomLevels,
         splashScreen: zhSplashScreen,
         tauriCloseHandler: zhTauriCloseHandler,
+        levelConfig: zhLevelConfig,
         // Add more namespaces as needed...
       },
     },
