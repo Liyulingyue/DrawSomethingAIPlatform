@@ -329,7 +329,7 @@ function ChallengeGuess() {
             <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
               <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.challengeEnd')}</p>
               <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
-                🎨 准备好迎接下一题挑战了吗？
+                {tPage('challengeGuess.ui.readyForNext')}
               </p>
             </div>
           </div>
@@ -393,7 +393,7 @@ function ChallengeGuess() {
               <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
                 <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('challengeGuess.ui.continueChallenge')}</p>
                 <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
-                  {tPage('challengeGuess.modals.guessSuccess.readyForNext')}
+                  {tPage('ui.readyForNext')}
                 </p>
               </div>
             </div>
@@ -424,7 +424,7 @@ function ChallengeGuess() {
                 <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
                   <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.challengeEnd')}</p>
                   <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
-                    {tPage('challengeGuess.modals.timeUp.readyForNext')}
+                    {tPage('ui.readyForNext')}
                   </p>
                 </div>
               </div>
@@ -465,7 +465,7 @@ function ChallengeGuess() {
                     <li>{tPage('ui.tips.associations')}</li>
                   </ul>
                   <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
-                    {tPage('challengeGuess.modals.guessWrong.continueGuessing')}
+                    {tPage('ui.readyForNext')}
                   </p>
                 </div>
               </div>
@@ -579,10 +579,10 @@ function ChallengeGuess() {
                 📊 挑战统计：
               </p>
               <p style={{ fontSize: '14px', margin: '0 0 4px 0', color: '#666' }}>
-                💰 {tPage('ui.levelScore', { score: levelScore })}
+                💰 {tPage('challengeGuess.ui.levelScore', { score: levelScore })}
               </p>
               <p style={{ fontSize: '14px', margin: '0', color: '#666' }}>
-                🏆 {tPage('ui.totalScore', { score: newTotalScore })}
+                🏆 {tPage('challengeGuess.ui.totalScore', { score: newTotalScore })}
               </p>
             </div>
             <p style={{ color: '#666', fontSize: '14px' }}>

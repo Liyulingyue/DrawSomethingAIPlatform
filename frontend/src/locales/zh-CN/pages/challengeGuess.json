@@ -76,7 +76,8 @@
         "differentAngles": "尝试不同的角度思考",
         "associations": "考虑常见的联想"
       },
-      "errorInfo": "错误信息："
+      "errorInfo": "错误信息：",
+      "readyForNext": "🎨 准备好迎接下一题挑战了吗？"
     },
     "pageTitle": "猜词闯关"
   }

@@ -77,7 +77,7 @@
         "fullscreen": false,
         "height": 900,
         "resizable": true,
-        "title": "DrawSomething AI (SQLite)",
+        "title": "DrawSomething AI",
         "width": 1400,
         "minHeight": 600,
         "minWidth": 800

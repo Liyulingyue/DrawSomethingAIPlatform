@@ -76,7 +76,8 @@
         "differentAngles": "Try thinking from different angles",
         "associations": "Consider common associations"
       },
-      "errorInfo": "Error Info:"
+      "errorInfo": "Error Info:",
+      "readyForNext": "🎨 Ready for the next challenge?"
     },
     "pageTitle": "Word Guessing Challenge"
   }
