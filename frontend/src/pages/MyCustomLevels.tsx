@@ -65,27 +65,27 @@ function MyCustomLevels() {
     const level = customLevels[index]
     if (!level) {
       console.error('Level not found at index:', index)
-      message.error(tPage('messages.levelNotFound'))
+      message.error(tPage('myCustomLevels.messages.levelNotFound'))
       return
     }
     
     console.log('Showing modal.confirm for level:', level.title)
     try {
       modal.confirm({
-        title: tPage('modals.deleteConfirm.title'),
-        content: tPage('modals.deleteConfirm.content', { title: level.title }),
-        okText: tPage('modals.deleteConfirm.okText'),
+        title: tPage('myCustomLevels.modals.deleteConfirm.title'),
+        content: tPage('myCustomLevels.modals.deleteConfirm.content', { title: level.title }),
+        okText: tPage('myCustomLevels.modals.deleteConfirm.okText'),
         okType: 'danger',
-        cancelText: tPage('modals.deleteConfirm.cancelText'),
+        cancelText: tPage('myCustomLevels.modals.deleteConfirm.cancelText'),
         onOk: () => {
           console.log('User confirmed deletion, deleting level:', level.id)
           const updatedCustomLevels = customLevels.filter((_, i) => i !== index)
           const saved = saveCustomLevels(updatedCustomLevels)
           if (saved) {
             setCustomLevels(updatedCustomLevels)
-            message.success(tPage('messages.deleteSuccess'))
+            message.success(tPage('myCustomLevels.messages.deleteSuccess'))
           } else {
-            message.error(tPage('messages.deleteFailed'))
+            message.error(tPage('myCustomLevels.messages.deleteFailed'))
           }
         },
         onCancel: () => {
@@ -95,7 +95,7 @@ function MyCustomLevels() {
       console.log('modal.confirm called successfully')
     } catch (error) {
       console.error('Error showing modal.confirm:', error)
-      message.error(tPage('messages.deleteFailed'))
+      message.error(tPage('myCustomLevels.messages.deleteFailed'))
     }
   }
 
@@ -107,7 +107,7 @@ function MyCustomLevels() {
       <div className="my-custom-levels-container">
         <div className="my-custom-levels-content">
           {/* 页面标题 */}
-          <h1 className="my-custom-levels-title">{tPage('title')}</h1>
+          <h1 className="my-custom-levels-title">{tPage('myCustomLevels.title')}</h1>
           
           <div className="my-custom-levels-nav-buttons">
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -116,7 +116,7 @@ function MyCustomLevels() {
                 ghost
                 onClick={() => navigate('/app/level-set')}
               >
-                {tPage('backToDrawing')}
+                {tPage('myCustomLevels.backToDrawing')}
               </Button>
               <Button
                 type="primary"
@@ -127,7 +127,7 @@ function MyCustomLevels() {
                   color: '#667eea'
                 }}
               >
-                {tPage('backToGuessing')}
+                {tPage('myCustomLevels.backToGuessing')}
               </Button>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -136,14 +136,14 @@ function MyCustomLevels() {
                 icon={<PlusOutlined />}
                 onClick={() => navigate('/app/level-config?type=draw')}
               >
-                {tPage('createDrawingLevel')}
+                {tPage('myCustomLevels.createDrawingLevel')}
               </Button>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => navigate('/app/level-config?type=guess')}
               >
-                {tPage('createGuessingLevel')}
+                {tPage('myCustomLevels.createGuessingLevel')}
               </Button>
             </div>
           </div>
@@ -163,7 +163,7 @@ function MyCustomLevels() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <h3 className="my-custom-level-card-title">{level.title}</h3>
                         <Tag color={level.type === 'guess' ? 'purple' : 'blue'}>
-                          {level.type === 'guess' ? tPage('guessLevelTag') : tPage('drawLevelTag')}
+                          {level.type === 'guess' ? tPage('myCustomLevels.guessLevelTag') : tPage('myCustomLevels.drawLevelTag')}
                         </Tag>
                       </div>
                       <p className="my-custom-level-card-id">ID: {level.id}</p>
@@ -190,7 +190,7 @@ function MyCustomLevels() {
                         handleEdit(level)
                       }}
                     >
-                      {tPage('levelCard.edit')}
+                      {tPage('myCustomLevels.levelCard.edit')}
                     </Button>
                     <Button
                       danger
@@ -202,7 +202,7 @@ function MyCustomLevels() {
                         handleDelete(index)
                       }}
                     >
-                      {tPage('levelCard.delete')}
+                      {tPage('myCustomLevels.levelCard.delete')}
                     </Button>
                   </div>
                 </Card>
@@ -211,8 +211,8 @@ function MyCustomLevels() {
           ) : (
             <div className="my-custom-levels-empty">
               <div className="my-custom-levels-empty-icon">📝</div>
-              <h3>{tPage('noCustomLevels')}</h3>
-              <p>{tPage('createFirstLevel')}</p>
+              <h3>{tPage('myCustomLevels.noCustomLevels')}</h3>
+              <p>{tPage('myCustomLevels.createFirstLevel')}</p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                 <Button
                   type="primary"
@@ -224,7 +224,7 @@ function MyCustomLevels() {
                     border: 'none'
                   }}
                 >
-                  {tPage('createDrawingLevel')}
+                  {tPage('myCustomLevels.createDrawingLevel')}
                 </Button>
                 <Button
                   type="primary"
@@ -236,7 +236,7 @@ function MyCustomLevels() {
                     border: 'none'
                   }}
                 >
-                  {tPage('createGuessingLevel')}
+                  {tPage('myCustomLevels.createGuessingLevel')}
                 </Button>
               </div>
             </div>

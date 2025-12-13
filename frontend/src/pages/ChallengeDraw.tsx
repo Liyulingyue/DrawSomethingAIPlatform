@@ -593,14 +593,14 @@ function ChallengeDraw() {
             <div className="challenge-draw-title-section">
               <div className="challenge-draw-level-info">
                 <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-                <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('pageTitle')}</h1>
+                <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('challengeDraw.pageTitle')}</h1>
               </div>
             </div>
 
             {/* 目标词区域 */}
             <div className="challenge-draw-header">
               <div className="challenge-draw-target-word">
-                <label className="challenge-target-word-label">{tPage('targetWordLabel')}</label>
+                <label className="challenge-target-word-label">{tPage('challengeDraw.targetWordLabel')}</label>
                 <div className="challenge-target-word-display">
                   {keyword || '未选择'}
                 </div>
@@ -648,14 +648,14 @@ function ChallengeDraw() {
           <div className="challenge-draw-title-section">
             <div className="challenge-draw-level-info">
               <span className="challenge-level-icon">{levelConfig?.icon || '🎯'}</span>
-              <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('pageTitle')}</h1>
+              <h1 className="challenge-draw-page-title">{getDisplayLevelText(levelConfig?.title) || tPage('challengeDraw.pageTitle')}</h1>
             </div>
           </div>
 
           {/* 目标词区域 - 只读显示 */}
           <div className="challenge-draw-header">
             <div className="challenge-draw-target-word">
-              <label className="challenge-target-word-label">{tPage('targetWordLabel')}</label>
+              <label className="challenge-target-word-label">{tPage('challengeDraw.targetWordLabel')}</label>
               <div className="challenge-target-word-display">
                 {keyword || '未选择'}
               </div>

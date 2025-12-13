@@ -231,7 +231,7 @@ function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, di
         <div className="mobile-draw-board-toolbar">
           <Space className="mobile-draw-board-controls" wrap>
             <Space size="small">
-              <span className="mobile-draw-board-label">{t('color')}</span>
+              <span className="mobile-draw-board-label">{t('mobileDrawBoard.color')}</span>
               <Space size={4} className="mobile-draw-board-colors" wrap>
                 {COLOR_PRESETS.map((color) => (
                   <button
@@ -240,15 +240,15 @@ function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, di
                     style={{ background: color, color: color === '#ffffff' ? '#ccc' : undefined }}
                     type="button"
                     onClick={() => setBrushColor(color)}
-                    aria-label={t('selectColor', { color })}
+                    aria-label={t('mobileDrawBoard.selectColor', { color })}
                   >
-                    {color === '#ffffff' ? t('eraser') : ''}
+                    {color === '#ffffff' ? t('mobileDrawBoard.eraser') : ''}
                   </button>
                 ))}
               </Space>
             </Space>
             <Space size="small" align="center" className="mobile-draw-board-size-control">
-              <span className="mobile-draw-board-label">{t('thickness')}</span>
+              <span className="mobile-draw-board-label">{t('mobileDrawBoard.thickness')}</span>
               <div className="mobile-draw-board-slider">
                 <Slider
                   min={2}
@@ -266,7 +266,7 @@ function MobileDrawBoard({ onDraw, hideColorPicker = false, readOnly = false, di
             onClick={clearCanvas}
             size="small"
           >
-            {t('clear')}
+            {t('mobileDrawBoard.clear')}
           </Button>
         </div>
       )}

@@ -1,7 +1,9 @@
 {
-  "color": "Color",
-  "thickness": "Thickness",
-  "clear": "Clear",
-  "selectColor": "Select color {{color}}",
-  "eraser": "Eraser"
+  "mobileDrawBoard": {
+    "color": "Color",
+    "thickness": "Thickness",
+    "clear": "Clear",
+    "selectColor": "Select color {{color}}",
+    "eraser": "Eraser"
+  }
 }
