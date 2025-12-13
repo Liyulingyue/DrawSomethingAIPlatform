@@ -71,7 +71,7 @@ function ChallengeDraw() {
   // 获取等级显示文本（支持 translation key 或 原文）
   const getDisplayLevelText = (text?: string | undefined): string => {
     if (!text) return ''
-    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+    if (text.includes('.') || text.startsWith('levels.draw.') || text.startsWith('levels.guess.')) {
       return tLevels(text)
     }
     return text
@@ -352,7 +352,7 @@ function ChallengeDraw() {
                   </div>
                 </div>
                 <p style={{ margin: '12px 0 0 0', color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>
-                  🎯 准备好挑战下一关了吗？
+                  {tPage('challengeDraw.modals.challengeSuccess.readyForNextChallenge')}
                 </p>
               </div>
             ),
@@ -365,27 +365,27 @@ function ChallengeDraw() {
                     setShowGalleryModal(true)
                   }}
                 >
-                  发布到画廊
+                  {tPage('challengeDraw.modals.challengeSuccess.publishToGallery')}
                 </Button>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <Button onClick={() => {
                     share(keyword, bestGuess, aiModel)
-                  }}>{tPage('buttons.share')}</Button>
+                  }}>{tPage('challengeDraw.modals.challengeSuccess.share')}</Button>
                   <Button type="primary" onClick={() => {
                     markKeywordCompleted(levelId, keyword)
                     modalInstance.destroy()
                     handleNextKeyword()
-                  }}>{tPage('buttons.nextLevel')}</Button>
+                  }}>{tPage('challengeDraw.modals.challengeSuccess.nextLevel')}</Button>
                 </div>
               </div>
             ),
           })
         }
-        message.success('挑战成功！')
+        message.success(tPage('challengeDraw.messages.challengeSuccess'))
       } else {
         // 显示失败弹窗
         modal.error({
-          title: '😅 再试一次！',
+          title: tPage('challengeDraw.modals.tryAgain.title'),
           content: (
             <div style={{ 
               maxHeight: '60vh', 
@@ -395,7 +395,7 @@ function ChallengeDraw() {
             }}>
               <p style={{ marginBottom: '12px', fontSize: '16px' }}>
                 <CloseCircleOutlined style={{ color: '#ff4d4f', marginRight: '8px' }} />
-                AI 没能准确识别出你的绘画
+                {tPage('challengeDraw.modals.tryAgain.description')}
               </p>
               <div style={{ 
                 background: '#fff2f0', 
@@ -404,12 +404,12 @@ function ChallengeDraw() {
                 padding: '12px',
                 marginTop: '12px'
               }}>
-                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('modals.tryAgain.progress')}</strong>{progress}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('modals.tryAgain.currentKeyword')}</strong>{keyword}</p>
-                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('modals.tryAgain.aiRecognition')}</strong>{bestGuess || tPage('modals.tryAgain.unableToRecognize')}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.tryAgain.progress')}</strong>{progress}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.tryAgain.currentKeyword')}</strong>{keyword}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>{tPage('challengeDraw.modals.tryAgain.aiRecognition')}</strong>{bestGuess || tPage('challengeDraw.modals.tryAgain.unableToRecognize')}</p>
                 {alternatives.length > 0 && (
                   <p style={{ margin: '0 0 8px 0' }}>
-                    <strong>{tPage('modals.tryAgain.alternatives')}</strong>{alternatives.join(', ')}
+                    <strong>{tPage('challengeDraw.modals.tryAgain.alternatives')}</strong>{alternatives.join(', ')}
                   </p>
                 )}
                 <div style={{ 
@@ -420,9 +420,9 @@ function ChallengeDraw() {
                   overflowY: 'auto',
                   wordBreak: 'break-word'
                 }}>
-                  <strong>{tPage('modals.tryAgain.aiAnalysis')}</strong>
+                  <strong>{tPage('challengeDraw.modals.tryAgain.aiAnalysis')}</strong>
                   <p style={{ margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>
-                    {result.reason || '无额外分析'}
+                    {result.reason || tPage('challengeDraw.modals.tryAgain.noAnalysis')}
                   </p>
                 </div>
               </div>
@@ -440,9 +440,9 @@ function ChallengeDraw() {
             </div>
           ),
           width: 520,
-          okText: '继续挑战'
+          okText: tPage('challengeDraw.modals.tryAgain.continueButton')
         })
-        message.warning('识别结果与目标词不匹配，再试一次吧！')
+        message.warning(tPage('challengeDraw.messages.noMatch'))
       }
       
     } catch (error) {
@@ -517,13 +517,13 @@ function ChallengeDraw() {
         name: galleryName.trim() || '佚名'
       })
 
-      message.success('成功发布到画廊！')
+      message.success(tPage('challengeDraw.messages.publishSuccess'))
       setShowGalleryModal(false)
       setGalleryName('佚名')
       // 发布成功后，成功弹窗保持打开状态，让用户可以继续选择下一关
     } catch (error) {
-      console.error('发布到画廊失败:', error)
-      message.error('发布失败，请稍后重试')
+      console.error(tPage('challengeDraw.messages.publishFailed'), error)
+      message.error(tPage('challengeDraw.messages.publishFailed'))
     }
   }
 
@@ -539,7 +539,7 @@ function ChallengeDraw() {
     const currentIndex = keywords.indexOf(keyword)
     
     if (currentIndex === -1) {
-      message.error('当前关键词不在关卡列表中')
+      message.error(tPage('challengeDraw.messages.keywordNotFound'))
       navigate('/app/level-set')
       return
     }
@@ -696,23 +696,23 @@ function ChallengeDraw() {
       )}
 
       <Modal
-        title="发布到画廊"
+        title={tPage('challengeDraw.galleryModal.title') || 'Publish to Gallery'}
         open={showGalleryModal}
         onOk={handlePublishToGallery}
         onCancel={() => setShowGalleryModal(false)}
-        okText="发布"
-        cancelText="取消"
+        okText={tPage('challengeDraw.galleryModal.submitButton')}
+        cancelText={tPage('challengeDraw.galleryModal.cancelButton')}
       >
         <Form layout="vertical">
-          <Form.Item label="您的名称">
+          <Form.Item label={tPage('challengeDraw.galleryModal.nameLabel')}>
             <Input
               value={galleryName}
               onChange={(e) => setGalleryName(e.target.value)}
-              placeholder={`输入您的名称（默认${username || '佚名'}）`}
+              placeholder={tPage('challengeDraw.galleryModal.namePlaceholder', { defaultName: username || '佚名' })}
             />
           </Form.Item>
           <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>
-            您的精彩绘画将被分享到画廊，让更多人欣赏您的艺术作品！
+            {tPage('challengeDraw.galleryModal.description')}
           </p>
         </Form>
       </Modal>

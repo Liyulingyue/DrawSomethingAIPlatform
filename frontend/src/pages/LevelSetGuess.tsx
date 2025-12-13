@@ -50,7 +50,7 @@ function LevelSetGuess() {
   // 获取等级显示文本（支持 translation key 或 原文）
   const getDisplayLevelText = (text?: string | undefined): string => {
     if (!text) return ''
-    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+    if (text.includes('.') || text.startsWith('levels.draw.') || text.startsWith('levels.guess.')) {
       return tLevels(text)
     }
     return text

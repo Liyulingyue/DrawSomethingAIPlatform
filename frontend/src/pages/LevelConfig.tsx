@@ -109,7 +109,7 @@ function CustomLevelConfiguration() {
           .map((k: string) => k.trim())
           .filter((k: string) => k.length > 0)
         keywordsToSave = keywordsArray
-      } else if (rawKeywordsInput.includes('.') && (rawKeywordsInput.startsWith('draw.') || rawKeywordsInput.startsWith('guess.'))) {
+      } else if (rawKeywordsInput.includes('.') && (rawKeywordsInput.startsWith('levels.draw.') || rawKeywordsInput.startsWith('levels.guess.'))) {
         // Treat as a translation key
         keywordsToSave = rawKeywordsInput
       } else {

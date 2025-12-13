@@ -39,8 +39,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, mess
         </div>
 
         {/* 应用名称 */}
-        <h1 className="splash-title">{t('title')}</h1>
-        <p className="splash-subtitle">{t('subtitle')}</p>
+        <h1 className="splash-title">{t('common.title')}</h1>
+        <p className="splash-subtitle">{t('common.subtitle')}</p>
 
         {/* 加载指示器 */}
         <div className="splash-loading">

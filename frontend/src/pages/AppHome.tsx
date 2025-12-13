@@ -113,9 +113,9 @@ function AppHome() {
       <div className="app-home-container">
         <div className="app-home-content">
               <div className="app-home-header">
-                    <h1 className="app-home-title">{t('title')}</h1>
-                    <p className="app-home-subtitle">{t('subtitle')}</p>
-                    <p className="app-home-hint">{t('hint')}</p>
+                    <h1 className="app-home-title">{t('common.title')}</h1>
+                    <p className="app-home-subtitle">{t('common.subtitle')}</p>
+                    <p className="app-home-hint">{t('common.hint')}</p>
                   </div>
           <div className="app-home-buttons">
         <Button
@@ -125,7 +125,7 @@ function AppHome() {
           onClick={handleLevelSelect}
           className="app-home-button app-home-button-primary"
           >
-          {t('buttons.level_draw')}
+          {t('common.buttons.level_draw')}
         </Button>
         <Button
           type="primary"
@@ -134,7 +134,7 @@ function AppHome() {
           onClick={handleLevelSetGuess}
           className="app-home-button app-home-button-secondary"
           >
-          {t('buttons.level_guess')}
+          {t('common.buttons.level_guess')}
         </Button>
         {/* Tauri 模式下不显示登录按钮（自动登录管理员） */}
         {!isInTauriMode && (
@@ -145,7 +145,7 @@ function AppHome() {
             onClick={handleLogin}
             className="app-home-button app-home-button-login"
             >
-            {t('buttons.login')}
+            {t('common.buttons.login')}
           </Button>
         )}
         <Button
@@ -155,7 +155,7 @@ function AppHome() {
           onClick={handleFreeDraw}
           className="app-home-button"
           >
-          {t('buttons.free_draw')}
+          {t('common.buttons.free_draw')}
         </Button>
         <Button
           type="default"
@@ -164,7 +164,7 @@ function AppHome() {
           onClick={handleGallery}
           className="app-home-button app-home-button-gallery"
           >
-          {t('buttons.gallery')}
+          {t('common.buttons.gallery')}
         </Button>
         <Button
           type="default"
@@ -173,7 +173,7 @@ function AppHome() {
           onClick={handleConfigAI}
           className="app-home-button app-home-button-config"
           >
-          {t('buttons.config_ai')}
+          {t('common.buttons.config_ai')}
         </Button>
         <Button
           type="default"
@@ -182,7 +182,7 @@ function AppHome() {
           onClick={handleIntroduction}
           className="app-home-button app-home-button-info"
           >
-          {t('buttons.introduction')}
+          {t('common.buttons.introduction')}
         </Button>
         {/* Tauri 模式下不显示支持我们按钮（桌面应用） */}
         {!isInTauriMode && (
@@ -193,7 +193,7 @@ function AppHome() {
             onClick={handleDonate}
             className="app-home-button app-home-button-donate"
             >
-            {t('buttons.donate')}
+            {t('common.buttons.donate')}
           </Button>
         )}
       </div>

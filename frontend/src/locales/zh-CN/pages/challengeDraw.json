@@ -46,23 +46,38 @@
         "progress": "进度：",
         "nextLevel": "进入下一关",
         "skipLevel": "跳过本关",
-        "backToLevelSelect": "返回选关"
+        "backToLevelSelect": "返回选关",
+        "readyForNextChallenge": "🎯 准备好挑战下一关了吗？",
+        "publishToGallery": "发布到画廊",
+        "shareDrawing": "分享画作",
+        "share": "分享"
       },
       "tryAgain": {
         "title": "😅 再试一次！",
         "description": "AI 没能准确识别出你的绘画",
+        "progress": "进度：",
         "level": "关卡：",
         "currentKeyword": "当前关卡：",
         "aiRecognition": "AI 识别：",
         "alternatives": "备选答案：",
-        "aiAnalysis": "AI 分析：",
+        "aiAnalysis": "AI 分析结果：",
         "noAnalysis": "无额外分析",
         "improvementTips": "💡 改进建议：",
         "tip1": "尝试画得更清晰一些",
         "tip2": "添加更多细节特征",
         "tip3": "使用更明显的形状",
         "continueDrawing": "🎨 继续在画板上修改或重新绘制！",
-        "continueButton": "继续创作"
+        "continueButton": "继续创作",
+        "unableToRecognize": "无法识别"
+      },
+      "guessFailed": {
+        "title": "😅 猜测失败！",
+        "description": "你的猜测与画作不匹配",
+        "improvementTips": "💡 改进提示：",
+        "tip1": "仔细观察画作细节",
+        "tip2": "想想常见物体",
+        "tip3": "考虑不同视角",
+        "continueDrawing": "🎨 继续尝试！"
       },
       "submitFailed": {
         "title": "⚠️ 提交失败",
@@ -73,9 +88,9 @@
     },
     "galleryModal": {
       "title": "发布到画廊",
-      "description": "将你的画作发布到公共画廊，与其他玩家分享",
-      "nameLabel": "画廊名称",
-      "namePlaceholder": "请输入画廊显示名称",
+      "description": "您的精彩绘画将被分享到画廊，让更多人欣赏您的艺术作品！",
+      "nameLabel": "您的名称",
+      "namePlaceholder": "输入您的名称（默认{{defaultName}}）",
       "submitButton": "发布",
       "cancelButton": "取消"
     },

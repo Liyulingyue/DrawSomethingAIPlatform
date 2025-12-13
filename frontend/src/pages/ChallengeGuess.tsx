@@ -78,7 +78,7 @@ function ChallengeGuess() {
   // 获取等级显示文本（支持 translation key 或 原文）
   const getDisplayLevelText = (text?: string | undefined): string => {
     if (!text) return ''
-    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+    if (text.includes('.') || text.startsWith('levels.draw.') || text.startsWith('levels.guess.')) {
       return tLevels(text)
     }
     return text
@@ -305,7 +305,7 @@ function ChallengeGuess() {
         width: 480,
         okText: tPage('challengeGuess.modals.timeUp.continue'),
         onOk: handleNextKeyword,
-        cancelText: '重新开始',
+        cancelText: tPage('challengeGuess.modals.timeUp.cancel'),
         onCancel: () => {
           // 重置状态，重新开始这一题
           setGuessInput('')
@@ -348,26 +348,26 @@ function ChallengeGuess() {
         markLevelCompleted(`${levelId}:${keywordIndex}`)
 
         modal.success({
-          title: '🎉 恭喜猜对！',
+          title: tPage('challengeGuess.modals.guessSuccess.title'),
           content: (
             <div style={{ textAlign: 'center', padding: '20px' }}>
               <CheckCircleOutlined style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }} />
               <p style={{ fontSize: '18px', marginBottom: '8px' }}>
-                正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
+                {tPage('challengeGuess.modals.guessSuccess.correctAnswer')}<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
               </p>
               <p style={{ color: '#666', marginBottom: '16px' }}>
                 {tPage('ui.timeSpent', { time: formatTime(timeLeft), score })}
               </p>
               <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.continueChallenge')}</p>
+                <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('challengeGuess.ui.continueChallenge')}</p>
                 <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
-                  🎨 准备好迎接下一题挑战了吗？
+                  {tPage('challengeGuess.modals.guessSuccess.readyForNext')}
                 </p>
               </div>
             </div>
           ),
           width: 480,
-          okText: '继续挑战',
+          okText: tPage('challengeGuess.modals.timeUp.continue'),
           onOk: handleNextKeyword
         })
 
@@ -379,28 +379,28 @@ function ChallengeGuess() {
         if (timeUp) {
           // 时间结束，显示正确答案
           modal.confirm({
-            title: '⏰ 时间到！',
+            title: tPage('challengeGuess.modals.timeUp.title'),
             content: (
               <div style={{ textAlign: 'center', padding: '20px' }}>
                 <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
                 <p style={{ fontSize: '16px', marginBottom: '8px' }}>
-                  您的猜测：<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
+                  {tPage('challengeGuess.modals.timeUp.yourGuess')}<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
                 </p>
                 <p style={{ fontSize: '16px', marginBottom: '16px' }}>
-                  正确答案：<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
+                  {tPage('challengeGuess.modals.timeUp.correctAnswer')}<strong style={{ color: '#52c41a' }}>{currentKeyword}</strong>
                 </p>
                 <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
                   <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.challengeEnd')}</p>
                   <p style={{ margin: '0', color: '#1890ff', fontWeight: 500 }}>
-                    🎨 准备好迎接下一题挑战了吗？
+                    {tPage('challengeGuess.modals.timeUp.readyForNext')}
                   </p>
                 </div>
               </div>
             ),
             width: 480,
-            okText: '继续挑战',
+            okText: tPage('challengeGuess.modals.timeUp.continue'),
             onOk: handleNextKeyword,
-            cancelText: '重新开始',
+            cancelText: tPage('challengeGuess.modals.timeUp.cancel'),
             onCancel: () => {
               // 重置状态，重新开始这一题
               setGuessInput('')
@@ -415,31 +415,31 @@ function ChallengeGuess() {
         } else {
           // 时间未结束，只显示猜错了
           modal.confirm({
-            title: '❌ 猜错了',
+            title: tPage('challengeGuess.modals.guessWrong.title'),
             content: (
               <div style={{ textAlign: 'center', padding: '20px' }}>
                 <CloseCircleOutlined style={{ fontSize: '48px', color: '#ff4d4f', marginBottom: '16px' }} />
                 <p style={{ fontSize: '16px', marginBottom: '8px' }}>
-                  您的猜测：<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
+                  {tPage('challengeGuess.modals.guessWrong.yourGuess')}<strong style={{ color: '#ff4d4f' }}>{guessInput}</strong>
                 </p>
                 <p style={{ color: '#666', marginBottom: '16px' }}>
-                  剩余时间：<strong style={{ color: '#faad14' }}>{formatTime(300 - timeLeft)}</strong>
+                  {tPage('challengeGuess.modals.guessWrong.timeRemaining')}<strong style={{ color: '#faad14' }}>{formatTime(300 - timeLeft)}</strong>
                 </p>
                 <div style={{ margin: '12px 0 0 0', color: '#666', fontSize: '14px' }}>
-                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('ui.continueChallenge')}</p>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: 500 }}>{tPage('challengeGuess.ui.continueChallenge')}</p>
                   <ul style={{ margin: '0 0 0 16px', paddingLeft: '8px', textAlign: 'left' }}>
                     <li>{tPage('ui.tips.observe')}</li>
                     <li>{tPage('ui.tips.differentAngles')}</li>
                     <li>{tPage('ui.tips.associations')}</li>
                   </ul>
                   <p style={{ margin: '8px 0 0 0', color: '#1890ff', fontWeight: 500 }}>
-                    🎨 继续在画板上观察或重新猜测！
+                    {tPage('challengeGuess.modals.guessWrong.continueGuessing')}
                   </p>
                 </div>
               </div>
             ),
             width: 480,
-            okText: '继续猜测',
+            okText: tPage('challengeGuess.modals.guessWrong.continueButton'),
             onOk: () => {
               setGuessInput('')
               // 不需要清空画板，让用户继续观察简笔画
@@ -590,14 +590,14 @@ function ChallengeGuess() {
 
     // 显示正确答案
     modal.info({
-      title: '正确答案',
+      title: tPage('challengeGuess.modals.skip.title'),
       content: (
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <p style={{ fontSize: '18px', marginBottom: '16px' }}>
-            正确答案是：<strong style={{ color: '#1890ff' }}>{currentKeyword}</strong>
+            {tPage('challengeGuess.modals.skip.correctAnswer')}<strong style={{ color: '#1890ff' }}>{currentKeyword}</strong>
           </p>
           <p style={{ color: '#666' }}>
-            继续挑战下一题吧！
+            {tPage('challengeGuess.modals.skip.continueMessage')}
           </p>
         </div>
       ),

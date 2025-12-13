@@ -29,11 +29,32 @@
         "perfectBonus": "Perfect Clear Bonus: {{bonus}} points",
         "backToLevels": "Back to Levels"
       },
+      "guessSuccess": {
+        "title": "🎉 Congratulations on guessing correctly!",
+        "correctAnswer": "Correct Answer:",
+        "readyForNext": "🎨 Ready for the next challenge?"
+      },
       "timeUp": {
         "title": "⏰ Time's Up!",
         "message": "Time has run out, the correct answer is:",
         "answer": "Correct Answer: {{answer}}",
-        "continue": "Continue Challenge"
+        "yourGuess": "Your Guess:",
+        "correctAnswer": "Correct Answer:",
+        "readyForNext": "🎨 Ready for the next challenge?",
+        "continue": "Continue Challenge",
+        "cancel": "Restart"
+      },
+      "guessWrong": {
+        "title": "❌ Wrong Guess",
+        "yourGuess": "Your Guess:",
+        "timeRemaining": "Time Remaining:",
+        "continueGuessing": "🎨 Continue observing on the canvas or guess again!",
+        "continueButton": "Continue Guessing"
+      },
+      "skip": {
+        "title": "Correct Answer",
+        "correctAnswer": "The correct answer is:",
+        "continueMessage": "Continue to the next challenge!"
       }
     },
     "ui": {

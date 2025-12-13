@@ -46,16 +46,21 @@
         "progress": "Progress:",
         "nextLevel": "Next Level",
         "skipLevel": "Skip Level",
-        "backToLevelSelect": "Back to Level Select"
+        "backToLevelSelect": "Back to Level Select",
+        "readyForNextChallenge": "🎯 Ready for the next challenge?",
+        "publishToGallery": "Publish to Gallery",
+        "shareDrawing": "Share Drawing",
+        "share": "Share"
       },
       "tryAgain": {
         "title": "😅 Try Again!",
         "description": "AI couldn't accurately recognize your drawing",
+        "progress": "Progress:",
         "level": "Level:",
         "currentKeyword": "Current Level:",
         "aiRecognition": "AI Recognition:",
         "alternatives": "Alternative Answers:",
-        "aiAnalysis": "AI Analysis:",
+        "aiAnalysis": "AI Analysis Result:",
         "noAnalysis": "No additional analysis",
         "improvementTips": "💡 Improvement Suggestions:",
         "tip1": "Try to draw more clearly",
@@ -64,6 +69,15 @@
         "continueDrawing": "🎨 Continue modifying or redrawing on the canvas!",
         "continueButton": "Continue Creating",
         "unableToRecognize": "Unable to recognize"
+      },
+      "guessFailed": {
+        "title": "😅 Guess Failed!",
+        "description": "Your guess didn't match the drawing",
+        "improvementTips": "💡 Improvement Tips:",
+        "tip1": "Look closely at the drawing details",
+        "tip2": "Think about common objects",
+        "tip3": "Consider different perspectives",
+        "continueDrawing": "🎨 Keep trying!"
       },
       "submitFailed": {
         "title": "⚠️ Submission Failed",
@@ -74,9 +88,9 @@
     },
     "galleryModal": {
       "title": "Publish to Gallery",
-      "description": "Publish your drawing to the public gallery to share with other players",
-      "nameLabel": "Gallery Name",
-      "namePlaceholder": "Please enter gallery display name",
+      "description": "Your wonderful painting will be shared to the gallery, let more people appreciate your artwork!",
+      "nameLabel": "Your Name",
+      "namePlaceholder": "Enter your name (default {{defaultName}})",
       "submitButton": "Publish",
       "cancelButton": "Cancel"
     },

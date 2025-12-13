@@ -294,7 +294,7 @@ function AppDraw() {
       setShowSuccessGalleryModal(false)
       setGalleryName('佚名')
     } catch (error) {
-      console.error('发布到画廊失败:', error)
+      console.error(t('appDraw.messages.publishFailed'), error)
       message.error(t('appDraw.messages.publishFailed'))
     }
   }

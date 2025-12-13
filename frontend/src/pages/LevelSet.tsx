@@ -68,7 +68,7 @@ function LevelSet() {
   const getDisplayLevelText = (text?: string | undefined): string => {
     if (!text) return ''
     // 如果看起来像翻译键（包含点或者以 draw/guess 开头）则使用 tLevels
-    if (text.includes('.') || text.startsWith('draw.') || text.startsWith('guess.')) {
+    if (text.includes('.') || text.startsWith('levels.draw.') || text.startsWith('levels.guess.')) {
       return tLevels(text)
     }
     // 否则原样返回（自定义关卡的文本）
