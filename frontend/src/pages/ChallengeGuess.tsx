@@ -199,7 +199,7 @@ function ChallengeGuess() {
         const sketchRequest: any = {
           prompt: currentKeyword,
           max_steps: 20,
-          sort_method: 'area',
+          sort_method: 'split', // 分割排序方法 'area': 按面积绘制简笔画 | 'position':按位置绘制简笔画 | 'split':展示彩色图片
           useCache: false, // 猜词闯关不使用缓存
         }
         

@@ -13,7 +13,7 @@ export interface SketchStep {
 export interface GenerateSketchRequest {
   prompt: string
   max_steps?: number
-  sort_method?: 'area' | 'position'
+  sort_method?: 'area' | 'position' | 'split'
   useCache?: boolean // 是否使用缓存，默认为 true
   sessionId?: string // 用户会话ID
   config?: {
@@ -27,7 +27,7 @@ export interface GenerateSketchRequest {
 export interface DecomposeImageRequest {
   image: string
   max_steps?: number
-  sort_method?: 'area' | 'position'
+  sort_method?: 'area' | 'position' | 'split'
 }
 
 // 简笔画缓存
