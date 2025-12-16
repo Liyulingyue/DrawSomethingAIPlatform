@@ -93,7 +93,7 @@ function ChallengeDraw() {
   const keyword = searchParams.get('keyword') || ''
 
   // 获取关卡配置
-  const levelConfig = getLevelById(levelId)
+  const levelConfig = getLevelById(levelId, tLevels)
 
   // 防止移动设备页面滚动
   useEffect(() => {

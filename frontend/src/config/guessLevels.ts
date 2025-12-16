@@ -10,99 +10,38 @@ export interface GuessLevelConfig {
   clue?: string
 }
 
-// 猜词闯关配置数据
-export const GUESS_LEVEL_CONFIGS: GuessLevelConfig[] = [
-  {
-    id: 'guess_beginner',
-    title: 'levels.guess.beginner.title',
-    description: 'levels.guess.beginner.description',
-    icon: '🌱',
-    status: 'available',
-    difficulty: 'levels.guess.beginner.difficulty',
-    keywords: 'levels.guess.beginner.keywords',
-    clue: 'levels.guess.beginner.clue',
-  },
-  {
-    id: 'guess_animals',
-    title: 'levels.guess.animals.title',
-    description: 'levels.guess.animals.description',
-    icon: '🐾',
-    status: 'available',
-    difficulty: 'levels.guess.animals.difficulty',
-    keywords: 'levels.guess.animals.keywords',
-    clue: 'levels.guess.animals.clue',
-  },
-  {
-    id: 'guess_vehicles',
-    title: 'levels.guess.vehicles.title',
-    description: 'levels.guess.vehicles.description',
-    icon: '🚗',
-    status: 'available',
-    difficulty: 'levels.guess.vehicles.difficulty',
-    keywords: 'levels.guess.vehicles.keywords',
-    clue: 'levels.guess.vehicles.clue',
-  },
-  {
-    id: 'guess_sports',
-    title: 'levels.guess.sports.title',
-    description: 'levels.guess.sports.description',
-    icon: '⚽',
-    status: 'available',
-    difficulty: 'levels.guess.sports.difficulty',
-    keywords: 'levels.guess.sports.keywords',
-    clue: 'levels.guess.sports.clue',
-  },
-  {
-    id: 'guess_food',
-    title: 'levels.guess.food.title',
-    description: 'levels.guess.food.description',
-    icon: '🥟',
-    status: 'available',
-    difficulty: 'levels.guess.food.difficulty',
-    keywords: 'levels.guess.food.keywords',
-    clue: 'levels.guess.food.clue',
-  },
-  {
-    id: 'guess_clothing',
-    title: 'levels.guess.clothing.title',
-    description: 'levels.guess.clothing.description',
-    icon: '👕',
-    status: 'available',
-    difficulty: 'levels.guess.clothing.difficulty',
-    keywords: 'levels.guess.clothing.keywords',
-    clue: 'levels.guess.clothing.clue',
-  },
-  {
-    id: 'guess_nature',
-    title: 'levels.guess.nature.title',
-    description: 'levels.guess.nature.description',
-    icon: '🌄',
-    status: 'available',
-    difficulty: 'levels.guess.nature.difficulty',
-    keywords: 'levels.guess.nature.keywords',
-    clue: 'levels.guess.nature.clue',
-  },
-  {
-    id: 'guess_professions',
-    title: 'levels.guess.professions.title',
-    description: 'levels.guess.professions.description',
-    icon: '👨‍⚕️',
-    status: 'available',
-    difficulty: 'levels.guess.professions.difficulty',
-    keywords: 'levels.guess.professions.keywords',
-    clue: 'levels.guess.professions.clue',
-  },
-  {
-    id: 'guess_emotions',
-    title: 'levels.guess.emotions.title',
-    description: 'levels.guess.emotions.description',
-    icon: '😊',
-    status: 'available',
-    difficulty: 'levels.guess.emotions.difficulty',
-    keywords: 'levels.guess.emotions.keywords',
-    clue: 'levels.guess.emotions.clue',
-  }
+// 预设猜词关卡 ID 列表
+export const GUESS_LEVEL_IDS = [
+  'guess_beginner',
+  'guess_animals',
+  'guess_vehicles',
+  'guess_sports',
+  'guess_food',
+  'guess_clothing',
+  'guess_nature',
+  'guess_professions',
+  'guess_emotions'
 ]
+
+// 获取猜词关卡配置（通过 i18n）
+export const getGuessLevelConfig = (id: string, t: (key: string, options?: any) => any): GuessLevelConfig | undefined => {
+  // 移除 'guess_' 前缀来匹配 i18n 键
+  const levelKey = id.replace('guess_', '')
+  const translated = t(`levels.guess.${levelKey}`, { returnObjects: true })
+  if (!translated || typeof translated !== 'object') {
+    return undefined
+  }
+  return {
+    id,
+    title: translated.title || '',
+    description: translated.description || '',
+    icon: translated.icon || '',
+    status: translated.status || 'coming-soon',
+    difficulty: translated.difficulty,
+    keywords: translated.keywords,
+    clue: translated.clue
+  }
+}
 
 // 本地存储 key
 const CUSTOM_LEVELS_KEY = 'custom_levels'
@@ -129,19 +68,21 @@ const getCustomLevels = (): GuessLevelConfig[] => {
 }
 
 // 获取可用的猜词关卡
-export const getAvailableGuessLevels = (): GuessLevelConfig[] => {
-  return GUESS_LEVEL_CONFIGS.filter(level => level.status === 'available')
+export const getAvailableGuessLevels = (t: (key: string, options?: any) => any): GuessLevelConfig[] => {
+  return GUESS_LEVEL_IDS
+    .map(id => getGuessLevelConfig(id, t))
+    .filter((level): level is GuessLevelConfig => level !== undefined && level.status === 'available')
 }
 
 // 根据 ID 获取猜词关卡配置（包含自定义关卡）
-export const getGuessLevelById = (id: string): GuessLevelConfig | undefined => {
+export const getGuessLevelById = (id: string, t: (key: string, options?: any) => any): GuessLevelConfig | undefined => {
   // 先从预设关卡中查找
-  let level = GUESS_LEVEL_CONFIGS.find(level => level.id === id)
+  let level = getGuessLevelConfig(id, t)
   
   // 如果没找到，再从自定义关卡中查找
   if (!level) {
     const customLevels = getCustomLevels()
-    level = customLevels.find(level => level.id === id)
+    level = customLevels.find((level: GuessLevelConfig) => level.id === id)
   }
   
   return level
@@ -149,7 +90,7 @@ export const getGuessLevelById = (id: string): GuessLevelConfig | undefined => {
 
 // 获取关卡的随机顺序关键词列表
 export const getShuffledKeywords = (levelId: string, t: (key: string, options?: any) => any): string[] => {
-  const level = getGuessLevelById(levelId)
+  const level = getGuessLevelById(levelId, t)
   if (!level || !level.keywords) {
     return []
   }
@@ -201,7 +142,7 @@ export const getShuffledKeywords = (levelId: string, t: (key: string, options?: 
 
 // 获取关卡的下一个关键词（基于当前进度）
 export const getNextKeyword = (levelId: string, currentIndex: number, t: (key: string, options?: any) => any): string | null => {
-  const level = getGuessLevelById(levelId)
+  const level = getGuessLevelById(levelId, t)
   if (!level || !level.keywords) {
     return null
   }

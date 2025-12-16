@@ -5,7 +5,7 @@ import { LockOutlined, PlayCircleOutlined, UnorderedListOutlined, CheckCircleOut
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
-import { LEVEL_CONFIGS, type LevelConfig } from '../config/levels'
+import { getAvailableLevels, type LevelConfig } from '../config/levels'
 import { useTranslation } from 'react-i18next'
 import './LevelSet.css'
 
@@ -79,7 +79,7 @@ function LevelSet() {
   const drawCustomLevels = customLevels.filter(level => !level.type || level.type === 'draw')
 
   // 合并默认关卡和自定义关卡，并排序：可用的在前，待更新的在后
-  const allLevels = [...LEVEL_CONFIGS, ...drawCustomLevels].sort((a, b) => {
+  const allLevels = [...getAvailableLevels(tLevels), ...drawCustomLevels].sort((a, b) => {
     // 如果状态不同，可用的排在前面
     if (a.status === 'coming-soon' && b.status !== 'coming-soon') return 1
     if (a.status !== 'coming-soon' && b.status === 'coming-soon') return -1

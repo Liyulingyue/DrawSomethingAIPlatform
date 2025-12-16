@@ -5,7 +5,7 @@ import { LockOutlined, PlayCircleOutlined, PlusOutlined } from '@ant-design/icon
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
-import { GUESS_LEVEL_CONFIGS, type GuessLevelConfig } from '../config/guessLevels'
+import { getAvailableGuessLevels, type GuessLevelConfig } from '../config/guessLevels'
 import type { LevelConfig } from '../config/levels'
 import { useTranslation } from 'react-i18next'
 import './LevelSet.css'
@@ -66,7 +66,7 @@ function LevelSetGuess() {
     }))
 
   // 合并预设关卡和自定义关卡
-  const allLevels = [...GUESS_LEVEL_CONFIGS, ...guessCustomLevels]
+  const allLevels = [...getAvailableGuessLevels(tLevels), ...guessCustomLevels]
 
   // 无需登录 - 用户可以使用自定义配置调用绘画API
 

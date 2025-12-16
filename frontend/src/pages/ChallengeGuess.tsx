@@ -124,7 +124,7 @@ function ChallengeGuess() {
   const keywordIndex = parseInt(keywordIndexStr, 10)
 
   // 获取关卡配置
-  const levelConfig = getGuessLevelById(levelId)
+  const levelConfig = getGuessLevelById(levelId, tLevels)
 
   // 获取当前关键词（使用 useMemo 缓存，避免每次渲染重新计算）
   const shuffledKeywords = useMemo(() => getShuffledKeywords(levelId, tLevels), [levelId, tLevels])
