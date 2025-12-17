@@ -24,7 +24,7 @@
         "description": "Various vehicles and transportation",
         "difficulty": "medium",
         "clue": "A vehicle or means of transport",
-        "keywords": ["car", "bicycle", "train", "airplane", "ship", "motorcycle", "bus", "subway", "helicopter", "sailboat"],
+        "keywords": ["car", "bicycle", "train", "airplane", "ship", "motorcycle"],
         "icon": "🚗",
         "status": "available"
       },
@@ -80,7 +80,7 @@
         "description": "Various vehicles to challenge your imagination",
         "difficulty": "medium",
         "clue": "A vehicle or means of transport",
-        "keywords": ["car", "bicycle", "train", "airplane", "ship", "motorcycle", "bus", "subway", "helicopter", "sailboat"],
+        "keywords": ["car", "bicycle", "train", "airplane", "ship", "motorcycle"],
         "icon": "🚗",
         "status": "available"
       },
