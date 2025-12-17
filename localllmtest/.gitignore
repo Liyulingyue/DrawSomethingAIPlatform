@@ -1,0 +1,16 @@
+# Ignore model files
+*.gguf
+*.bin
+*.safetensors
+
+# Ignore downloaded model directories
+models/
+__pycache__/
+*.pyc
+
+# Ignore virtual environment (if not already ignored)
+.venv/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
