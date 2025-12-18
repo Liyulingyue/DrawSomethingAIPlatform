@@ -1,0 +1,32 @@
+# Core dependencies
+torch==2.8
+torchvision==0.23.0
+qwen-vl-utils
+Pillow
+gradio>=4.36
+ipywidgets
+requests
+huggingface_hub
+
+# Web server
+fastapi
+uvicorn
+
+# OpenAI client for testing
+openai
+
+# OpenVINO and optimization
+openvino==2025.3
+nncf
+
+# Required Git packages (install manually with pip install git+<url>)
+# These provide optimum-cli and Qwen3-VL support
+# pip install git+https://github.com/openvino-dev-samples/optimum.git@qwen3vl
+# pip install git+https://github.com/openvino-dev-samples/transformers.git@qwen3vl
+# pip install git+https://github.com/openvino-dev-samples/optimum-intel.git@741501ef4bb57f29e22ef0695f77f2ba67a6c16e
+
+# For macOS
+# numpy<2.0  # Uncomment if on macOS
+
+# Additional utilities
+pathlib
