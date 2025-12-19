@@ -10,7 +10,7 @@ export interface AIConfig {
   imageKey: string
   imageModelName: string
   
-  callPreference: 'custom' | 'server' | 'local'  // 调用偏好：自定义服务、服务器调用点或本地模型
+  callPreference: 'custom' | 'server' | 'custom-local'  // 调用偏好：自定义服务、服务器调用点或本地模型
 }
 
 // 默认配置
@@ -83,8 +83,8 @@ const AI_CONFIG_KEYS = {
 export const getAIConfig = (): AIConfig => {
   try {
     const storedCallPreference = localStorage.getItem(AI_CONFIG_KEYS.CALL_PREFERENCE)
-    const callPreference = (storedCallPreference === 'custom' || storedCallPreference === 'server' || storedCallPreference === 'local')
-      ? storedCallPreference as 'custom' | 'server' | 'local'
+    const callPreference = (storedCallPreference === 'custom' || storedCallPreference === 'server' || storedCallPreference === 'custom-local')
+      ? storedCallPreference as 'custom' | 'server' | 'custom-local'
       : DEFAULT_AI_CONFIG.callPreference
 
     return {

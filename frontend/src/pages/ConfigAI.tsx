@@ -33,7 +33,7 @@ function ConfigAI() {
   const [config, setConfig] = useState<AIConfig>(() => getAIConfig())
 
   // 跟踪当前选择的调用偏好，用于动态验证
-  const [currentCallPreference, setCurrentCallPreference] = useState<'custom' | 'server' | 'local'>(() => {
+  const [currentCallPreference, setCurrentCallPreference] = useState<'custom' | 'server' | 'custom-local'>(() => {
     const currentConfig = getAIConfig()
     return currentConfig.callPreference
   })
@@ -55,7 +55,7 @@ function ConfigAI() {
   }
 
   // 处理调用偏好变化
-  const handleCallPreferenceChange = (value: 'custom' | 'server' | 'local') => {
+  const handleCallPreferenceChange = (value: 'custom' | 'server' | 'custom-local') => {
     setCurrentCallPreference(value)
     // 当切换到服务器模式时，显示登录提示
     if (value === 'server') {
@@ -620,7 +620,7 @@ function ConfigAI() {
                   }
                 ]}
               />
-              {currentCallPreference === 'local' && (
+              {currentCallPreference === 'custom-local' && (
                 <div style={{ marginBottom: '16px', padding: '20px', backgroundColor: modelLoaded ? '#f6ffed' : '#fff2f0', border: `2px solid ${modelLoaded ? '#b7eb8f' : '#ffccc7'}`, borderRadius: '8px', textAlign: 'center' }}>
                   <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#262626' }}>
                     {t('configAI.preferences.modelStatus')}
@@ -692,7 +692,7 @@ function ConfigAI() {
                       <SettingOutlined style={{ marginRight: '8px' }} />
                       {t('configAI.preferences.custom')}
                     </Radio.Button>
-                    <Radio.Button value="local" className="config-radio-button">
+                    <Radio.Button value="custom-local" className="config-radio-button">
                       <DesktopOutlined style={{ marginRight: '8px' }} />
                       {t('configAI.preferences.local')}
                     </Radio.Button>

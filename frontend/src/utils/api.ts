@@ -16,7 +16,7 @@ export interface GuessRequest {
     model?: string
     prompt?: string
   }
-  call_preference?: 'custom' | 'server'
+  call_preference?: 'custom' | 'server' | 'custom-local'
   session_id?: string
   language?: string
 }
