@@ -28,7 +28,11 @@
       "testImage": "Test Text-to-Image Model",
       "reset": "Reset",
       "resetToPlatform": "Reset to {{platform}}",
-      "save": "Save Configuration"
+      "save": "Save Configuration",
+      "loadModel": "Load Model",
+      "loadingModel": "Loading...",
+      "modelLoaded": "Loaded",
+      "unloadModel": "Unload Model"
     },
     "messages": {
       "serverLoginRequired": "💰 Server endpoint requires login to use.",
@@ -70,7 +74,11 @@
       "solutions": "Solutions:",
       "ensureBackendRunning": "Ensure backend service is running (python run.py)",
       "checkBackendPort": "Check if backend port is 8002",
-      "checkFirewall": "Confirm firewall is not blocking connection"
+      "checkFirewall": "Confirm firewall is not blocking connection",
+      "modelLoadSuccess": "Local model loaded successfully",
+      "modelLoadFailed": "Failed to load local model",
+      "modelUnloadSuccess": "Local model unloaded successfully",
+      "modelUnloadFailed": "Failed to unload local model"
     },
     "validation": {
       "enterValidUrl": "Please enter a valid URL",
@@ -85,7 +93,12 @@
     "preferences": {
       "custom": "Custom Service",
       "server": "Server Endpoint",
-      "serverTip": "💡 Server endpoint requires login to use, prioritizes platform services, automatically switches to custom services when points are insufficient"
+      "local": "Local Model",
+      "serverTip": "💡 Server endpoint requires login to use, prioritizes platform services, automatically switches to custom services when points are insufficient",
+      "localTip": "💡 When selecting local model, you need to load the model first before using AI features",
+      "modelStatus": "Local Model Status:",
+      "loaded": "Loaded",
+      "notLoaded": "Not Loaded"
     },
     "footer": {
       "hint": "💡 Hint: Configuration information will be saved in browser local storage.",

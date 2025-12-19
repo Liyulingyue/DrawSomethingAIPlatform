@@ -10,7 +10,7 @@ export interface AIConfig {
   imageKey: string
   imageModelName: string
   
-  callPreference: 'custom' | 'server'  // 调用偏好：自定义服务或服务器调用点
+  callPreference: 'custom' | 'server' | 'local'  // 调用偏好：自定义服务、服务器调用点或本地模型
 }
 
 // 默认配置
@@ -83,8 +83,8 @@ const AI_CONFIG_KEYS = {
 export const getAIConfig = (): AIConfig => {
   try {
     const storedCallPreference = localStorage.getItem(AI_CONFIG_KEYS.CALL_PREFERENCE)
-    const callPreference = (storedCallPreference === 'custom' || storedCallPreference === 'server')
-      ? storedCallPreference as 'custom' | 'server'
+    const callPreference = (storedCallPreference === 'custom' || storedCallPreference === 'server' || storedCallPreference === 'local')
+      ? storedCallPreference as 'custom' | 'server' | 'local'
       : DEFAULT_AI_CONFIG.callPreference
 
     return {
@@ -145,7 +145,7 @@ export const isAIConfigValid = (config?: AIConfig, modelType: 'vision' | 'image'
     return true
   }
   
-  // 如果选择自定义服务，则需要检查对应模型的 API 配置是否完整
+  // 如果选择自定义服务或本地模型，则需要检查对应模型的 API 配置是否完整
   if (modelType === 'vision') {
     return !!(
       currentConfig.visionUrl &&

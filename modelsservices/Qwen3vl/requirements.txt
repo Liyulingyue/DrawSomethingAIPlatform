@@ -1,0 +1,36 @@
+# Qwen3VL Local Model Service Dependencies
+# OpenVINO-optimized Qwen3VL vision model
+
+# Core dependencies
+torch==2.8
+torchvision==0.23.0
+qwen-vl-utils
+Pillow
+transformers==4.36.2
+accelerate==0.25.0
+sentencepiece==0.1.99
+protobuf==4.25.1
+tokenizers==0.15.0
+
+# Web server
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# OpenVINO and optimization (Git packages - install manually)
+# These provide optimum-cli and Qwen3-VL support
+# pip install git+https://github.com/openvino-dev-samples/optimum.git@qwen3vl
+# pip install git+https://github.com/openvino-dev-samples/transformers.git@qwen3vl
+# pip install git+https://github.com/openvino-dev-samples/optimum-intel.git@741501ef4bb57f29e22ef0695f77f2ba67a6c16e
+
+# OpenVINO runtime
+openvino==2025.3
+nncf
+
+# Utilities
+psutil==5.9.6
+numpy==1.26.2
+
+# For macOS compatibility
+# numpy<2.0  # Uncomment if on macOS

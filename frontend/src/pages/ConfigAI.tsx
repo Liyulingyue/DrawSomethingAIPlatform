@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Input, Button, Form, Card, App, Radio, Tabs, Dropdown } from 'antd'
-import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined, DownOutlined } from '@ant-design/icons'
+import { ApiOutlined, KeyOutlined, RobotOutlined, SaveOutlined, SyncOutlined, CheckCircleOutlined, CloseCircleOutlined, SettingOutlined, DownOutlined, DesktopOutlined, DownloadOutlined, PoweroffOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
@@ -26,12 +26,14 @@ function ConfigAI() {
   const isInTauriMode = isTauri()
   const [form] = Form.useForm()
   const [testing, setTesting] = useState(false)
+  const [loadingModel, setLoadingModel] = useState(false)
+  const [modelLoaded, setModelLoaded] = useState(false)
 
   // 从配置管理器加载初始配置
   const [config, setConfig] = useState<AIConfig>(() => getAIConfig())
 
   // 跟踪当前选择的调用偏好，用于动态验证
-  const [currentCallPreference, setCurrentCallPreference] = useState<'custom' | 'server'>(() => {
+  const [currentCallPreference, setCurrentCallPreference] = useState<'custom' | 'server' | 'local'>(() => {
     const currentConfig = getAIConfig()
     return currentConfig.callPreference
   })
@@ -53,7 +55,7 @@ function ConfigAI() {
   }
 
   // 处理调用偏好变化
-  const handleCallPreferenceChange = (value: 'custom' | 'server') => {
+  const handleCallPreferenceChange = (value: 'custom' | 'server' | 'local') => {
     setCurrentCallPreference(value)
     // 当切换到服务器模式时，显示登录提示
     if (value === 'server') {
@@ -64,6 +66,39 @@ function ConfigAI() {
           marginTop: '20px',
         },
       })
+    }
+  }
+
+  // 处理本地模型加载
+  const handleLoadModel = async () => {
+    setLoadingModel(true)
+    try {
+      // 这里应该调用后端API来加载模型
+      // 暂时模拟加载过程
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      setModelLoaded(true)
+      message.success(t('configAI.messages.modelLoadSuccess'))
+    } catch (error) {
+      message.error(t('configAI.messages.modelLoadFailed'))
+      setModelLoaded(false)
+    } finally {
+      setLoadingModel(false)
+    }
+  }
+
+  // 处理本地模型卸载
+  const handleUnloadModel = async () => {
+    setLoadingModel(true)
+    try {
+      // 这里应该调用后端API来卸载模型
+      // 暂时模拟卸载过程
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setModelLoaded(false)
+      message.success(t('configAI.messages.modelUnloadSuccess'))
+    } catch (error) {
+      message.error(t('configAI.messages.modelUnloadFailed'))
+    } finally {
+      setLoadingModel(false)
     }
   }
 
@@ -585,7 +620,62 @@ function ConfigAI() {
                   }
                 ]}
               />
-
+              {currentCallPreference === 'local' && (
+                <div style={{ marginBottom: '16px', padding: '20px', backgroundColor: modelLoaded ? '#f6ffed' : '#fff2f0', border: `2px solid ${modelLoaded ? '#b7eb8f' : '#ffccc7'}`, borderRadius: '8px', textAlign: 'center' }}>
+                  <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#262626' }}>
+                    {t('configAI.preferences.modelStatus')}
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    {modelLoaded ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#52c41a' }}>
+                        <CheckCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
+                        {t('configAI.preferences.loaded')}
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#ff4d4f' }}>
+                        <CloseCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
+                        {t('configAI.preferences.notLoaded')}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                    {!modelLoaded ? (
+                      <Button
+                        type="primary"
+                        size="large"
+                        loading={loadingModel}
+                        onClick={handleLoadModel}
+                        icon={!loadingModel ? <DownloadOutlined /> : undefined}
+                        style={{
+                          background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
+                          border: 'none',
+                          borderRadius: '6px'
+                        }}
+                      >
+                        {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.loadModel')}
+                      </Button>
+                    ) : (
+                      <Button
+                        danger
+                        size="large"
+                        loading={loadingModel}
+                        onClick={handleUnloadModel}
+                        icon={!loadingModel ? <PoweroffOutlined /> : undefined}
+                        style={{
+                          background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
+                          border: 'none',
+                          borderRadius: '6px'
+                        }}
+                      >
+                        {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.unloadModel')}
+                      </Button>
+                    )}
+                  </div>
+                  <div style={{ marginTop: '16px', fontSize: '14px', color: '#666', fontWeight: '500' }}>
+                    {t('configAI.preferences.localTip')}
+                  </div>
+                </div>
+              )}
               <Form.Item
                 label={t('configAI.form.callPreference')}
                 name="callPreference"
@@ -601,6 +691,10 @@ function ConfigAI() {
                     <Radio.Button value="custom" className="config-radio-button">
                       <SettingOutlined style={{ marginRight: '8px' }} />
                       {t('configAI.preferences.custom')}
+                    </Radio.Button>
+                    <Radio.Button value="local" className="config-radio-button">
+                      <DesktopOutlined style={{ marginRight: '8px' }} />
+                      {t('configAI.preferences.local')}
                     </Radio.Button>
                     {!isInTauriMode && (
                       <Radio.Button value="server" className="config-radio-button">

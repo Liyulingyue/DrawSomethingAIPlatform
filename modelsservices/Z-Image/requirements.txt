@@ -1,0 +1,33 @@
+# Z-Image Local Model Service
+# OpenAI-compatible API for Z-Image text-to-image model
+
+# Core web framework
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Git-based dependencies for OpenVINO optimization
+git+https://github.com/huggingface/diffusers
+git+https://github.com/openvino-dev-samples/optimum-intel.git@zimage
+git+https://github.com/huggingface/optimum
+
+# PyTorch and related packages
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
+--index-url https://download.pytorch.org/whl/cpu
+
+# OpenVINO and optimization
+openvino==2025.4
+nncf
+
+# Model and data processing
+transformers==4.36.2
+accelerate==0.25.0
+pillow==10.1.0
+numpy==1.26.2
+huggingface_hub
+
+# System utilities
+psutil==5.9.6
