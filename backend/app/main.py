@@ -9,6 +9,7 @@ from .routes import (
     gallery_router,
     sketch_router,
     health_router,
+    admin_router,
 )
 
 app = FastAPI()
@@ -43,6 +44,7 @@ app.include_router(gallery_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
 app.include_router(sketch_router, prefix="/api")
 app.include_router(health_router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
 
 
 @app.get("/")
