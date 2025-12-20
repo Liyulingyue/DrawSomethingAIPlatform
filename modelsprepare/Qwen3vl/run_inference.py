@@ -71,7 +71,7 @@ def run_inference(model, processor, image_path_or_url, question, max_new_tokens=
 
 def main():
     parser = argparse.ArgumentParser(description="Run Qwen3-VL inference")
-    parser.add_argument("--model_path", required=True, help="Path to converted model")
+    parser.add_argument("--model_path", default="../Models_Converted/Qwen3-VL-2B-instruct/INT4", help="Path to converted model")
     parser.add_argument("--device", default="AUTO", help="Inference device")
     parser.add_argument("--image", default="https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen-VL/assets/demo.jpeg",
                        help="Image path or URL")
