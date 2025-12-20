@@ -14,6 +14,35 @@ import { useUser } from '../context/UserContext'
 import { useTranslation } from 'react-i18next'
 import './ChallengeDraw.css'
 
+// 缩放图片到256x256
+const resizeImageTo256x256 = (base64Image: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      if (!ctx) {
+        reject(new Error('无法获取Canvas上下文'))
+        return
+      }
+
+      // 设置Canvas尺寸为256x256
+      canvas.width = 256
+      canvas.height = 256
+
+      // 绘制缩放后的图片
+      ctx.drawImage(img, 0, 0, 256, 256)
+
+      // 转换为base64
+      const resizedBase64 = canvas.toDataURL('image/png')
+      resolve(resizedBase64)
+    }
+    img.onerror = () => reject(new Error('图片加载失败'))
+    img.src = base64Image
+  })
+}
+
 // 本地存储 key
 const COMPLETED_KEYWORDS_KEY = 'completed_keywords'
 
@@ -160,6 +189,26 @@ function ChallengeDraw() {
       return
     }
 
+    // 缩放图片到256x256
+    const resizedImage = await resizeImageTo256x256(image)
+
+    // 打印图片尺寸
+    try {
+      const img = new Image()
+      img.onload = () => {
+        console.log(`📏 原始图片尺寸: ${img.width}x${img.height}`)
+      }
+      img.src = image
+
+      const resizedImg = new Image()
+      resizedImg.onload = () => {
+        console.log(`📏 缩放后图片尺寸: ${resizedImg.width}x${resizedImg.height}`)
+      }
+      resizedImg.src = resizedImage
+    } catch (error) {
+      console.error('❌ 获取图片尺寸失败:', error)
+    }
+
     setSubmitting(true)
     try {
       console.log('🎨 提交闯关绘画')
@@ -170,7 +219,7 @@ function ChallengeDraw() {
       
       // 构造请求体
       const requestBody: GuessRequest = {
-        image,
+        image: resizedImage,
         target: keyword,
       }
 

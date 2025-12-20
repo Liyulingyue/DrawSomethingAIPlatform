@@ -97,6 +97,8 @@
       "serverTip": "💡 服务器调用点需要登录后使用，优先使用平台服务，点数不足时自动切换到自定义服务",
       "localTip": "💡 选择本地模型时，需要先加载模型才能使用AI功能",
       "modelStatus": "本地模型状态:",
+      "visionModelStatus": "本地视觉模型状态:",
+      "imageModelStatus": "本地文生图模型状态:",
       "loaded": "已加载",
       "notLoaded": "未加载"
     },

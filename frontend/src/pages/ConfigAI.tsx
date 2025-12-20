@@ -28,6 +28,9 @@ function ConfigAI() {
   const [testing, setTesting] = useState(false)
   const [loadingModel, setLoadingModel] = useState(false)
   const [modelLoaded, setModelLoaded] = useState(false)
+  const [visionModelLoaded, setVisionModelLoaded] = useState(false)
+  const [imageModelLoaded, setImageModelLoaded] = useState(false)
+  const [activeTab, setActiveTab] = useState('vision')
 
   // 从配置管理器加载初始配置
   const [config, setConfig] = useState<AIConfig>(() => getAIConfig())
@@ -55,8 +58,8 @@ function ConfigAI() {
   }
 
   // 处理调用偏好变化
-  const handleCallPreferenceChange = (value: 'custom' | 'server' | 'custom-local') => {
-    setCurrentCallPreference(value)
+  const handleCallPreferenceChange = (value: string) => {
+    setCurrentCallPreference(value as 'custom' | 'server' | 'custom-local')
     // 当切换到服务器模式时，显示登录提示
     if (value === 'server') {
       message.info({
@@ -76,11 +79,19 @@ function ConfigAI() {
       // 这里应该调用后端API来加载模型
       // 暂时模拟加载过程
       await new Promise(resolve => setTimeout(resolve, 2000))
-      setModelLoaded(true)
+      if (activeTab === 'vision') {
+        setVisionModelLoaded(true)
+      } else {
+        setImageModelLoaded(true)
+      }
       message.success(t('configAI.messages.modelLoadSuccess'))
     } catch (error) {
       message.error(t('configAI.messages.modelLoadFailed'))
-      setModelLoaded(false)
+      if (activeTab === 'vision') {
+        setVisionModelLoaded(false)
+      } else {
+        setImageModelLoaded(false)
+      }
     } finally {
       setLoadingModel(false)
     }
@@ -93,7 +104,11 @@ function ConfigAI() {
       // 这里应该调用后端API来卸载模型
       // 暂时模拟卸载过程
       await new Promise(resolve => setTimeout(resolve, 1000))
-      setModelLoaded(false)
+      if (activeTab === 'vision') {
+        setVisionModelLoaded(false)
+      } else {
+        setImageModelLoaded(false)
+      }
       message.success(t('configAI.messages.modelUnloadSuccess'))
     } catch (error) {
       message.error(t('configAI.messages.modelUnloadFailed'))
@@ -105,9 +120,17 @@ function ConfigAI() {
   // 确保表单正确初始化
   useEffect(() => {
     const currentConfig = getAIConfig()
-    // 在Tauri模式下强制使用自定义服务
-    if (isInTauriMode && currentConfig.callPreference === 'server') {
-      currentConfig.callPreference = 'custom'
+    // 根据运行环境调整调用偏好
+    if (isInTauriMode) {
+      // Tauri环境：如果当前不是本地模型，设置为自定义服务
+      if (currentConfig.callPreference !== 'custom-local') {
+        currentConfig.callPreference = 'custom'
+      }
+    } else {
+      // Web环境：如果当前是本地模型，设置为自定义服务
+      if (currentConfig.callPreference === 'custom-local') {
+        currentConfig.callPreference = 'custom'
+      }
     }
     form.setFieldsValue(currentConfig)
     setCurrentCallPreference(currentConfig.callPreference)
@@ -463,81 +486,142 @@ function ConfigAI() {
               <Tabs 
                 defaultActiveKey="vision" 
                 className="config-ai-tabs"
+                onChange={setActiveTab}
                 items={[
                   {
                     key: 'vision',
                     label: t('configAI.tabs.vision'),
                     children: (
                       <div className="config-tab-content">
-                        <Form.Item
-                          label={t('configAI.form.visionUrl')}
-                          name="visionUrl"
-                          rules={getValidationRules('url')}
-                        >
-                          <Input
-                            prefix={<ApiOutlined />}
-                            placeholder={t('configAI.placeholders.visionUrl')}
-                            size="large"
-                            className="config-input"
-                          />
-                        </Form.Item>
+                        {currentCallPreference !== 'custom-local' && (
+                          <>
+                            <Form.Item
+                              label={t('configAI.form.visionUrl')}
+                              name="visionUrl"
+                              rules={getValidationRules('url')}
+                            >
+                              <Input
+                                prefix={<ApiOutlined />}
+                                placeholder={t('configAI.placeholders.visionUrl')}
+                                size="large"
+                                className="config-input"
+                              />
+                            </Form.Item>
 
-                        <Form.Item
-                          label={t('configAI.form.visionKey')}
-                          name="visionKey"
-                          rules={getValidationRules('key')}
-                          extra={
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                              <span style={{ color: '#666', fontSize: '14px' }}>🔗 {t('configAI.links.getTokenPrefix')}</span>
-                              <a 
-                                href="https://aistudio.baidu.com/account/accessToken" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ color: '#1890ff', fontSize: '14px' }}
-                              >
-                                {PLATFORM_PRESETS.baidu.name}
-                              </a>
-                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
-                              <a 
-                                href="https://modelscope.cn/my/myaccesstoken" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ color: '#1890ff', fontSize: '14px' }}
-                              >
-                                {PLATFORM_PRESETS.modelscope.name}
-                              </a>
-                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
-                              <a 
-                                href="https://huggingface.co/settings/tokens" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ color: '#1890ff', fontSize: '14px' }}
-                              >
-                                {PLATFORM_PRESETS.huggingface.name}
-                              </a>
+                            <Form.Item
+                              label={t('configAI.form.visionKey')}
+                              name="visionKey"
+                              rules={getValidationRules('key')}
+                              extra={
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                  <span style={{ color: '#666', fontSize: '14px' }}>🔗 {t('configAI.links.getTokenPrefix')}</span>
+                                  <a 
+                                    href="https://aistudio.baidu.com/account/accessToken" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1890ff', fontSize: '14px' }}
+                                  >
+                                    {PLATFORM_PRESETS.baidu.name}
+                                  </a>
+                                  <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                                  <a 
+                                    href="https://modelscope.cn/my/myaccesstoken" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1890ff', fontSize: '14px' }}
+                                  >
+                                    {PLATFORM_PRESETS.modelscope.name}
+                                  </a>
+                                  <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                                  <a 
+                                    href="https://huggingface.co/settings/tokens" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1890ff', fontSize: '14px' }}
+                                  >
+                                    {PLATFORM_PRESETS.huggingface.name}
+                                  </a>
+                                </div>
+                              }
+                            >
+                              <Input.Password
+                                prefix={<KeyOutlined />}
+                                placeholder={t('configAI.placeholders.visionKey')}
+                                size="large"
+                                className="config-input"
+                              />
+                            </Form.Item>
+
+                            <Form.Item
+                              label={t('configAI.form.visionModelName')}
+                              name="visionModelName"
+                              rules={getValidationRules('modelName')}
+                            >
+                              <Input
+                                prefix={<RobotOutlined />}
+                                placeholder={t('configAI.placeholders.visionModelName')}
+                                size="large"
+                                className="config-input"
+                              />
+                            </Form.Item>
+                          </>
+                        )}
+                        {currentCallPreference === 'custom-local' && (
+                          <div style={{ marginTop: '16px', padding: '20px', backgroundColor: visionModelLoaded ? '#f6ffed' : '#fff2f0', border: `2px solid ${visionModelLoaded ? '#b7eb8f' : '#ffccc7'}`, borderRadius: '8px', textAlign: 'center' }}>
+                            <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#262626' }}>
+                              {t('configAI.preferences.visionModelStatus')}
                             </div>
-                          }
-                        >
-                          <Input.Password
-                            prefix={<KeyOutlined />}
-                            placeholder={t('configAI.placeholders.visionKey')}
-                            size="large"
-                            className="config-input"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={t('configAI.form.visionModelName')}
-                          name="visionModelName"
-                          rules={getValidationRules('modelName')}
-                        >
-                          <Input
-                            prefix={<RobotOutlined />}
-                            placeholder={t('configAI.placeholders.visionModelName')}
-                            size="large"
-                            className="config-input"
-                          />
-                        </Form.Item>
+                            <div style={{ marginBottom: '16px' }}>
+                              {visionModelLoaded ? (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#52c41a' }}>
+                                  <CheckCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
+                                  {t('configAI.preferences.loaded')}
+                                </div>
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#ff4d4f' }}>
+                                  <CloseCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
+                                  {t('configAI.preferences.notLoaded')}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                              {!visionModelLoaded ? (
+                                <Button
+                                  type="primary"
+                                  size="large"
+                                  loading={loadingModel}
+                                  onClick={handleLoadModel}
+                                  icon={!loadingModel ? <DownloadOutlined /> : undefined}
+                                  style={{
+                                    background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
+                                    border: 'none',
+                                    borderRadius: '6px'
+                                  }}
+                                >
+                                  {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.loadModel')}
+                                </Button>
+                              ) : (
+                                <Button
+                                  danger
+                                  size="large"
+                                  loading={loadingModel}
+                                  onClick={handleUnloadModel}
+                                  icon={!loadingModel ? <PoweroffOutlined /> : undefined}
+                                  style={{
+                                    background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
+                                    border: 'none',
+                                    borderRadius: '6px'
+                                  }}
+                                >
+                                  {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.unloadModel')}
+                                </Button>
+                              )}
+                            </div>
+                            <div style={{ marginTop: '16px', fontSize: '14px', color: '#666', fontWeight: '500' }}>
+                              {t('configAI.preferences.localTip')}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   },
@@ -546,136 +630,140 @@ function ConfigAI() {
                     label: t('configAI.tabs.image'),
                     children: (
                       <div className="config-tab-content">
-                        <Form.Item
-                          label={t('configAI.form.imageUrl')}
-                          name="imageUrl"
-                          rules={getValidationRules('url')}
-                        >
-                          <Input
-                            prefix={<ApiOutlined />}
-                            placeholder={t('configAI.placeholders.imageUrl')}
-                            size="large"
-                            className="config-input"
-                          />
-                        </Form.Item>
+                        {currentCallPreference !== 'custom-local' && (
+                          <>
+                            <Form.Item
+                              label={t('configAI.form.imageUrl')}
+                              name="imageUrl"
+                              rules={getValidationRules('url')}
+                            >
+                              <Input
+                                prefix={<ApiOutlined />}
+                                placeholder={t('configAI.placeholders.imageUrl')}
+                                size="large"
+                                className="config-input"
+                              />
+                            </Form.Item>
 
-                        <Form.Item
-                          label={t('configAI.form.imageKey')}
-                          name="imageKey"
-                          rules={getValidationRules('key')}
-                          extra={
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                              <span style={{ color: '#666', fontSize: '14px' }}>🔗 {t('configAI.links.getTokenPrefix')}</span>
-                              <a 
-                                href="https://aistudio.baidu.com/account/accessToken" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ color: '#1890ff', fontSize: '14px' }}
-                              >
-                                {PLATFORM_PRESETS.baidu.name}
-                              </a>
-                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
-                              <a 
-                                href="https://modelscope.cn/my/myaccesstoken" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ color: '#1890ff', fontSize: '14px' }}
-                              >
-                                {PLATFORM_PRESETS.modelscope.name}
-                              </a>
-                              <span style={{ color: '#999', fontSize: '14px' }}>•</span>
-                              <a 
-                                href="https://huggingface.co/settings/tokens" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ color: '#1890ff', fontSize: '14px' }}
-                              >
-                                {PLATFORM_PRESETS.huggingface.name}
-                              </a>
+                            <Form.Item
+                              label={t('configAI.form.imageKey')}
+                              name="imageKey"
+                              rules={getValidationRules('key')}
+                              extra={
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                  <span style={{ color: '#666', fontSize: '14px' }}>🔗 {t('configAI.links.getTokenPrefix')}</span>
+                                  <a 
+                                    href="https://aistudio.baidu.com/account/accessToken" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1890ff', fontSize: '14px' }}
+                                  >
+                                    {PLATFORM_PRESETS.baidu.name}
+                                  </a>
+                                  <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                                  <a 
+                                    href="https://modelscope.cn/my/myaccesstoken" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1890ff', fontSize: '14px' }}
+                                  >
+                                    {PLATFORM_PRESETS.modelscope.name}
+                                  </a>
+                                  <span style={{ color: '#999', fontSize: '14px' }}>•</span>
+                                  <a 
+                                    href="https://huggingface.co/settings/tokens" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1890ff', fontSize: '14px' }}
+                                  >
+                                    {PLATFORM_PRESETS.huggingface.name}
+                                  </a>
+                                </div>
+                              }
+                            >
+                              <Input.Password
+                                prefix={<KeyOutlined />}
+                                placeholder={t('configAI.placeholders.imageKey')}
+                                size="large"
+                                className="config-input"
+                              />
+                            </Form.Item>
+
+                            <Form.Item
+                              label={t('configAI.form.imageModelName')}
+                              name="imageModelName"
+                              rules={getValidationRules('modelName')}
+                            >
+                              <Input
+                                prefix={<RobotOutlined />}
+                                placeholder={t('configAI.placeholders.imageModelName')}
+                                size="large"
+                                className="config-input"
+                              />
+                            </Form.Item>
+                          </>
+                        )}
+                        {currentCallPreference === 'custom-local' && (
+                          <div style={{ marginTop: '16px', padding: '20px', backgroundColor: imageModelLoaded ? '#f6ffed' : '#fff2f0', border: `2px solid ${imageModelLoaded ? '#b7eb8f' : '#ffccc7'}`, borderRadius: '8px', textAlign: 'center' }}>
+                            <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#262626' }}>
+                              {t('configAI.preferences.imageModelStatus')}
                             </div>
-                          }
-                        >
-                          <Input.Password
-                            prefix={<KeyOutlined />}
-                            placeholder={t('configAI.placeholders.imageKey')}
-                            size="large"
-                            className="config-input"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={t('configAI.form.imageModelName')}
-                          name="imageModelName"
-                          rules={getValidationRules('modelName')}
-                        >
-                          <Input
-                            prefix={<RobotOutlined />}
-                            placeholder={t('configAI.placeholders.imageModelName')}
-                            size="large"
-                            className="config-input"
-                          />
-                        </Form.Item>
+                            <div style={{ marginBottom: '16px' }}>
+                              {imageModelLoaded ? (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#52c41a' }}>
+                                  <CheckCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
+                                  {t('configAI.preferences.loaded')}
+                                </div>
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#ff4d4f' }}>
+                                  <CloseCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
+                                  {t('configAI.preferences.notLoaded')}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                              {!imageModelLoaded ? (
+                                <Button
+                                  type="primary"
+                                  size="large"
+                                  loading={loadingModel}
+                                  onClick={handleLoadModel}
+                                  icon={!loadingModel ? <DownloadOutlined /> : undefined}
+                                  style={{
+                                    background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
+                                    border: 'none',
+                                    borderRadius: '6px'
+                                  }}
+                                >
+                                  {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.loadModel')}
+                                </Button>
+                              ) : (
+                                <Button
+                                  danger
+                                  size="large"
+                                  loading={loadingModel}
+                                  onClick={handleUnloadModel}
+                                  icon={!loadingModel ? <PoweroffOutlined /> : undefined}
+                                  style={{
+                                    background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
+                                    border: 'none',
+                                    borderRadius: '6px'
+                                  }}
+                                >
+                                  {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.unloadModel')}
+                                </Button>
+                              )}
+                            </div>
+                            <div style={{ marginTop: '16px', fontSize: '14px', color: '#666', fontWeight: '500' }}>
+                              {t('configAI.preferences.localTip')}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   }
                 ]}
               />
-              {currentCallPreference === 'custom-local' && (
-                <div style={{ marginBottom: '16px', padding: '20px', backgroundColor: modelLoaded ? '#f6ffed' : '#fff2f0', border: `2px solid ${modelLoaded ? '#b7eb8f' : '#ffccc7'}`, borderRadius: '8px', textAlign: 'center' }}>
-                  <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#262626' }}>
-                    {t('configAI.preferences.modelStatus')}
-                  </div>
-                  <div style={{ marginBottom: '16px' }}>
-                    {modelLoaded ? (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#52c41a' }}>
-                        <CheckCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
-                        {t('configAI.preferences.loaded')}
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600', color: '#ff4d4f' }}>
-                        <CloseCircleOutlined style={{ marginRight: '12px', fontSize: '24px' }} />
-                        {t('configAI.preferences.notLoaded')}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-                    {!modelLoaded ? (
-                      <Button
-                        type="primary"
-                        size="large"
-                        loading={loadingModel}
-                        onClick={handleLoadModel}
-                        icon={!loadingModel ? <DownloadOutlined /> : undefined}
-                        style={{
-                          background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
-                          border: 'none',
-                          borderRadius: '6px'
-                        }}
-                      >
-                        {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.loadModel')}
-                      </Button>
-                    ) : (
-                      <Button
-                        danger
-                        size="large"
-                        loading={loadingModel}
-                        onClick={handleUnloadModel}
-                        icon={!loadingModel ? <PoweroffOutlined /> : undefined}
-                        style={{
-                          background: 'linear-gradient(135deg, #722ed1 0%, #9c27b0 100%)',
-                          border: 'none',
-                          borderRadius: '6px'
-                        }}
-                      >
-                        {loadingModel ? t('configAI.buttons.loadingModel') : t('configAI.buttons.unloadModel')}
-                      </Button>
-                    )}
-                  </div>
-                  <div style={{ marginTop: '16px', fontSize: '14px', color: '#666', fontWeight: '500' }}>
-                    {t('configAI.preferences.localTip')}
-                  </div>
-                </div>
-              )}
               <Form.Item
                 label={t('configAI.form.callPreference')}
                 name="callPreference"
@@ -692,18 +780,23 @@ function ConfigAI() {
                       <SettingOutlined style={{ marginRight: '8px' }} />
                       {t('configAI.preferences.custom')}
                     </Radio.Button>
-                    <Radio.Button value="custom-local" className="config-radio-button">
-                      <DesktopOutlined style={{ marginRight: '8px' }} />
-                      {t('configAI.preferences.local')}
-                    </Radio.Button>
-                    {!isInTauriMode && (
+                    {isInTauriMode ? (
+                      <Radio.Button value="custom-local" className="config-radio-button">
+                        <DesktopOutlined style={{ marginRight: '8px' }} />
+                        {t('configAI.preferences.local')}
+                      </Radio.Button>
+                    ) : (
                       <Radio.Button value="server" className="config-radio-button">
                         <ApiOutlined style={{ marginRight: '8px' }} />
                         {t('configAI.preferences.server')}
                       </Radio.Button>
                     )}
                   </Radio.Group>
-                  {!isInTauriMode && (
+                  {isInTauriMode ? (
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                      {t('configAI.preferences.localTip')}
+                    </div>
+                  ) : (
                     <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
                       {t('configAI.preferences.serverTip')}
                     </div>

@@ -97,6 +97,8 @@
       "serverTip": "💡 Server endpoint requires login to use, prioritizes platform services, automatically switches to custom services when points are insufficient",
       "localTip": "💡 When selecting local model, you need to load the model first before using AI features",
       "modelStatus": "Local Model Status:",
+      "visionModelStatus": "Local Vision Model Status:",
+      "imageModelStatus": "Local Text-to-Image Model Status:",
       "loaded": "Loaded",
       "notLoaded": "Not Loaded"
     },
