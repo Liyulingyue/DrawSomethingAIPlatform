@@ -2,7 +2,8 @@
 param(
     [switch]$Qwen3VL,
     [switch]$ZImage,
-    [switch]$All
+    [switch]$All,
+    [switch]$SkipDeps
 )
 
 Write-Host "===================================" -ForegroundColor Cyan
@@ -18,7 +19,8 @@ function Build-Service {
     param(
         [string]$ServiceName,
         [string]$ServicePath,
-        [string]$SpecFile
+        [string]$SpecFile,
+        [switch]$SkipDeps
     )
 
     Write-Host "===================================" -ForegroundColor Green
@@ -58,21 +60,27 @@ function Build-Service {
     }
 
     # Activate virtual environment and install dependencies
-    Write-Host "Installing dependencies..." -ForegroundColor Yellow
-    Push-Location $serviceDir
-    try {
-        & "$venvPath\Scripts\Activate.ps1"
-        if (Test-Path "run_requirements.txt") {
-            pip install --prefer-binary -r run_requirements.txt
-        } else {
-            pip install --prefer-binary -r requirements.txt
+    if (-Not $SkipDeps) {
+        Write-Host "Installing dependencies..." -ForegroundColor Yellow
+        Push-Location $serviceDir
+        try {
+            & "$venvPath\Scripts\Activate.ps1"
+            if (Test-Path "run_requirements.txt") {
+                pip install --prefer-binary -r run_requirements.txt
+            } else {
+                pip install --prefer-binary -r requirements.txt
+            }
+            pip install pyinstaller
+            Write-Host "Dependencies installed" -ForegroundColor Green
+        } catch {
+            Write-Host "Failed to install dependencies: $_" -ForegroundColor Red
+            Pop-Location
+            return
         }
-        pip install pyinstaller
-        Write-Host "Dependencies installed" -ForegroundColor Green
-    } catch {
-        Write-Host "Failed to install dependencies: $_" -ForegroundColor Red
-        Pop-Location
-        return
+    } else {
+        Write-Host "Skipping dependency installation..." -ForegroundColor Yellow
+        Push-Location $serviceDir
+        & "$venvPath\Scripts\Activate.ps1"
     }
 
     # Build with PyInstaller
@@ -103,18 +111,20 @@ if (-Not $buildQwen3VL -and -Not $buildZImage) {
     Write-Host "  -Qwen3VL    Build Qwen3VL service" -ForegroundColor White
     Write-Host "  -ZImage     Build Z-Image service" -ForegroundColor White
     Write-Host "  -All        Build all services" -ForegroundColor White
+    Write-Host "  -SkipDeps   Skip installing dependencies (if already installed)" -ForegroundColor White
     Write-Host ""
     Write-Host "Example: .\build_model_services.ps1 -All" -ForegroundColor Gray
+    Write-Host "Example: .\build_model_services.ps1 -Qwen3VL -SkipDeps" -ForegroundColor Gray
     exit 1
 }
 
 # Build services
 if ($buildQwen3VL) {
-    Build-Service -ServiceName "Qwen3VL" -ServicePath "modelsservices\Qwen3vl" -SpecFile "qwen3vl_service.spec"
+    Build-Service -ServiceName "Qwen3VL" -ServicePath "modelsservices\Qwen3vl" -SpecFile "qwen3vl_service.spec" -SkipDeps:$SkipDeps
 }
 
 if ($buildZImage) {
-    Build-Service -ServiceName "Z-Image" -ServicePath "modelsservices\Z-Image" -SpecFile "z_image_service.spec"
+    Build-Service -ServiceName "Z-Image" -ServicePath "modelsservices\Z-Image" -SpecFile "z_image_service.spec" -SkipDeps:$SkipDeps
 }
 
 Write-Host ""

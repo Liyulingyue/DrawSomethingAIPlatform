@@ -14,3 +14,8 @@ torchvision==0.23.0
 git+https://github.com/openvino-dev-samples/optimum.git@qwen3vl
 git+https://github.com/openvino-dev-samples/transformers.git@qwen3vl
 git+https://github.com/openvino-dev-samples/optimum-intel.git@741501ef4bb57f29e22ef0695f77f2ba67a6c16e
+
+
+# Additional dependencies for model service building
+sentencepiece
+tokenizers

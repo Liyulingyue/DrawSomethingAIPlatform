@@ -4,6 +4,11 @@ Qwen3VL Local Model Service
 OpenAI-compatible API for Qwen3VL vision model
 """
 
+# Configure logging first
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 import os
 import sys
 import json
@@ -11,7 +16,6 @@ import time
 import socket
 import signal
 import asyncio
-import logging
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
 
@@ -21,9 +25,14 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import psutil
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Force import tqdm to ensure it's included
+import tqdm
+
+# DO NOT import transformers at module level to avoid PyInstaller issues
+# Instead, we'll import it dynamically when needed
+AutoModelForCausalLM = None
+AutoTokenizer = None
+torch = None
 
 # Global variables
 model = None
@@ -63,24 +72,78 @@ def find_available_port(start_port: int = 8003, max_attempts: int = 100) -> int:
 
 def load_model():
     """Load the Qwen3VL model"""
-    global model, tokenizer, is_model_loaded
+def load_model():
+    """Load the Qwen3VL model"""
+    global model, tokenizer, is_model_loaded, AutoModelForCausalLM, AutoTokenizer, torch
 
     try:
         logger.info("Loading Qwen3VL model...")
 
-        # Import here to avoid loading if not needed
-        from transformers import AutoModelForCausalLM, AutoTokenizer
-        import torch
+        # Import transformers components dynamically to avoid PyInstaller issues
+        if AutoModelForCausalLM is None or AutoTokenizer is None or torch is None:
+            logger.info("Dynamically importing transformers components...")
 
-        model_path = os.path.join(os.path.dirname(__file__), "models", "Qwen3-VL-2B-Instruct")
+            # Set environment variable to disable lazy loading
+            os.environ['TRANSFORMERS_NO_LAZY_IMPORT'] = '1'
+
+            try:
+                # Import torch first
+                import torch
+                logger.info("Torch imported successfully")
+
+                # Create a custom transformers module to avoid the problematic __init__.py
+                import types
+                import sys
+
+                # Check if we already have a custom transformers module
+                if 'transformers' not in sys.modules:
+                    # Create a minimal transformers module
+                    transformers_module = types.ModuleType('transformers')
+
+                    # Manually import the components we need
+                    try:
+                        from transformers.models.auto.modeling_auto import AutoModelForCausalLM as AutoModelForCausalLMClass
+                        from transformers.models.auto.tokenization_auto import AutoTokenizer as AutoTokenizerClass
+
+                        transformers_module.AutoModelForCausalLM = AutoModelForCausalLMClass
+                        transformers_module.AutoTokenizer = AutoTokenizerClass
+
+                        # Add to sys.modules to prevent future imports
+                        sys.modules['transformers'] = transformers_module
+
+                        AutoModelForCausalLM = AutoModelForCausalLMClass
+                        AutoTokenizer = AutoTokenizerClass
+
+                        logger.info("Transformers components imported successfully via custom module")
+
+                    except ImportError as ie:
+                        logger.warning(f"Custom module import failed: {ie}")
+                        raise
+                else:
+                    # Use existing transformers module
+                    transformers_module = sys.modules['transformers']
+                    AutoModelForCausalLM = transformers_module.AutoModelForCausalLM
+                    AutoTokenizer = transformers_module.AutoTokenizer
+                    logger.info("Using existing transformers module")
+
+            except Exception as import_e:
+                logger.error(f"Failed to import transformers components: {import_e}")
+                logger.error(f"Exception type: {type(import_e)}")
+                import traceback
+                logger.error(f"Import traceback: {traceback.format_exc()}")
+                raise RuntimeError(f"Cannot import required components: {import_e}")
+
+        model_path = os.path.join(os.path.dirname(sys.executable), "models", "Qwen3-VL-2B-Instruct")
+        logger.info(f"Model path: {model_path}")
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model path not found: {model_path}")
 
-        # Load tokenizer
+        logger.info("Loading tokenizer...")
         tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+        logger.info("Tokenizer loaded successfully")
 
-        # Load model with optimizations
+        logger.info("Loading model...")
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
             trust_remote_code=True,
@@ -88,12 +151,46 @@ def load_model():
             device_map="auto",
             low_cpu_mem_usage=True
         )
+        logger.info("Model loaded successfully")
 
         is_model_loaded = True
         logger.info("Qwen3VL model loaded successfully")
 
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
+        logger.error(f"Exception type: {type(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise
+
+        model_path = os.path.join(os.path.dirname(sys.executable), "models", "Qwen3-VL-2B-Instruct")
+        logger.info(f"Model path: {model_path}")
+
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model path not found: {model_path}")
+
+        logger.info("Loading tokenizer...")
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+        logger.info("Tokenizer loaded successfully")
+
+        logger.info("Loading model...")
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            trust_remote_code=True,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            low_cpu_mem_usage=True
+        )
+        logger.info("Model loaded successfully")
+
+        is_model_loaded = True
+        logger.info("Qwen3VL model loaded successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to load model: {e}")
+        logger.error(f"Exception type: {type(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise
 
 def unload_model():
