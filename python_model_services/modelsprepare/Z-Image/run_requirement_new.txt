@@ -6,6 +6,10 @@ uvicorn
 pydantic
 python-multipart
 
+nncf
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
 openvino==2025.4
 git+https://github.com/huggingface/diffusers
 git+https://github.com/openvino-dev-samples/optimum-intel.git@zimage

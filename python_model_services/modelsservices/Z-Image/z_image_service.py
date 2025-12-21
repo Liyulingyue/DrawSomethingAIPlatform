@@ -12,17 +12,54 @@ import socket
 import signal
 import asyncio
 import logging
+import threading
+import traceback
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
+import base64
+from io import BytesIO
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-import psutil
+
+# OpenVINO and ML imports
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = ''  # Disable CUDA
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = ''  # Disable CUDA memory allocator
+
+from optimum.intel import OVZImagePipeline
+
+# Handle torch.cuda import issue
+try:
+    import torch
+    # Try to access torch.cuda to see if it's available
+    torch.cuda.is_available()
+except (ImportError, AttributeError):
+    # If torch.cuda is not available, create a mock module
+    import sys
+    import types
+    
+    # Create a mock torch.cuda module
+    cuda_mock = types.ModuleType('torch.cuda')
+    cuda_mock.is_available = lambda: False
+    cuda_mock.device_count = lambda: 0
+    cuda_mock.current_device = lambda: 0
+    cuda_mock.get_device_name = lambda x: "CPU"
+    cuda_mock.set_device = lambda x: None
+    
+    # Add it to torch module
+    if hasattr(torch, 'cuda'):
+        # Replace existing cuda module
+        sys.modules['torch.cuda'] = cuda_mock
+    else:
+        # Add cuda module to torch
+        torch.cuda = cuda_mock
+        sys.modules['torch.cuda'] = cuda_mock
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s socket- %(message)s')
 logger = logging.getLogger(__name__)
 
 # Global variables
@@ -52,37 +89,28 @@ def find_available_port(start_port: int = 8004, max_attempts: int = 100) -> int:
     raise RuntimeError(f"No available ports found between {start_port} and {start_port + max_attempts}")
 
 def load_model():
-    """Load the Z-Image model"""
+    """Load the Z-Image model with OpenVINO"""
     global model, is_model_loaded
 
     try:
-        logger.info("Loading Z-Image model...")
+        logger.info("Loading Z-Image model with OpenVINO...")
 
-        # Import here to avoid loading if not needed
-        from diffusers import StableDiffusionPipeline
-        import torch
-
+        # Try different model paths
         model_path = os.path.join(os.path.dirname(__file__), "models", "Z-Image-Turbo")
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model path not found: {model_path}")
 
-        # Load model with optimizations
-        model = StableDiffusionPipeline.from_pretrained(
+        logger.info(f"Loading model from: {model_path}")
+
+        # Load OpenVINO optimized model
+        model = OVZImagePipeline.from_pretrained(
             model_path,
-            torch_dtype=torch.float16,
-            safety_checker=None,
-            requires_safety_checker=False
+            device="cpu"  # Force CPU for compatibility
         )
 
-        # Use GPU if available
-        if torch.cuda.is_available():
-            model = model.to("cuda")
-        else:
-            model = model.to("cpu")
-
         is_model_loaded = True
-        logger.info("Z-Image model loaded successfully")
+        logger.info("Z-Image OpenVINO model loaded successfully")
 
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
@@ -174,36 +202,70 @@ async def shutdown():
         time.sleep(1)  # Give time for response
         os.kill(os.getpid(), signal.SIGTERM)
 
-    import threading
     threading.Thread(target=shutdown_server, daemon=True).start()
 
     return {"status": "shutting_down", "model": "Z-Image"}
 
 @app.post("/images/generations")
 async def generate_images(request: ImageGenerationRequest):
-    """OpenAI-compatible image generation endpoint"""
+    """OpenAI-compatible image generation endpoint using OpenVINO"""
     if not is_model_loaded:
         raise HTTPException(status_code=503, detail="Model not loaded. Please call /load first.")
 
     async with model_lock:
         try:
-            # Process image generation request
-            # This is a simplified implementation - you would need to implement
-            # the actual model inference logic here
+            # Parse size parameter
+            if request.size:
+                try:
+                    width, height = map(int, request.size.split('x'))
+                except ValueError:
+                    width, height = 512, 512  # default
+            else:
+                width, height = 512, 512  # default
 
-            # For now, return a mock response
+            logger.info(f"Generating image with prompt: {request.prompt[:50]}...")
+            logger.info(f"Image size: {width}x{height}")
+
+            start_time = time.time()
+
+            # Generate image using OpenVINO pipeline
+            # Z-Image Turbo specific parameters
+            generated_images = model(
+                prompt=request.prompt,
+                height=height,
+                width=width,
+                num_inference_steps=9,  # Z-Image Turbo optimized steps
+                guidance_scale=0.0,     # Turbo model uses 0 guidance
+                generator=torch.Generator("cpu").manual_seed(42),
+            ).images
+
+            end_time = time.time()
+            generation_time = end_time - start_time
+            logger.info(f"Image generated in {generation_time:.2f} seconds")
+
+            # Convert images to base64
+            image_data = []
+            for i, image in enumerate(generated_images):
+                # Convert PIL image to base64
+                buffer = BytesIO()
+                image.save(buffer, format="PNG")
+                image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                image_data.append({
+                    "url": f"data:image/png;base64,{image_base64}",
+                    "revised_prompt": request.prompt
+                })
+
             response = ImageGenerationResponse(
                 created=int(time.time()),
-                data=[{
-                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",  # 1x1 transparent PNG
-                    "revised_prompt": request.prompt
-                }]
+                data=image_data
             )
 
             return response
 
         except Exception as e:
             logger.error(f"Error in image generation: {e}")
+            logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=f"Image generation failed: {str(e)}")
 
 @app.get("/models")
