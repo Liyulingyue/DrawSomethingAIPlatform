@@ -27,7 +27,6 @@ function ConfigAI() {
   const [form] = Form.useForm()
   const [testing, setTesting] = useState(false)
   const [loadingModel, setLoadingModel] = useState(false)
-  const [modelLoaded, setModelLoaded] = useState(false)
   const [visionModelLoaded, setVisionModelLoaded] = useState(false)
   const [imageModelLoaded, setImageModelLoaded] = useState(false)
   const [activeTab, setActiveTab] = useState('vision')
