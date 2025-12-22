@@ -14,8 +14,8 @@ import { useUser } from '../context/UserContext'
 import { useTranslation } from 'react-i18next'
 import './ChallengeDraw.css'
 
-// 缩放图片到256x256
-const resizeImageTo256x256 = (base64Image: string): Promise<string> => {
+// 缩放图片到512x512
+const resizeImageTo512x512 = (base64Image: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -27,12 +27,12 @@ const resizeImageTo256x256 = (base64Image: string): Promise<string> => {
         return
       }
 
-      // 设置Canvas尺寸为256x256
-      canvas.width = 256
-      canvas.height = 256
+      // 设置Canvas尺寸为512x512
+      canvas.width = 512
+      canvas.height = 512
 
       // 绘制缩放后的图片
-      ctx.drawImage(img, 0, 0, 256, 256)
+      ctx.drawImage(img, 0, 0, 512, 512)
 
       // 转换为base64
       const resizedBase64 = canvas.toDataURL('image/png')
@@ -189,8 +189,8 @@ function ChallengeDraw() {
       return
     }
 
-    // 缩放图片到256x256
-    const resizedImage = await resizeImageTo256x256(image)
+    // 缩放图片到512x512
+    const resizedImage = await resizeImageTo512x512(image)
 
     // 打印图片尺寸
     try {
