@@ -65,6 +65,7 @@ logger = logging.getLogger(__name__)
 # Global variables
 model = None
 is_model_loaded = False
+device_name = None
 model_lock = asyncio.Lock()
 
 class ImageGenerationRequest(BaseModel):
@@ -90,13 +91,17 @@ def find_available_port(start_port: int = 8004, max_attempts: int = 100) -> int:
 
 def load_model():
     """Load the Z-Image model with OpenVINO"""
-    global model, is_model_loaded
+    global model, is_model_loaded, device_name
 
     try:
         logger.info("Loading Z-Image model with OpenVINO...")
 
+        # Determine device based on CUDA availability
+        device_name = "GPU" if torch.cuda.is_available() else "CPU"
+        logger.info(f"Using device: {device_name}")
+
         # Try different model paths
-        model_path = os.path.join(os.path.dirname(__file__), "models", "Z-Image-Turbo")
+        model_path = os.path.join(os.path.dirname(__file__), "..", "models", "Z-Image-Turbo")
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model path not found: {model_path}")
@@ -106,8 +111,11 @@ def load_model():
         # Load OpenVINO optimized model
         model = OVZImagePipeline.from_pretrained(
             model_path,
-            device="cpu"  # Force CPU for compatibility
+            device=device_name,
+            library="diffusers",
+            export=True
         )
+
 
         is_model_loaded = True
         logger.info("Z-Image OpenVINO model loaded successfully")
@@ -118,7 +126,7 @@ def load_model():
 
 def unload_model():
     """Unload the model to free memory"""
-    global model, is_model_loaded
+    global model, is_model_loaded, device_name
 
     try:
         logger.info("Unloading Z-Image model...")
@@ -128,6 +136,7 @@ def unload_model():
             model = None
 
         is_model_loaded = False
+        device_name = None
 
         # Force garbage collection
         import gc
@@ -236,7 +245,7 @@ async def generate_images(request: ImageGenerationRequest):
                 width=width,
                 num_inference_steps=9,  # Z-Image Turbo optimized steps
                 guidance_scale=0.0,     # Turbo model uses 0 guidance
-                generator=torch.Generator("cpu").manual_seed(42),
+                generator=torch.Generator("cuda" if device_name == "GPU" else "cpu").manual_seed(42),
             ).images
 
             end_time = time.time()
