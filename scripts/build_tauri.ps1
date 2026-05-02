@@ -221,6 +221,53 @@ Copy-Item $backendExe (Join-Path $tauriSidecarDir "DrawSomethingBackend-x86_64-p
 Write-Host "Backend copied to Tauri" -ForegroundColor Green
 Write-Host ""
 
+# Copy llama-server to Tauri
+Write-Host "Copying llama-server to Tauri..." -ForegroundColor Yellow
+$llamaServerExe = Join-Path $ProjectRoot "cpp_model_services\llama-server.exe"
+
+if (Test-Path $llamaServerExe) {
+    Copy-Item $llamaServerExe (Join-Path $tauriSidecarDir "llama-server.exe") -Force
+    Copy-Item $llamaServerExe (Join-Path $tauriSidecarDir "llama-server-x86_64-pc-windows-msvc.exe") -Force
+    Write-Host "llama-server copied to Tauri" -ForegroundColor Green
+} else {
+    Write-Host "Warning: llama-server.exe not found at: $llamaServerExe" -ForegroundColor Yellow
+    Write-Host "Please ensure llama-server.exe is in cpp_model_services/" -ForegroundColor Yellow
+}
+Write-Host ""
+
+# Copy model files to Tauri
+Write-Host "Copying model files to Tauri..." -ForegroundColor Yellow
+$modelsSourceDir = Join-Path $ProjectRoot "cpp_model_services\models\Qwen3VL-2B-Instruct"
+$modelsTargetDir = Join-Path $ProjectRoot "frontend\src-tauri\models\Qwen3VL-2B-Instruct"
+
+if (Test-Path $modelsSourceDir) {
+    if (-Not (Test-Path $modelsTargetDir)) {
+        New-Item -ItemType Directory -Path $modelsTargetDir -Force | Out-Null
+    }
+    
+    # Copy model files
+    $modelFiles = @(
+        "Qwen3VL-2B-Instruct-Q8_0.gguf",
+        "mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf"
+    )
+    
+    foreach ($file in $modelFiles) {
+        $sourceFile = Join-Path $modelsSourceDir $file
+        if (Test-Path $sourceFile) {
+            Copy-Item $sourceFile $modelsTargetDir -Force
+            Write-Host "Copied: $file" -ForegroundColor Green
+        } else {
+            Write-Host "Warning: Model file not found: $file" -ForegroundColor Yellow
+        }
+    }
+    
+    Write-Host "Model files copied to Tauri" -ForegroundColor Green
+} else {
+    Write-Host "Warning: Model directory not found: $modelsSourceDir" -ForegroundColor Yellow
+    Write-Host "Please run cpp_model_services/prepare_model.py to download models" -ForegroundColor Yellow
+}
+Write-Host ""
+
 # Build Tauri
 Write-Host "===================================" -ForegroundColor Cyan
 Write-Host "Building Tauri" -ForegroundColor Cyan

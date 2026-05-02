@@ -180,9 +180,9 @@ function ConfigAI() {
     }
   }
 
-  const handleResetToPlatform = (platform: keyof typeof PLATFORM_PRESETS) => {
+  const handleResetToPlatform = async (platform: keyof typeof PLATFORM_PRESETS) => {
     try {
-      const success = resetAIConfigToPlatform(platform)
+      const success = await resetAIConfigToPlatform(platform)
       if (success) {
         const platformConfig = { ...PLATFORM_PRESETS[platform] }
         form.setFieldsValue(platformConfig)

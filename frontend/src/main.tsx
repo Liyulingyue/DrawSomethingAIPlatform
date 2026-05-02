@@ -4,7 +4,7 @@ import 'antd/dist/reset.css'
 import './index.css'
 import App from './App.tsx'
 import { ensureApiInitialized } from './utils/api'
-import './i18n'
+import i18n from './i18n'
 
 // 在 Tauri 环境中，拦截外部链接在默认浏览器中打开
 if (typeof window !== 'undefined' && '__TAURI__' in window) {
@@ -39,8 +39,17 @@ ensureApiInitialized().then(() => {
   console.log('✅ API 配置已初始化')
 })
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+// 等待 i18n 初始化完成后再渲染，避免 SplashScreen 出现翻译键名
+const renderApp = () => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  )
+}
+
+if (i18n.isInitialized) {
+  renderApp()
+} else {
+  i18n.on('initialized', renderApp)
+}

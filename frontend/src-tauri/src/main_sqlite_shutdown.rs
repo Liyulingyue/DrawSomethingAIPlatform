@@ -3,9 +3,19 @@
 
 use tauri::{Manager, api::process::{Command, CommandEvent, CommandChild}};
 use std::sync::{Arc, Mutex};
-use std::net::TcpStream;
+use std::net::{TcpStream, TcpListener};
 use std::io::{Write, Read};
 use std::time::Duration;
+
+// 查找可用端口
+fn find_available_port(start_port: u16) -> Option<u16> {
+    for port in start_port..start_port + 100 {
+        if TcpListener::bind(format!("127.0.0.1:{}", port)).is_ok() {
+            return Some(port);
+        }
+    }
+    None
+}
 
 // 从日志行中解析端口号
 fn parse_port_from_line(line: &str) -> Option<u16> {
@@ -74,13 +84,32 @@ fn parse_port_from_line(line: &str) -> Option<u16> {
     None
 }
 
+    fn should_try_parse_port(line: &str) -> bool {
+        let lower = line.to_lowercase();
+        line.contains("[PORT]")
+            || lower.contains("backend port")
+            || lower.contains(" port ")
+            || lower.contains("://127.0.0.1")
+            || lower.contains("uvicorn running on")
+    }
+
+    fn is_error_stderr(line: &str) -> bool {
+        let lower = line.to_lowercase();
+        !(lower.starts_with("info")
+            || lower.contains("[info]")
+            || line.contains("[PORT]")
+            || lower.contains("uvicorn running on")
+            || lower.contains("application startup complete")
+            || lower.contains("waiting for application startup"))
+    }
+
 // 发送 shutdown 请求到后端
 fn send_shutdown_request(port: u16, timeout_ms: u64) -> Result<(), Box<dyn std::error::Error>> {
     let addr = format!("127.0.0.1:{}", port);
     let mut stream = TcpStream::connect_timeout(&addr.parse()?, Duration::from_millis(timeout_ms))?;
     
     let request = format!(
-        "POST /admin/shutdown HTTP/1.1\r\n\
+        "POST /api/admin/shutdown HTTP/1.1\r\n\
          Host: 127.0.0.1:{}\r\n\
          Content-Type: application/json\r\n\
          Content-Length: 0\r\n\
@@ -115,6 +144,112 @@ fn get_backend_url(state: tauri::State<AppState>) -> String {
             "http://localhost:8002".to_string()
         }
     }
+}
+
+// Tauri 命令：获取 llama-server URL
+#[tauri::command]
+fn get_llama_url(state: tauri::State<AppState>) -> Option<String> {
+    let port = state.llama_port.lock().unwrap();
+    match *port {
+        Some(p) => Some(format!("http://127.0.0.1:{}", p)),
+        None => None,
+    }
+}
+
+// Tauri 命令：检查 llama-server 是否已启动
+#[tauri::command]
+fn is_llama_ready(state: tauri::State<AppState>) -> bool {
+    state.llama_port.lock().unwrap().is_some()
+}
+
+// Tauri 命令：按需启动 llama-server
+#[tauri::command]
+async fn start_llama_server(app_handle: tauri::AppHandle) -> Result<Option<String>, String> {
+    let state: tauri::State<AppState> = app_handle.state();
+    
+    // 检查是否已经启动
+    {
+        let port = state.llama_port.lock().unwrap();
+        if let Some(p) = *port {
+            return Ok(Some(format!("http://127.0.0.1:{}", p)));
+        }
+    }
+    
+    // 获取模型路径
+    let resource_path = app_handle.path_resolver()
+        .resource_dir()
+        .ok_or("无法获取资源目录")?;
+    
+    let model_path = resource_path.join("models").join("Qwen3VL-2B-Instruct")
+        .join("Qwen3VL-2B-Instruct-Q8_0.gguf");
+    let mmproj_path = resource_path.join("models").join("Qwen3VL-2B-Instruct")
+        .join("mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf");
+    
+    // 检查模型文件是否存在
+    if !model_path.exists() || !mmproj_path.exists() {
+        return Err("模型文件不存在".to_string());
+    }
+    
+    // 查找可用端口
+    let llama_server_port = find_available_port(8080)
+        .ok_or("无法找到可用端口")?;
+    
+    println!("按需启动 llama-server，端口: {}", llama_server_port);
+    
+    // 启动 llama-server
+    let command = Command::new_sidecar("llama-server")
+        .map_err(|e| format!("创建命令失败: {}", e))?;
+    
+    let args = vec![
+        "--model".to_string(),
+        model_path.to_string_lossy().to_string(),
+        "--mmproj".to_string(),
+        mmproj_path.to_string_lossy().to_string(),
+        "--host".to_string(),
+        "127.0.0.1".to_string(),
+        "--port".to_string(),
+        llama_server_port.to_string(),
+        "--ctx-size".to_string(),
+        "4096".to_string(),
+        "--threads".to_string(),
+        "4".to_string(),
+    ];
+    
+    let (mut rx, child) = command.args(&args).spawn()
+        .map_err(|e| format!("启动失败: {}", e))?;
+    
+    // 保存进程句柄和端口
+    *state.llama_child.lock().unwrap() = Some(child);
+    *state.llama_port.lock().unwrap() = Some(llama_server_port);
+    
+    let llama_port_arc = state.llama_port.clone();
+    
+    // 监听进程输出
+    tauri::async_runtime::spawn(async move {
+        while let Some(event) = rx.recv().await {
+            match event {
+                CommandEvent::Stdout(line) => {
+                    println!("[llama-server] {}", line);
+                }
+                CommandEvent::Stderr(line) => {
+                    eprintln!("[llama-server] {}", line);
+                }
+                CommandEvent::Error(err) => {
+                    eprintln!("[llama-server 错误] {}", err);
+                }
+                CommandEvent::Terminated(payload) => {
+                    println!("[llama-server] 进程终止，退出码: {:?}", payload.code);
+                    *llama_port_arc.lock().unwrap() = None;
+                }
+                _ => {}
+            }
+        }
+    });
+    
+    // 等待服务就绪
+    std::thread::sleep(std::time::Duration::from_secs(3));
+    
+    Ok(Some(format!("http://127.0.0.1:{}", llama_server_port)))
 }
 
 // 清理 PyInstaller 临时文件
@@ -176,12 +311,52 @@ fn cleanup_pyinstaller_temp() {
 struct AppState {
     backend_port: Arc<Mutex<Option<u16>>>,
     backend_child: Arc<Mutex<Option<CommandChild>>>,
+    llama_port: Arc<Mutex<Option<u16>>>,
+    llama_child: Arc<Mutex<Option<CommandChild>>>,
 }
 
 // 清理函数：清理临时文件
 fn cleanup_backend(app_handle: &tauri::AppHandle) {
     #[cfg(debug_assertions)]
-    println!("🗑️ 清理 PyInstaller 临时文件...");
+    println!("清理进程...");
+    
+    let state: tauri::State<AppState> = app_handle.state();
+
+    // 清理 backend 进程（shutdown 请求失败时的兜底）
+    {
+        let mut backend_child = state.backend_child.lock().unwrap();
+        if let Some(mut child) = backend_child.take() {
+            #[cfg(debug_assertions)]
+            println!("正在杀死 backend 进程...");
+            #[cfg(target_os = "windows")]
+            {
+                let pid = child.pid();
+                let _ = std::process::Command::new("taskkill")
+                    .args(&["/F", "/T", "/PID", &pid.to_string()])
+                    .output();
+            }
+            #[cfg(not(target_os = "windows"))]
+            { let _ = child.kill(); }
+        }
+    }
+    
+    // 清理 llama-server
+    {
+        let mut llama_child = state.llama_child.lock().unwrap();
+        if let Some(mut child) = llama_child.take() {
+            #[cfg(debug_assertions)]
+            println!("正在杀死 llama-server 进程...");
+            #[cfg(target_os = "windows")]
+            {
+                let pid = child.pid();
+                let _ = std::process::Command::new("taskkill")
+                    .args(&["/F", "/T", "/PID", &pid.to_string()])
+                    .output();
+            }
+            #[cfg(not(target_os = "windows"))]
+            { let _ = child.kill(); }
+        }
+    }
 
     // 清理 PyInstaller 临时文件
     cleanup_pyinstaller_temp();
@@ -195,6 +370,8 @@ fn main() {
         .manage(AppState {
             backend_port: Arc::new(Mutex::new(None)),
             backend_child: Arc::new(Mutex::new(None)),
+            llama_port: Arc::new(Mutex::new(None)),
+            llama_child: Arc::new(Mutex::new(None)),
         })
         .setup(|app| {
             // 仅在调试模式下打印启动信息
@@ -264,11 +441,14 @@ fn main() {
                                             }
                                         }
                                         CommandEvent::Stderr(line) => {
-                                            // 始终打印后端错误输出（用于调试）
-                                            eprintln!("[后端错误] {}", line);
-                                            
-                                            // 也尝试从 stderr 解析端口(uvicorn 输出在这里)
-                                            if !port_found {
+                                            if is_error_stderr(&line) {
+                                                eprintln!("[后端错误] {}", line);
+                                            } else {
+                                                println!("[后端] {}", line);
+                                            }
+
+                                            // 仅对可能包含端口的 stderr 行做解析，减少噪音
+                                            if !port_found && should_try_parse_port(&line) {
                                                 println!("[调试] 尝试从 stderr 解析端口: {}", line);
                                                 if let Some(port) = parse_port_from_line(&line) {
                                                     println!("✅ 从 stderr 检测到后端端口: {}", port);
@@ -378,7 +558,7 @@ fn main() {
                 _ => {}
             }
         })
-        .invoke_handler(tauri::generate_handler![get_backend_url])
+        .invoke_handler(tauri::generate_handler![get_backend_url, get_llama_url, is_llama_ready, start_llama_server])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

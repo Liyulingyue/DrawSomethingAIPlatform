@@ -9,7 +9,7 @@ interface SplashScreenProps {
   message?: string
 }
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, message = '正在启动应用...' }) => {
+const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, message }) => {
   const [displayProgress, setDisplayProgress] = useState(0)
   const { t } = useTranslation('splashScreen')
 
@@ -39,13 +39,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, mess
         </div>
 
         {/* 应用名称 */}
-        <h1 className="splash-title">{t('common.title')}</h1>
-        <p className="splash-subtitle">{t('common.subtitle')}</p>
+        <h1 className="splash-title">{t('title', { ns: 'splashScreen', defaultValue: 'DrawSomething AI' })}</h1>
+        <p className="splash-subtitle">{t('subtitle', { ns: 'splashScreen', defaultValue: 'Intelligent Drawing Recognition Platform' })}</p>
 
         {/* 加载指示器 */}
         <div className="splash-loading">
           <Spin size="large" />
-          <p className="splash-message">{message}</p>
+          <p className="splash-message">{message || t('steps.starting', { ns: 'splashScreen', defaultValue: 'Starting application...' })}</p>
         </div>
 
         {/* 进度条 */}
@@ -64,7 +64,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ visible, progress = 0, mess
 
         {/* 提示信息 */}
         <div className="splash-tips">
-          <p>{t('firstTimeTip')}</p>
+          <p>{t('firstTimeTip', { ns: 'splashScreen', defaultValue: 'First launch may take longer, please be patient' })}</p>
         </div>
       </div>
     </div>

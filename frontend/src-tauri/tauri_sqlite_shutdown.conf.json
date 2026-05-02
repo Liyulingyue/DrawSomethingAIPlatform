@@ -18,7 +18,8 @@
         "open": true,
         "sidecar": true,
         "scope": [
-          { "name": "DrawSomethingBackend", "sidecar": true }
+          { "name": "DrawSomethingBackend", "sidecar": true },
+          { "name": "llama-server", "sidecar": true }
         ]
       },
       "http": {
@@ -39,7 +40,8 @@
         "depends": []
       },
       "externalBin": [
-        "binaries/DrawSomethingBackend"
+        "binaries/DrawSomethingBackend",
+        "binaries/llama-server"
       ],
       "icon": [
         "icons/32x32.png",
@@ -57,9 +59,11 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "models/*"
+      ],
       "shortDescription": "",
-      "targets": ["nsis"],
+      "targets": [],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

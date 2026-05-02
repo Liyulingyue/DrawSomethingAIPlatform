@@ -1,18 +1,16 @@
 {
-  "common": {
-    "title": "🎨 你画AI猜",
-    "subtitle": "DrawSomething AI Platform",
-    "hint": "💡 第一次使用建议阅读使用说明",
-    "buttons": {
-      "level_draw": "绘画闯关",
-      "level_guess": "猜词闯关",
-      "login": "用户登录",
-      "free_draw": "自由绘画",
-      "gallery": "画廊",
-      "config_ai": "AI 配置",
-      "introduction": "使用说明",
-      "donate": "支持我们"
-    },
-    "view_source": "查看项目源码"
-  }
+  "title": "🎨 你画AI猜",
+  "subtitle": "DrawSomething AI Platform",
+  "hint": "💡 第一次使用建议阅读使用说明",
+  "buttons": {
+    "level_draw": "绘画闯关",
+    "level_guess": "猜词闯关",
+    "login": "用户登录",
+    "free_draw": "自由绘画",
+    "gallery": "画廊",
+    "config_ai": "AI 配置",
+    "introduction": "使用说明",
+    "donate": "支持我们"
+  },
+  "view_source": "查看项目源码"
 }

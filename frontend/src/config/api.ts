@@ -48,6 +48,76 @@ export const getApiBaseUrl = async (): Promise<string> => {
 
 // 单例模式缓存 API 基础 URL
 let cachedApiBaseUrl: string | null = null;
+let cachedLlamaUrl: string | null = null;
+
+// 获取 llama-server URL（本地模型服务）
+export const getLlamaUrl = async (): Promise<string | null> => {
+  if (!isTauri()) {
+    return null;
+  }
+  
+  try {
+    const { invoke } = await import('@tauri-apps/api/tauri');
+    
+    // 等待 llama-server 就绪（最多等待 30 秒）
+    const maxAttempts = 60;
+    const retryDelay = 500;
+    
+    for (let i = 0; i < maxAttempts; i++) {
+      const llamaUrl = await invoke<string | null>('get_llama_url');
+      if (llamaUrl) {
+        console.log('llama-server 地址:', llamaUrl);
+        cachedLlamaUrl = llamaUrl;
+        return llamaUrl;
+      }
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+    
+    console.log('llama-server 未启动或模型不存在');
+    return null;
+  } catch (error) {
+    console.error('获取 llama-server 地址失败:', error);
+    return null;
+  }
+};
+
+// 获取缓存的 llama-server URL
+export const getLlamaUrlSync = (): string | null => {
+  return cachedLlamaUrl;
+};
+
+// 检查 llama-server 是否就绪
+export const isLlamaReady = async (): Promise<boolean> => {
+  if (!isTauri()) {
+    return false;
+  }
+  
+  try {
+    const { invoke } = await import('@tauri-apps/api/tauri');
+    return await invoke<boolean>('is_llama_ready');
+  } catch {
+    return false;
+  }
+};
+
+// 按需启动 llama-server
+export const startLlamaServer = async (): Promise<string | null> => {
+  if (!isTauri()) {
+    return null;
+  }
+  
+  try {
+    const { invoke } = await import('@tauri-apps/api/tauri');
+    const url = await invoke<string | null>('start_llama_server');
+    if (url) {
+      cachedLlamaUrl = url;
+    }
+    return url;
+  } catch (error) {
+    console.error('启动 llama-server 失败:', error);
+    return null;
+  }
+};
 
 export const getApiBaseUrlSync = (): string => {
   if (cachedApiBaseUrl) {
@@ -81,4 +151,8 @@ export default {
   getApiBaseUrlSync,
   initApiConfig,
   buildApiUrl,
+  getLlamaUrl,
+  getLlamaUrlSync,
+  isLlamaReady,
+  startLlamaServer,
 };

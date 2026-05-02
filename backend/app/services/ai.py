@@ -25,6 +25,13 @@ DEFAULT_PROMPT = (
 
 JSON_BLOCK_PATTERN = re.compile(r"```json\s*(.*?)\s*```", re.IGNORECASE | re.DOTALL)
 
+def _is_local_llama_server(url: str) -> bool:
+    """Check if the URL points to a local llama-server instance."""
+    if not url:
+        return False
+    url_lower = url.lower()
+    return "127.0.0.1" in url_lower or "localhost" in url_lower
+
 def _is_guess_correct(guess: Optional[str], target: Optional[str]) -> bool:
     """Check if the AI guess matches the target word."""
     if not guess or not target:
@@ -367,20 +374,41 @@ def guess_drawing(
     model_name = sanitized_config.get("model")
     print(f"🔧 准备调用AI模型，提供者: {provider}, base_url: {base_url}, api_key: {api_key}, model_name: {model_name}")
 
-    if not base_url or not api_key:
+    if not base_url:
         return {
             "success": False,
             "configured": False,
             "best_guess": None,
             "alternatives": [],
-            "reason": "请先在AI配置页面设置API Key和URL",
+            "reason": "请先在AI配置页面设置API URL",
             "matched": False,
             "target": target,
-            "raw": {"reason": "Missing URL or API Key"},
+            "raw": {"reason": "Missing URL"},
             "provider": provider,
         }
 
     try:
+        # Check if this is a local llama-server
+        is_local_llama = _is_local_llama_server(base_url)
+        
+        if is_local_llama:
+            print(f"🦙 检测到本地 llama-server: {base_url}")
+            # 本地服务不需要 API Key，使用占位符
+            api_key = "local"
+        
+        if not api_key:
+            return {
+                "success": False,
+                "configured": False,
+                "best_guess": None,
+                "alternatives": [],
+                "reason": "请先在AI配置页面设置API Key",
+                "matched": False,
+                "target": target,
+                "raw": {"reason": "Missing API Key"},
+                "provider": provider,
+            }
+        
         data = _call_openai_model(image, prompt, base_url, api_key, model_name)
         parsed = _extract_guesses(data)
         best_guess = parsed.get("best_guess")

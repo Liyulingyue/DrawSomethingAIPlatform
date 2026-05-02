@@ -1,6 +1,7 @@
 import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { UserProvider } from './context/UserContext'
 import { isTauri, ensureApiInitialized } from './utils/api'
 import { getApiBaseUrlSync } from './config/api'
@@ -47,7 +48,8 @@ function AppContent() {
 function App() {
   const [isInitialized, setIsInitialized] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [message, setMessage] = useState('正在启动应用...')
+  const [message, setMessage] = useState('')
+  const { t } = useTranslation('splashScreen')
 
   // 检测是否在 Tauri 环境中（打包 EXE）
   const isTauriMode = isTauri()
@@ -59,18 +61,18 @@ function App() {
       try {
         if (shouldShowSplash) {
           // 步骤 1: 检查 Tauri 环境
-          setMessage('🔍 检测运行环境...')
+          setMessage(t('steps.detectingEnv', { ns: 'splashScreen' }))
           setProgress(10)
           await new Promise(resolve => setTimeout(resolve, 800))
 
           // 步骤 2: 初始化 API 配置
-          setMessage('⚙️ 初始化 API 配置...')
+          setMessage(t('steps.initApi', { ns: 'splashScreen' }))
           setProgress(30)
           await ensureApiInitialized()
           await new Promise(resolve => setTimeout(resolve, 600))
 
           // 步骤 3: 连接后端
-          setMessage('🔗 连接后端服务...')
+          setMessage(t('steps.connectingBackend', { ns: 'splashScreen' }))
           setProgress(60)
           const baseUrl = getApiBaseUrlSync()
           
@@ -83,20 +85,20 @@ function App() {
           }).catch(() => ({ ok: false })).finally(() => clearTimeout(timeout))
           
           if (!response.ok) {
-            setMessage('⏳ 等待后端启动...')
+            setMessage(t('steps.waitingBackend', { ns: 'splashScreen' }))
             setProgress(70)
             // 后端可能还在启动，等待一下
             await new Promise(resolve => setTimeout(resolve, 2000))
           }
 
           // 步骤 4: 加载主应用
-          setMessage('✨ 加载应用界面...')
+          setMessage(t('steps.loadingUI', { ns: 'splashScreen' }))
           setProgress(90)
           await new Promise(resolve => setTimeout(resolve, 500))
 
           // 步骤 5: 完成
           setProgress(100)
-          setMessage('✅ 启动完成！')
+          setMessage(t('steps.done', { ns: 'splashScreen' }))
           await new Promise(resolve => setTimeout(resolve, 800))
         } else {
           // 开发环境：直接初始化，不显示启动屏幕
@@ -112,7 +114,7 @@ function App() {
       } catch (error) {
         console.error('应用初始化失败:', error)
         if (shouldShowSplash) {
-          setMessage('⚠️ 初始化失败，请检查网络连接')
+          setMessage(t('steps.initFailed', { ns: 'splashScreen' }))
           setProgress(0)
           // 即使出错也继续加载
           await new Promise(resolve => setTimeout(resolve, 2000))

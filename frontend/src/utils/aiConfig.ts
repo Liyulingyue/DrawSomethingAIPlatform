@@ -60,6 +60,16 @@ export const PLATFORM_PRESETS = {
     imageModelName: '',
     callPreference: 'custom' as const,
   },
+  local_llama: {
+    name: 'Local Model (Qwen3-VL)',
+    visionUrl: '',
+    visionKey: 'local',
+    visionModelName: 'local',
+    imageUrl: '',
+    imageKey: '',
+    imageModelName: '',
+    callPreference: 'custom-local' as const,
+  },
 }
 
 // 本地存储键名
@@ -145,7 +155,16 @@ export const isAIConfigValid = (config?: AIConfig, modelType: 'vision' | 'image'
     return true
   }
   
-  // 如果选择自定义服务或本地模型，则需要检查对应模型的 API 配置是否完整
+  // 如果选择本地模型，只需要 URL（不需要 API Key）
+  if (currentConfig.callPreference === 'custom-local') {
+    if (modelType === 'vision') {
+      return !!(currentConfig.visionUrl)
+    } else {
+      return !!(currentConfig.imageUrl)
+    }
+  }
+  
+  // 如果选择自定义服务，则需要检查对应模型的 API 配置是否完整
   if (modelType === 'vision') {
     return !!(
       currentConfig.visionUrl &&
@@ -171,7 +190,7 @@ export const resetAIConfig = (): boolean => {
 /**
  * 重置为指定平台的预设配置
  */
-export const resetAIConfigToPlatform = (platform: keyof typeof PLATFORM_PRESETS): boolean => {
+export const resetAIConfigToPlatform = async (platform: keyof typeof PLATFORM_PRESETS): Promise<boolean> => {
   try {
     const preset = PLATFORM_PRESETS[platform]
     if (!preset) {
@@ -179,7 +198,7 @@ export const resetAIConfigToPlatform = (platform: keyof typeof PLATFORM_PRESETS)
       return false
     }
 
-    const config: AIConfig = {
+    let config: AIConfig = {
       visionUrl: preset.visionUrl,
       visionKey: preset.visionKey,
       visionModelName: preset.visionModelName,
@@ -187,6 +206,17 @@ export const resetAIConfigToPlatform = (platform: keyof typeof PLATFORM_PRESETS)
       imageKey: preset.imageKey,
       imageModelName: preset.imageModelName,
       callPreference: preset.callPreference,
+    }
+    
+    // 本地模型需要动态获取端口
+    if (platform === 'local_llama') {
+      const appliedConfig = await applyLocalModelConfig()
+      if (appliedConfig) {
+        config = appliedConfig
+      } else {
+        console.warn('本地模型不可用')
+        return false
+      }
     }
 
     return saveAIConfig(config)
@@ -202,10 +232,17 @@ export const resetAIConfigToPlatform = (platform: keyof typeof PLATFORM_PRESETS)
 export const getAIRequestHeaders = (modelType: 'vision' | 'image' = 'vision'): Record<string, string> => {
   const config = getAIConfig()
   const key = modelType === 'vision' ? config.visionKey : config.imageKey
-  return {
+  
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${key}`,
   }
+  
+  // 本地模型不需要 Authorization
+  if (config.callPreference !== 'custom-local' && key) {
+    headers['Authorization'] = `Bearer ${key}`
+  }
+  
+  return headers
 }
 
 /**
@@ -291,6 +328,52 @@ export const notifyAIConfigChange = () => {
       console.error('配置变化监听器执行失败:', error)
     }
   })
+}
+
+/**
+ * 获取本地 llama-server 的实际 URL（动态端口）
+ */
+export const getLocalLlamaUrl = async (): Promise<string | null> => {
+  try {
+    const { isTauri, isLlamaReady, startLlamaServer } = await import('../config/api');
+    if (!isTauri()) {
+      return null;
+    }
+    
+    // 检查是否已启动
+    if (await isLlamaReady()) {
+      const { invoke } = await import('@tauri-apps/api/tauri');
+      return await invoke<string | null>('get_llama_url');
+    }
+    
+    // 未启动，按需启动
+    return await startLlamaServer();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 应用本地模型配置（自动获取动态端口）
+ */
+export const applyLocalModelConfig = async (): Promise<AIConfig | null> => {
+  const llamaUrl = await getLocalLlamaUrl();
+  if (!llamaUrl) {
+    return null;
+  }
+  
+  const config: AIConfig = {
+    visionUrl: `${llamaUrl}/v1`,
+    visionKey: 'local',
+    visionModelName: 'local',
+    imageUrl: '',
+    imageKey: '',
+    imageModelName: '',
+    callPreference: 'custom-local',
+  };
+  
+  saveAIConfig(config);
+  return config;
 }
 
 /**

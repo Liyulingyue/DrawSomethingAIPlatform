@@ -1,7 +1,15 @@
 {
-  "splashScreen": {
-    "title": "DrawSomething AI",
-    "subtitle": "智能绘图识别平台",
-    "firstTimeTip": "💡 首次启动可能需要较长时间，请耐心等待"
+  "title": "DrawSomething AI",
+  "subtitle": "智能绘图识别平台",
+  "firstTimeTip": "💡 首次启动可能需要较长时间，请耐心等待",
+  "steps": {
+    "starting": "正在启动应用...",
+    "detectingEnv": "🔍 检测运行环境...",
+    "initApi": "⚙️ 初始化 API 配置...",
+    "connectingBackend": "🔗 连接后端服务...",
+    "waitingBackend": "⏳ 等待后端启动...",
+    "loadingUI": "✨ 加载应用界面...",
+    "done": "✅ 启动完成！",
+    "initFailed": "⚠️ 初始化失败，请检查网络连接"
   }
 }

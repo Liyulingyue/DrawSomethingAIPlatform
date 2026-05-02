@@ -1,7 +1,15 @@
 {
-  "splashScreen": {
-    "title": "DrawSomething AI",
-    "subtitle": "Intelligent Drawing Recognition Platform",
-    "firstTimeTip": "💡 First launch may take longer, please be patient"
+  "title": "DrawSomething AI",
+  "subtitle": "Intelligent Drawing Recognition Platform",
+  "firstTimeTip": "💡 First launch may take longer, please be patient",
+  "steps": {
+    "starting": "Starting application...",
+    "detectingEnv": "🔍 Detecting environment...",
+    "initApi": "⚙️ Initializing API configuration...",
+    "connectingBackend": "🔗 Connecting to backend...",
+    "waitingBackend": "⏳ Waiting for backend to start...",
+    "loadingUI": "✨ Loading application UI...",
+    "done": "✅ Launch complete!",
+    "initFailed": "⚠️ Initialization failed, please check your network"
   }
 }

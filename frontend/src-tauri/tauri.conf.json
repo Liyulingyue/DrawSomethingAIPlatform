@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "DrawSomething AI",
+    "productName": "DrawSomething AI (SQLite + Shutdown)",
     "version": "1.0.0"
   },
   "tauri": {
@@ -19,7 +19,7 @@
         "sidecar": true,
         "scope": [
           { "name": "DrawSomethingBackend", "sidecar": true },
-          { "name": "postgres", "sidecar": true }
+          { "name": "llama-server", "sidecar": true }
         ]
       },
       "http": {
@@ -40,7 +40,8 @@
         "depends": []
       },
       "externalBin": [
-        "binaries/DrawSomethingBackend"
+        "binaries/DrawSomethingBackend",
+        "binaries/llama-server"
       ],
       "icon": [
         "icons/32x32.png",
@@ -49,7 +50,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.drawai.app",
+      "identifier": "com.drawai.app.sqlite.shutdown",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -58,9 +59,11 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "models/*"
+      ],
       "shortDescription": "",
-      "targets": "all",
+      "targets": ["nsis"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

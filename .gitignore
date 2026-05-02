@@ -242,6 +242,7 @@ frontend/public/donate-qr.*
 # Tauri build outputs
 frontend/src-tauri/target/
 frontend/src-tauri/binaries/
+frontend/src-tauri/models/
 frontend/dist/
 
 # Backend build artifacts
@@ -249,3 +250,5 @@ backend/dist/
 backend/build/
 backend/backend.spec
 backend/resources/postgres/
+
+dist-portable/

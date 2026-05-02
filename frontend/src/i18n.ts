@@ -97,6 +97,7 @@ i18n
     },
     fallbackLng: 'en',
     debug: false,
+    initImmediate: false, // 强制同步初始化，避免打包后首帧渲染时 i18n 未就绪
     interpolation: {
       escapeValue: false,
     },
