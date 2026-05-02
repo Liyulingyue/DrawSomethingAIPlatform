@@ -454,3 +454,6 @@ else {
 
 Write-Host ""
 Write-Host "Done!" -ForegroundColor Green
+
+Add-Type -AssemblyName System.Windows.Forms
+[System.Media.SystemSounds]::Exclamation.Play()
