@@ -456,4 +456,6 @@ Write-Host ""
 Write-Host "Done!" -ForegroundColor Green
 
 Add-Type -AssemblyName System.Windows.Forms
-[System.Media.SystemSounds]::Exclamation.Play()
+[Console]::Beep(800, 300)
+[Console]::Beep(600, 300)
+[Console]::Beep(800, 300)

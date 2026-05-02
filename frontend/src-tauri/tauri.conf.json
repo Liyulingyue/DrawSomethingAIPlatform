@@ -63,7 +63,7 @@
         "models/*"
       ],
       "shortDescription": "",
-      "targets": ["nsis"],
+      "targets": [],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

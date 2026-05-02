@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::net::{TcpStream, TcpListener};
 use std::io::{Write, Read};
 use std::time::Duration;
+use std::collections::HashMap;
 
 // 查找可用端口
 fn find_available_port(start_port: u16) -> Option<u16> {
@@ -162,17 +163,20 @@ fn is_llama_ready(state: tauri::State<AppState>) -> bool {
     state.llama_port.lock().unwrap().is_some()
 }
 
-// Tauri 命令：按需启动 llama-server
+// Tauri 命令：带健康检查的启动 llama-server
 #[tauri::command]
-async fn start_llama_server(app_handle: tauri::AppHandle) -> Result<Option<String>, String> {
+async fn start_llama_server(app_handle: tauri::AppHandle) -> Result<HashMap<String, serde_json::Value>, String> {
     let state: tauri::State<AppState> = app_handle.state();
     
+    let mut result = HashMap::new();
+    
     // 检查是否已经启动
-    {
-        let port = state.llama_port.lock().unwrap();
-        if let Some(p) = *port {
-            return Ok(Some(format!("http://127.0.0.1:{}", p)));
-        }
+    if let Some(port) = *state.llama_port.lock().unwrap() {
+        let url = format!("http://127.0.0.1:{}", port);
+        result.insert("url".to_string(), serde_json::json!(url));
+        result.insert("ready".to_string(), serde_json::json!(true));
+        result.insert("message".to_string(), serde_json::json!("模型已在运行"));
+        return Ok(result);
     }
     
     // 获取模型路径
@@ -187,7 +191,9 @@ async fn start_llama_server(app_handle: tauri::AppHandle) -> Result<Option<Strin
     
     // 检查模型文件是否存在
     if !model_path.exists() || !mmproj_path.exists() {
-        return Err("模型文件不存在".to_string());
+        result.insert("ready".to_string(), serde_json::json!(false));
+        result.insert("message".to_string(), serde_json::json!("模型文件不存在"));
+        return Ok(result);
     }
     
     // 查找可用端口
@@ -246,10 +252,31 @@ async fn start_llama_server(app_handle: tauri::AppHandle) -> Result<Option<Strin
         }
     });
     
-    // 等待服务就绪
-    std::thread::sleep(std::time::Duration::from_secs(3));
+    let url = format!("http://127.0.0.1:{}", llama_server_port);
     
-    Ok(Some(format!("http://127.0.0.1:{}", llama_server_port)))
+    // 等待服务就绪（最多等待 30 秒）
+    let max_wait = 30;
+    let mut ready = false;
+    
+    for i in 0..max_wait {
+        std::thread::sleep(Duration::from_secs(1));
+        
+        // 尝试连接
+        if TcpStream::connect_timeout(
+            &format!("127.0.0.1:{}", llama_server_port).parse().unwrap(),
+            Duration::from_secs(1)
+        ).is_ok() {
+            ready = true;
+            println!("[llama-server] 服务已就绪，耗时 {} 秒", i + 1);
+            break;
+        }
+    }
+    
+    result.insert("url".to_string(), serde_json::json!(url));
+    result.insert("ready".to_string(), serde_json::json!(ready));
+    result.insert("message".to_string(), serde_json::json!(if ready { "模型加载成功" } else { "模型加载中，请稍后" }));
+    
+    Ok(result)
 }
 
 // 清理 PyInstaller 临时文件

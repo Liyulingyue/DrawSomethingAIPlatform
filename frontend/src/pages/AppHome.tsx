@@ -28,24 +28,39 @@ function AppHome() {
       
       console.log('🔍 检查 AI 配置:', config)
       
-      // 检查是否配置了任何 AI 服务
-      const hasVisionConfig = config.visionUrl && config.visionKey && config.visionModelName
-      const hasImageConfig = config.imageUrl && config.imageKey && config.imageModelName
+      // 检查调用偏好
+      const callPreference = config.callPreference
       
-      console.log('📊 配置状态:', {
-        hasVisionConfig,
-        hasImageConfig,
-        visionUrl: config.visionUrl,
-        visionKey: config.visionKey ? '已配置' : '未配置',
-        visionModelName: config.visionModelName,
-        imageUrl: config.imageUrl,
-        imageKey: config.imageKey ? '已配置' : '未配置',
-        imageModelName: config.imageModelName,
-      })
+      // 根据调用偏好判断配置是否完整
+      let needsConfig = false
       
-      // 如果都没有配置，显示警告弹窗
-      if (!hasVisionConfig && !hasImageConfig) {
-        console.log('⚠️ 未配置 AI 服务，显示提示弹窗')
+      if (callPreference === 'custom-local') {
+        // 本地模型只需要 visionUrl
+        needsConfig = !config.visionUrl
+        console.log('📊 本地模型模式:', { needsConfig, visionUrl: config.visionUrl })
+      } else if (callPreference === 'server') {
+        // 服务器模式不需要前端配置
+        needsConfig = false
+        console.log('📊 服务器模式: 无需前端配置')
+      } else {
+        // 自定义服务需要完整的 API 配置
+        const hasVisionConfig = config.visionUrl && config.visionKey && config.visionModelName
+        // Tauri 打包模式不需要文生图配置
+        const hasImageConfig = isInTauriMode || (config.imageUrl && config.imageKey && config.imageModelName)
+        needsConfig = !hasVisionConfig && !hasImageConfig
+        
+        console.log('📊 自定义服务模式:', {
+          hasVisionConfig,
+          hasImageConfig,
+          visionUrl: config.visionUrl,
+          visionKey: config.visionKey ? '已配置' : '未配置',
+          visionModelName: config.visionModelName,
+        })
+      }
+      
+      // 如果配置不完整，显示警告弹窗
+      if (needsConfig) {
+        console.log('⚠️ AI 服务配置不完整，显示提示弹窗')
         setShowConfigModal(true)
       } else {
         console.log('✅ AI 服务已配置，不显示弹窗')
@@ -127,15 +142,17 @@ function AppHome() {
           >
           {t('buttons.level_draw')}
         </Button>
-        <Button
-          type="primary"
-          size="large"
-          icon={<TrophyOutlined />}
-          onClick={handleLevelSetGuess}
-          className="app-home-button app-home-button-secondary"
-          >
-          {t('buttons.level_guess')}
-        </Button>
+        {!isInTauriMode && (
+          <Button
+            type="primary"
+            size="large"
+            icon={<TrophyOutlined />}
+            onClick={handleLevelSetGuess}
+            className="app-home-button app-home-button-secondary"
+            >
+            {t('buttons.level_guess')}
+          </Button>
+        )}
         {/* Tauri 模式下不显示登录按钮（自动登录管理员） */}
         {!isInTauriMode && (
           <Button

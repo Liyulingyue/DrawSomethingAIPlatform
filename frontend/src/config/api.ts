@@ -101,18 +101,24 @@ export const isLlamaReady = async (): Promise<boolean> => {
 };
 
 // 按需启动 llama-server
-export const startLlamaServer = async (): Promise<string | null> => {
+export interface LlamaServerResult {
+  url: string | null;
+  ready: boolean;
+  message: string;
+}
+
+export const startLlamaServer = async (): Promise<LlamaServerResult | null> => {
   if (!isTauri()) {
     return null;
   }
   
   try {
     const { invoke } = await import('@tauri-apps/api/tauri');
-    const url = await invoke<string | null>('start_llama_server');
-    if (url) {
-      cachedLlamaUrl = url;
+    const result = await invoke<{ url: string; ready: boolean; message: string }>('start_llama_server');
+    if (result && result.url) {
+      cachedLlamaUrl = result.url;
     }
-    return url;
+    return result;
   } catch (error) {
     console.error('启动 llama-server 失败:', error);
     return null;

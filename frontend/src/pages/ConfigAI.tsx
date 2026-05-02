@@ -7,9 +7,11 @@ import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { getApiBaseUrlSync } from '../config/api'
 import { isTauri } from '../utils/api'
+import { isLlamaReady, startLlamaServer } from '../config/api'
 import { 
   getAIConfig, 
   saveAIConfigWithNotification, 
+  saveLlamaServerUrl,
   resetAIConfig, 
   resetAIConfigToPlatform,
   isAIConfigValid,
@@ -75,22 +77,37 @@ function ConfigAI() {
   const handleLoadModel = async () => {
     setLoadingModel(true)
     try {
-      // 这里应该调用后端API来加载模型
-      // 暂时模拟加载过程
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      if (activeTab === 'vision') {
+      const result = await startLlamaServer()
+      if (result && result.ready) {
         setVisionModelLoaded(true)
+        
+        // 保存 llama-server URL 到独立存储
+        saveLlamaServerUrl(result.url + '/v1')
+        
+        // 更新 callPreference 为 custom-local
+        const currentConfig = getAIConfig()
+        const updatedConfig = {
+          ...currentConfig,
+          callPreference: 'custom-local' as const,
+        }
+        saveAIConfigWithNotification(updatedConfig)
+        
+        // 更新表单
+        form.setFieldsValue(updatedConfig)
+        setConfig(updatedConfig)
+        setCurrentCallPreference('custom-local')
+        
+        message.success(result.message || t('configAI.messages.modelLoadSuccess'))
+      } else if (result) {
+        setVisionModelLoaded(false)
+        message.warning(result.message || '模型加载中，请稍后重试')
       } else {
-        setImageModelLoaded(true)
+        setVisionModelLoaded(false)
+        message.error(t('configAI.messages.modelLoadFailed'))
       }
-      message.success(t('configAI.messages.modelLoadSuccess'))
     } catch (error) {
       message.error(t('configAI.messages.modelLoadFailed'))
-      if (activeTab === 'vision') {
-        setVisionModelLoaded(false)
-      } else {
-        setImageModelLoaded(false)
-      }
+      setVisionModelLoaded(false)
     } finally {
       setLoadingModel(false)
     }
@@ -134,6 +151,17 @@ function ConfigAI() {
     form.setFieldsValue(currentConfig)
     setCurrentCallPreference(currentConfig.callPreference)
   }, [form, isInTauriMode])
+
+  // 检查 llama 模型状态
+  useEffect(() => {
+    const checkLlamaStatus = async () => {
+      if (isInTauriMode) {
+        const ready = await isLlamaReady()
+        setVisionModelLoaded(ready)
+      }
+    }
+    checkLlamaStatus()
+  }, [isInTauriMode])
 
   const handleSave = (values: AIConfig) => {
     try {
@@ -486,6 +514,7 @@ function ConfigAI() {
                 defaultActiveKey="vision" 
                 className="config-ai-tabs"
                 onChange={setActiveTab}
+                activeKey={isInTauriMode ? 'vision' : activeTab}
                 items={[
                   {
                     key: 'vision',
@@ -624,7 +653,7 @@ function ConfigAI() {
                       </div>
                     )
                   },
-                  {
+                  ...(isInTauriMode ? [] : [{
                     key: 'image',
                     label: t('configAI.tabs.image'),
                     children: (
@@ -760,7 +789,7 @@ function ConfigAI() {
                         )}
                       </div>
                     )
-                  }
+                  }]),
                 ]}
               />
               <Form.Item
@@ -815,16 +844,18 @@ function ConfigAI() {
                   >
                     {t('configAI.buttons.testVision')}
                   </Button>
-                  <Button
-                    type="default"
-                    size="large"
-                    icon={<SyncOutlined spin={testing} />}
-                    onClick={() => handleTestConnection('image')}
-                    loading={testing}
-                    className="config-test-button"
-                  >
-                    {t('configAI.buttons.testImage')}
-                  </Button>
+                  {!isInTauriMode && (
+                    <Button
+                      type="default"
+                      size="large"
+                      icon={<SyncOutlined spin={testing} />}
+                      onClick={() => handleTestConnection('image')}
+                      loading={testing}
+                      className="config-test-button"
+                    >
+                      {t('configAI.buttons.testImage')}
+                    </Button>
+                  )}
                   <Dropdown
                     menu={{
                       items: [

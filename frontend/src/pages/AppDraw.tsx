@@ -7,7 +7,7 @@ import AppSidebar from '../components/AppSidebar'
 import SidebarTrigger from '../components/SidebarTrigger'
 import AppFooter from '../components/AppFooter'
 import { api, type GuessRequest } from '../utils/api'
-import { getAIConfig } from '../utils/aiConfig'
+import { getAIConfig, getAPIConfig } from '../utils/aiConfig'
 import { useUser } from '../context/UserContext'
 import './AppDraw.css'
 
@@ -109,16 +109,17 @@ function AppDraw() {
         console.log('📝 使用用户提供的线索:', clue.trim())
       }
 
-      // 如果有自定义视觉模型配置，则使用
-      if (aiConfig.visionUrl && aiConfig.visionKey && aiConfig.visionModelName) {
+      // 根据 callPreference 获取 API 配置
+      const apiConfig = getAPIConfig('vision')
+      if (apiConfig.url) {
         requestBody.config = {
-          url: aiConfig.visionUrl,
-          key: aiConfig.visionKey,
-          model: aiConfig.visionModelName,
+          url: apiConfig.url,
+          key: apiConfig.key || '',
+          model: apiConfig.model || '',
         }
-        console.log('✅ 使用自定义视觉模型配置')
+        console.log('✅ 使用配置:', aiConfig.callPreference, apiConfig.url)
       } else {
-        console.log('ℹ️ 使用默认视觉模型配置')
+        console.log('ℹ️ 使用服务器配置')
       }
 
       // 添加调用偏好参数

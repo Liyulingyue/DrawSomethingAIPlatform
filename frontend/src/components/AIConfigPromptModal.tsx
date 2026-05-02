@@ -1,6 +1,7 @@
 import { Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { isTauri } from '../utils/api'
 
 interface AIConfigPromptModalProps {
   open: boolean
@@ -54,8 +55,13 @@ export const AIConfigPromptModal = ({ open, onConfig, onCancel }: AIConfigPrompt
           color: '#262626',
           lineHeight: '1.6'
         }}>
-          <strong style={{ color: '#1890ff' }}>{t('aiConfigModal.drawing_guess')}</strong> {t('aiConfigModal.needs_config')} <strong>{t('aiConfigModal.vision_model')}</strong> API Key，
-          <strong style={{ color: '#52c41a' }}>{t('aiConfigModal.ai_draw')}</strong> {t('aiConfigModal.needs_config')} <strong>{t('aiConfigModal.generation_model')}</strong> API Key。
+          <strong style={{ color: '#1890ff' }}>{t('aiConfigModal.drawing_guess')}</strong> {t('aiConfigModal.needs_config')} <strong>{t('aiConfigModal.vision_model')}</strong> API Key
+          {!isTauri() && (
+            <>
+              ，<strong style={{ color: '#52c41a' }}>{t('aiConfigModal.ai_draw')}</strong> {t('aiConfigModal.needs_config')} <strong>{t('aiConfigModal.generation_model')}</strong> API Key
+            </>
+          )}
+          。
         </p>
         
         <div style={{ 

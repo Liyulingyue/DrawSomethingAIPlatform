@@ -85,6 +85,9 @@ const AI_CONFIG_KEYS = {
   IMAGE_MODEL_NAME: 'ai_image_model_name',
   
   CALL_PREFERENCE: 'ai_call_preference',
+  
+  // llama-server URL（独立存储）
+  LLAMA_SERVER_URL: 'llama_server_url',
 } as const
 
 /**
@@ -347,7 +350,8 @@ export const getLocalLlamaUrl = async (): Promise<string | null> => {
     }
     
     // 未启动，按需启动
-    return await startLlamaServer();
+    const result = await startLlamaServer();
+    return result?.url || null;
   } catch {
     return null;
   }
@@ -385,4 +389,68 @@ export const saveAIConfigWithNotification = (config: AIConfig): boolean => {
     notifyAIConfigChange()
   }
   return success
+}
+
+/**
+ * 保存 llama-server URL
+ */
+export const saveLlamaServerUrl = (url: string): void => {
+  localStorage.setItem(AI_CONFIG_KEYS.LLAMA_SERVER_URL, url)
+}
+
+/**
+ * 获取 llama-server URL
+ */
+export const getLlamaServerUrl = (): string | null => {
+  return localStorage.getItem(AI_CONFIG_KEYS.LLAMA_SERVER_URL)
+}
+
+/**
+ * 清除 llama-server URL
+ */
+export const clearLlamaServerUrl = (): void => {
+  localStorage.removeItem(AI_CONFIG_KEYS.LLAMA_SERVER_URL)
+}
+
+/**
+ * 获取用于 API 调用的配置（根据 callPreference 决定）
+ */
+export const getAPIConfig = (modelType: 'vision' | 'image' = 'vision'): {
+  url: string | null
+  key: string | null
+  model: string | null
+} => {
+  const config = getAIConfig()
+  
+  if (config.callPreference === 'custom-local' && modelType === 'vision') {
+    const llamaUrl = getLlamaServerUrl()
+    return {
+      url: llamaUrl,
+      key: 'local',
+      model: 'local'
+    }
+  }
+  
+  if (config.callPreference === 'server') {
+    return {
+      url: null,
+      key: null,
+      model: null
+    }
+  }
+  
+  // custom 模式
+  if (modelType === 'vision') {
+    return {
+      url: config.visionUrl || null,
+      key: config.visionKey || null,
+      model: config.visionModelName || null
+    }
+  } else {
+    return {
+      url: config.imageUrl || null,
+      key: config.imageKey || null,
+      model: config.imageModelName || null
+    }
+  }
 }

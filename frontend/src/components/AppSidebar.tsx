@@ -47,11 +47,11 @@ function AppSidebar({ open, onClose }: AppSidebarProps) {
       icon: <TrophyOutlined />,
       label: t('sidebar.level_draw'),
     },
-    {
+    ...(!isInTauriMode ? [{
       key: '/app/level-set-guess',
       icon: <TrophyOutlined />,
       label: t('sidebar.level_guess'),
-    },
+    }] : []),
     {
       key: '/app/my-custom-levels',
       icon: <PlusOutlined />,
