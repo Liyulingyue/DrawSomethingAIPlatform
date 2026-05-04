@@ -1,7 +1,7 @@
 .config-ai-container {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%) !important;
   padding: 2rem 1rem;
   padding-top: 4rem; /* 为顶部按钮留出空间 */
   box-sizing: border-box;
@@ -57,15 +57,42 @@
 }
 
 .config-ai-tabs .ant-tabs-tab:hover {
-  color: #667eea;
+  color: #7b8ff8;
 }
 
 .config-ai-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #667eea;
+  color: #7b8ff8;
 }
 
 .config-ai-tabs .ant-tabs-ink-bar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  height: 3px;
+}
+
+.config-ai-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #7b8ff8;
+}
+
+.config-ai-tabs .ant-tabs-ink-bar {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  height: 3px;
+}
+
+.config-ai-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #7b8ff8;
+}
+
+.config-ai-tabs .ant-tabs-ink-bar {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  height: 3px;
+}
+
+.config-ai-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #7b8ff8;
+}
+
+.config-ai-tabs .ant-tabs-ink-bar {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   height: 3px;
 }
 
@@ -98,20 +125,56 @@
 }
 
 .config-radio-button:hover {
-  background: rgba(102, 126, 234, 0.1);
-  border-color: #667eea;
+  background: rgba(123, 143, 248, 0.1);
+  border-color: #7b8ff8;
 }
 
 .config-radio-button.ant-radio-button-wrapper-checked {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border-color: #7b8ff8;
   color: white;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(123, 143, 248, 0.3);
 }
 
 .config-radio-button.ant-radio-button-wrapper-checked:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-  border-color: #764ba2;
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  border-color: #8a5fc0;
+}
+
+.config-radio-button.ant-radio-button-wrapper-checked {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border-color: #7b8ff8;
+  color: white;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.config-radio-button.ant-radio-button-wrapper-checked:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  border-color: #8a5fc0;
+}
+
+.config-radio-button.ant-radio-button-wrapper-checked {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border-color: #7b8ff8;
+  color: white;
+  box-shadow: 0 2px 8px rgba(124, 143, 240, 0.3);
+}
+
+.config-radio-button.ant-radio-button-wrapper-checked:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  border-color: #8a5fc0;
+}
+
+.config-radio-button.ant-radio-button-wrapper-checked {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border-color: #7b8ff8;
+  color: white;
+  box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+}
+
+.config-radio-button.ant-radio-button-wrapper-checked:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  border-color: #8a5fc0;
 }
 
 .config-ai-actions {
@@ -152,8 +215,8 @@
 }
 
 .config-reset-button:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: #7b8ff8;
+  color: #7b8ff8;
 }
 
 .config-save-button {
@@ -161,16 +224,67 @@
   height: 48px;
   border-radius: 24px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   border: none;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(123, 143, 248, 0.3);
   transition: all 0.3s ease;
 }
 
 .config-save-button:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 16px rgba(123, 143, 248, 0.4);
+}
+
+.config-save-button {
+  min-width: 140px;
+  height: 48px;
+  border-radius: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  transition: all 0.3s ease;
+}
+
+.config-save-button:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.config-save-button {
+  min-width: 140px;
+  height: 48px;
+  border-radius: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(124, 143, 240, 0.3);
+  transition: all 0.3s ease;
+}
+
+.config-save-button:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(124, 143, 240, 0.4);
+}
+
+.config-save-button {
+  min-width: 140px;
+  height: 48px;
+  border-radius: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+  transition: all 0.3s ease;
+}
+
+.config-save-button:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
 }
 
 .config-save-button:active {
@@ -202,14 +316,29 @@
 }
 
 .config-ai-link {
-  color: #667eea;
+  color: #7b8ff8;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .config-ai-link:hover {
-  color: #764ba2;
+  color: #8a5fc0;
+  text-decoration: underline;
+}
+
+.config-ai-link:hover {
+  color: #8a5fc0;
+  text-decoration: underline;
+}
+
+.config-ai-link:hover {
+  color: #8a5fc0;
+  text-decoration: underline;
+}
+
+.config-ai-link:hover {
+  color: #8a5fc0;
   text-decoration: underline;
 }
 
@@ -298,8 +427,8 @@
 /* 成功输入样式 */
 .config-ai-form .ant-input:focus,
 .config-ai-form .ant-input-password:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: #7b8ff8;
+  box-shadow: 0 0 0 2px rgba(123, 143, 248, 0.2);
 }
 
 /* ConfigAI页面的Footer样式 - 完全透明融入背景 */

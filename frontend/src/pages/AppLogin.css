@@ -37,7 +37,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -112,7 +112,7 @@
 }
 
 .app-login-card .ant-radio-button-wrapper-checked {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   border-color: transparent;
   color: white;
 }
@@ -128,7 +128,7 @@
 
 .app-login-card .ant-input:focus,
 .app-login-card .ant-input-password:focus {
-  border-color: #667eea;
+  border-color: #7b8ff8;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
@@ -137,13 +137,13 @@
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .app-login-card .ant-btn-primary:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }

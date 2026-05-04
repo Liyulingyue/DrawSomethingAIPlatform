@@ -9,6 +9,17 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* 主题色变量 - 原紫蓝色系，稍微亮一点 */
+  --primary-blue: #7b8ff8;
+  --primary-blue-dark: #8a5fc0;
+  --primary-yellow: #f5af19;
+  --primary-yellow-light: #fcd34d;
+  --primary-green: #22c55e;
+  --primary-orange: #f97316;
+  --primary-pink: #ec4899;
+  --bg-gradient: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  --accent-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
 
 *,

@@ -2,7 +2,7 @@
   width: 100vw;
   height: 100vh;
   display: flex;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   overflow-x: hidden;
   overflow-y: auto;
   position: fixed;
@@ -139,7 +139,7 @@
 .challenge-target-word-display {
   flex: 1;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   color: white;
   border-radius: 8px;
   font-size: 1.2rem;
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(123, 143, 248, 0.3);
 }
 
 /* 画板内容区域 - 占据剩余空间 */

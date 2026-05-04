@@ -1,7 +1,7 @@
 .introduction-container {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   padding: 2rem 1rem;
   padding-top: 4rem;
   box-sizing: border-box;
@@ -64,7 +64,7 @@
 }
 
 .section-title .anticon {
-  color: #667eea;
+  color: #7b8ff8;
   font-size: 1.2em;
 }
 
@@ -142,12 +142,12 @@
   padding: 2px 8px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
-  color: #667eea;
+  color: #7b8ff8;
   font-size: 0.9em;
 }
 
 .guide-content a {
-  color: #667eea;
+  color: #7b8ff8;
   text-decoration: none;
   font-weight: 500;
 }
@@ -272,7 +272,7 @@
 }
 
 .action-button.ant-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   border: none;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }

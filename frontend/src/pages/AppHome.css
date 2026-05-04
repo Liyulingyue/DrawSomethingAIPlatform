@@ -15,7 +15,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -129,13 +129,19 @@
 .app-home-button.ant-btn-default {
   background: white;
   border: 2px solid white;
-  color: #667eea;
+  color: #7b8ff8;
 }
 
 .app-home-button.ant-btn-default:hover {
   background: rgba(255, 255, 255, 0.9);
   border-color: white;
-  color: #764ba2;
+  color: #8a5fc0;
+}
+
+.app-home-button.ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: white;
+  color: #8a5fc0;
 }
 
 /* 绘画闯关按钮特殊样式 */
@@ -150,62 +156,79 @@
 
 /* 猜词闯关按钮特殊样式 */
 .app-home-button-secondary.ant-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   border: none;
 }
 
 .app-home-button-secondary.ant-btn-primary:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
 }
 
 /* AI 配置按钮特殊样式 */
 .app-home-button-config.ant-btn-default {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
   border: 2px solid transparent;
   color: white;
 }
 
 .app-home-button-config.ant-btn-default:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.app-home-button-secondary.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
+}
+
+/* AI 配置按钮特殊样式 */
+.app-home-button-config.ant-btn-default {
+  background: linear-gradient(135deg, #7b8ff8 0%, #8a5fc0 100%);
+  border: 2px solid transparent;
+  color: white;
+}
+
+.app-home-button-config.ant-btn-default:hover {
+  background: linear-gradient(135deg, #8a5fc0 0%, #7b8ff8 100%);
   border-color: transparent;
   color: white;
 }
 
 /* 使用说明按钮特殊样式 */
 .app-home-button-info.ant-btn-default {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   border: 2px solid transparent;
   color: white;
 }
 
 .app-home-button-info.ant-btn-default:hover {
-  background: linear-gradient(135deg, #fee140 0%, #fa709a 100%);
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
   border-color: transparent;
   color: white;
 }
 
 /* 画廊按钮特殊样式 */
 .app-home-button-gallery.ant-btn-default {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
   border: 2px solid transparent;
   color: white;
 }
 
 .app-home-button-gallery.ant-btn-default:hover {
-  background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%);
+  background: linear-gradient(135deg, #db2777 0%, #ec4899 100%);
   border-color: transparent;
   color: white;
 }
 
 /* 打赏按钮特殊样式 */
 .app-home-button-donate.ant-btn-default {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   border: 2px solid transparent;
   color: white;
 }
 
 .app-home-button-donate.ant-btn-default:hover {
-  background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
   border-color: transparent;
   color: white;
 }

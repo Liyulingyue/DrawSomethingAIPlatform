@@ -45,13 +45,13 @@
 }
 
 .language-switcher .ant-select-arrow {
-  color: #667eea;
+  color: #7b8ff8;
   font-size: 0.8rem;
   margin-left: 4px;
 }
 
 .language-switcher .ant-select:hover .ant-select-arrow {
-  color: #764ba2;
+  color: #8a5fc0;
 }
 
 .language-option-content {
@@ -88,12 +88,12 @@
 
 .language-switcher .ant-select-item-option:hover {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
-  color: #667eea;
+  color: #7b8ff8;
 }
 
 .language-switcher .ant-select-item-option-selected {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%) !important;
-  color: #764ba2 !important;
+  color: #8a5fc0 !important;
   font-weight: 700;
 }
 
